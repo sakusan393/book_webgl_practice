@@ -90,7 +90,7 @@ Funnel.prototype = {
 }
 Cokpit = function (gl,img) {
     this.gl = gl;
-    this.modelData = window.sphere();
+    this.modelData = window.sphere(10,10,3);
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
@@ -310,8 +310,8 @@ var World = function (canvasId) {
         var funnel = new Funnel(this.gl,ImageLoader.images[0]);
         this.scene3D.addChild(funnel)
     }
-    //var cokpit = new Cokpit(this.gl,ImageLoader.images[1]);
-    //this.scene3D.addChild(cokpit)
+    var cokpit = new Cokpit(this.gl,ImageLoader.images[1]);
+    this.scene3D.addChild(cokpit)
 
 
 }
