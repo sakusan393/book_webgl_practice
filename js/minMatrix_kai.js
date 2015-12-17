@@ -147,10 +147,11 @@ function matIV() {
         if (eyeX == centerX && eyeY == centerY && eyeZ == centerZ) {
             return this.identity(dest);
         }
+
         var x0, x1, x2, y0, y1, y2, z0, z1, z2, l;
-        z0 = eyeX - center[0];
-        z1 = eyeY - center[1];
-        z2 = eyeZ - center[2];
+        z0 = eyeX - centerX;
+        z1 = eyeY - centerY;
+        z2 = eyeZ - centerZ;
         l = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
         z0 *= l;
         z1 *= l;
@@ -201,6 +202,7 @@ function matIV() {
         dest[15] = 1;
         return dest;
     };
+
     this.perspective = function (fovy, aspect, near, far, dest) {
         var t = near * Math.tan(fovy * Math.PI / 360);
         var r = t * aspect;

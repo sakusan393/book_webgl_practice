@@ -3,7 +3,7 @@ var Camera = function (canvas) {
     this.centerPoint = [0.0, 0.0, 0.0];    // 注視点
     this.x = 0
     this.y = 0
-    this.z =20
+    this.z = 20
     this.cameraPosition = [this.x, this.y, this.z]; // カメラの位置
     this.cameraUp = [0.0, 1.0, 0.0];       // カメラの上方向
     this.mat = new matIV();
@@ -19,14 +19,14 @@ var Camera = function (canvas) {
     this.far = 200.0;                            // 空間の奥行き終端
     this.mat.perspective(this.fov, this.aspect, this.near, this.far, this.pMatrix);
     this.mat.multiply(this.pMatrix, this.vMatrix, this.vpMatrix);
-    this.count=0;
+    this.count = 0;
 }
 Camera.prototype = {
-    render:function(){
-        this.count+=1;
-        this.x = Math.sin( (this.count *.003 % 360 ))  * 10;
-        this.y = Math.cos( (this.count *.002 % 360) ) * 13;
-        this.z = Math.cos( (this.count *.010 % 360) ) * 5;
+    render: function () {
+        this.count += 1;
+        this.x = Math.sin((this.count * .003 % 360 )) * 10;
+        this.y = Math.cos((this.count * .002 % 360)) * 13;
+        this.z = Math.cos((this.count * .010 % 360)) * 5;
         //this.z = (Math.sin( (this.count % 360 *.1) * Math.PI / 180))*  30 - 10
         this.cameraPosition = [this.x, this.y, this.z]
 
@@ -42,15 +42,16 @@ var DirectionLight = function () {
 }
 DirectionLight.prototype = {}
 
-Funnel = function (gl,img) {
+Funnel = function (gl, img) {
     this.gl = gl;
     this.modelData = window.funnel();
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
+    this.aMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
-    this.x = 0
-    this.y = 0
-    this.z = 0
+    this.x = 1.6;
+    this.y = 1.6;
+    this.z = .2;
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationY = 0;
@@ -58,15 +59,16 @@ Funnel = function (gl,img) {
     this.scaleY = 1;
     this.scaleZ = 1;
     this.count = 0;
-    this.rnd = Math.random() * 180 + 20
-    this.speed = Math.random() * .1
+    this.rnd = Math.random() * 200 + 20;
+    this.posRnd = Math.random() * 200;
+    this.speed = Math.random() * .1;
 
-    if(img){
+    if (img) {
         this.initTexture(img);
     }
 }
 Funnel.prototype = {
-    initTexture:function(img){
+    initTexture: function (img) {
         // テクスチャオブジェクトの生成
         this.texture = this.gl.createTexture();
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
@@ -75,28 +77,36 @@ Funnel.prototype = {
         //this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
     render: function () {
-        this.count+=this.speed
-        this.x = Math.sin((this.count+this.rnd)/10) * this.rnd * .14
-        this.y = Math.sin((this.count+this.rnd)/3) * this.rnd * .2
-        this.z = Math.cos((this.count+this.rnd)/7) * this.rnd * .5
+        this.count += this.speed;
+        //this.x = Math.sin((this.count + this.posRnd) / 3) * this.rnd * .1;
+        this.y = Math.cos((this.count + this.posRnd) / 3) * this.rnd * .1;
+        //this.z = Math.cos((this.count + this.posRnd) / 7) * this.rnd * .5;
+
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
+        this.mat.identity(this.aMatrix);
+
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
-        var radians = (0 % 360) * Math.PI / 180;
-        var axis = [1.0, 0.0, 0.0];
-        this.mat.rotate(this.mMatrix, radians, axis, this.mMatrix);
+
+        this.mat.lookAt2(translatePosition, [0.0,0.0,0.0], [0.0,1.0,0.0], this.aMatrix);
+        this.mat.multiply(this.aMatrix,this.mMatrix, this.mMatrix);
+        //var radians = (90 % 360) * Math.PI / 180;
+        //var axis = [1.0, 0.0, 0.0];
+        //this.mat.rotate(this.mMatrix, radians, axis, this.mMatrix);
         this.mat.inverse(this.mMatrix, this.invMatrix);
     }
+
 }
-Cokpit = function (gl,img) {
+Cokpit = function (gl, img) {
     this.gl = gl;
-    this.modelData = window.sphere(10,10,3);
+    this.modelData = window.sphere(10, 10,.5);
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
+
     this.invMatrix = this.mat.identity(this.mat.create());
-    this.x = 0
-    this.y = 0
-    this.z = 0
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationY = 0;
@@ -104,39 +114,39 @@ Cokpit = function (gl,img) {
     this.scaleY = 1;
     this.scaleZ = 1;
     this.count = 0;
-    this.rnd = Math.random() * 180 + 20
-    this.speed = Math.random() * .1
+    this.rnd = Math.random() * 180 + 20;
+    this.speed = Math.random() * .1;
 
-    if(img){
+    if (img) {
         this.initTexture(img);
     }
 }
 Cokpit.prototype = {
-    initTexture:function(img){
+    initTexture: function (img) {
         // テクスチャオブジェクトの生成
         this.texture = this.gl.createTexture();
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        //this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
     render: function () {
-        this.count+=this.speed
+        this.count += this.speed
         //this.x = Math.sin((this.count+this.rnd)/10) * this.rnd * .14
         //this.y = Math.sin((this.count+this.rnd)/3) * this.rnd * .2
         //this.z = Math.cos((this.count+this.rnd)/7) * this.rnd * .5
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
-        var radians = (0 % 360) * Math.PI / 180;
-        var axis = [1.0, 0.0, 0.0];
+        //var radians = (0 % 360) * Math.PI / 180;
+        //var axis = [1.0, 0.0, 0.0];
         //this.mat.rotate(this.mMatrix, radians, axis, this.mMatrix);
         this.mat.inverse(this.mMatrix, this.invMatrix);
     }
 }
 
 
-Scene3D = function (gl, camera,light) {
+Scene3D = function (gl, camera, light) {
     this.gl = gl
     this.camera = camera;
     this.light = light;
@@ -151,19 +161,22 @@ Scene3D = function (gl, camera,light) {
 Scene3D.prototype = {
 
     addChild: function (mesh) {
-        // 頂点データからバッファを生成（りんごモデル）
         var vPositionBuffer = this.generateVBO(mesh.modelData.p);
         var vNormalBuffer = this.generateVBO(mesh.modelData.n);
         var vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
         var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer];
         var meshIndexBuffer = this.generateIBO(mesh.modelData.i);
-        var obj = {"vertexBufferList":meshVboList, "indexBuffer":meshIndexBuffer,"mesh":mesh};
+        var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
         this.meshList.push(obj)
     },
 
     render: function () {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+        //カメラに座標変換行列の更新
         this.camera.render()
+
+        //各3Dオブジェクトの描画処理
         for (var i = 0, l = this.meshList.length; i < l; i++) {
             this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
             this.meshList[i].mesh.render();
@@ -173,6 +186,8 @@ Scene3D.prototype = {
             this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
             this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
             //
+
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
             //// インデックスバッファによる描画
             this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
         }
@@ -208,7 +223,7 @@ Scene3D.prototype = {
 
         // attributeLocationを取得して配列に格納する
         this.attLocation = [];
-        this. attLocation[0] = this.gl.getAttribLocation(this.programs, 'position');
+        this.attLocation[0] = this.gl.getAttribLocation(this.programs, 'position');
         this.attLocation[1] = this.gl.getAttribLocation(this.programs, 'normal');
         this.attLocation[2] = this.gl.getAttribLocation(this.programs, 'texCoord');
 
@@ -301,56 +316,94 @@ Scene3D.prototype = {
 
 
 var World = function (canvasId) {
-    this.init(canvasId);
+    this.gl = this.initWebglContext(canvasId);
     this.camera = new Camera(this.canvas);
     this.light = new DirectionLight();
-    this.scene3D = new Scene3D(this.gl, this.camera,this.light);
+    this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
-    for(var i = 0; i < 300; i++){
-        var funnel = new Funnel(this.gl,ImageLoader.images[0]);
+    for(var i = 0; i < 10; i++){
+        var funnel = new Funnel(this.gl,ImageLoader.images["texturefunnel"]);
         this.scene3D.addChild(funnel)
     }
-    var cokpit = new Cokpit(this.gl,ImageLoader.images[1]);
-    this.scene3D.addChild(cokpit)
 
+    var cokpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
+    this.scene3D.addChild(cokpit)
 
 }
 World.prototype = {
 
-    init: function (canvasId) {
-        this.canvas = document.getElementById(canvasId);
+    initWebglContext: function (canvasId) {
+
+        this.canvas = document.createElement("canvas");
+        this.canvas.setAttribute("id", "canvasId")
+        document.body.appendChild(this.canvas)
         this.setCanvasSize();
+
         this.gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
         if (!this.gl) {
             alert("no support webgl");
             return null
         }
+        //this.canvas.width  = 500;
+        //this.canvas.height = 500;
+        //
+
+        return this.gl
     },
     setCanvasSize: function () {
-        this.canvas.width = this.canvasWidth = document.documentElement.clientWidth;
-        this.canvas.height = this.canvasHeight = document.documentElement.clientHeight;
-        //this.canvas.width = this.canvasWidth = 500;
-        //this.canvas.height = this.canvasHeight = 500;
+        this.canvas.width = document.documentElement.clientWidth;
+        this.canvas.height = document.documentElement.clientHeight;
     }
 }
 
 
 window.onload = function () {
 
+    //テクスチャ読み込み後の処理
     var loadCompleteHandler = function () {
-        console.log("loaded", ImageLoader.images);
-        new World("canvas")
+
+        for (var val in ImageLoader.images) {
+            console.log("loaded", ImageLoader.images["texturefunnel"]);
+        }
+
+        //ドキュメントクラス的なもの canvasのIDを渡す
+        new World()
     }
 
-    var pashArray = ["images/texturefunnel.png","images/texturesazabycokpit.jpg"];
-    ImageLoader.load(pashArray, loadCompleteHandler);
+    //テクスチャ画像リスト
+    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg"];
+    //テクスチャ画像をImage要素としての読み込み
+    ImageLoader.load(texturePashArray, loadCompleteHandler);
 
 }
 
+TextureList = {
+    gl: null,
+    initialize: false,
+    textures: [],
+    initWebgl: function (gl) {
+        this.gl = gl
+        this.initialize = true
+    },
+    setTexture: function () {
+        if (!this.initialize) return
+
+    },
+    initTexture: function (imageElement) {
+        if (!this.initialize) return
+
+        // テクスチャオブジェクトの生成
+        this.texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, imageElement);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        //this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    },
+}
 
 ImageLoader = {
     length: 0,
-    images: [],
+    images: {},
     load: function (pathArray, callback) {
         this.length = pathArray.length;
         for (var i = 0; i < this.length; i++) {
@@ -358,7 +411,9 @@ ImageLoader = {
             var counter = 0;
             img.onload = function () {
                 counter++;
-                ImageLoader.images.push(this)
+                id = this.src.split("/")[this.src.split("/").length-1].split(".")[0]
+                ImageLoader.images[id] = this;
+                console.log(ImageLoader.images[id])
                 if (counter >= ImageLoader.length) {
                     callback()
                 }
