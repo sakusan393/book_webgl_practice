@@ -92,30 +92,35 @@ function matIV() {
         return dest;
     };
     this.rotate = function (mat, angle, axis, dest) {
+        //方向成分がなければリターン
+        //方向成分の
         var sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
         if (!sq) {
             return null;
         }
-        var a = axis[0], b = axis[1], c = axis[2];
+
+        var axis0 = axis[0], axis1 = axis[1], axis2 = axis[2];
         if (sq != 1) {
             sq = 1 / sq;
-            a *= sq;
-            b *= sq;
-            c *= sq;
+            axis0 *= sq;
+            axis1 *= sq;
+            axis2 *= sq;
         }
-        var d = Math.sin(angle), e = Math.cos(angle), f = 1 - e,
-            g = mat[0], h = mat[1], i = mat[2], j = mat[3],
-            k = mat[4], l = mat[5], m = mat[6], n = mat[7],
-            o = mat[8], p = mat[9], q = mat[10], r = mat[11],
-            s = a * a * f + e,
-            t = b * a * f + c * d,
-            u = c * a * f - b * d,
-            v = a * b * f - c * d,
-            w = b * b * f + e,
-            x = c * b * f + a * d,
-            y = a * c * f + b * d,
-            z = b * c * f - a * d,
-            A = c * c * f + e;
+        var sin = Math.sin(angle),
+            cos = Math.cos(angle),
+            inverse_cos = 1 - cos,
+            m0 = mat[0], m1 = mat[1], m2 = mat[2], m3 = mat[3],
+            m4 = mat[4], m5 = mat[5], m6 = mat[6], m7 = mat[7],
+            m8 = mat[8], m9 = mat[9], m10 = mat[10], m11 = mat[11],
+            s = axis0 * axis0 * inverse_cos + cos,
+            t = axis1 * axis0 * inverse_cos + axis2 * sin,
+            u = axis2 * axis0 * inverse_cos - axis1 * sin,
+            v = axis0 * axis1 * inverse_cos - axis2 * sin,
+            w = axis1 * axis1 * inverse_cos + cos,
+            x = axis2 * axis1 * inverse_cos + axis0 * sin,
+            y = axis0 * axis2 * inverse_cos + axis1 * sin,
+            z = axis1 * axis2 * inverse_cos - axis0 * sin,
+            A = axis2 * axis2 * inverse_cos + cos;
         if (angle) {
             if (mat != dest) {
                 dest[12] = mat[12];
@@ -123,21 +128,22 @@ function matIV() {
                 dest[14] = mat[14];
                 dest[15] = mat[15];
             }
-        } else {
+        } else
+        {
             dest = mat;
         }
-        dest[0] = g * s + k * t + o * u;
-        dest[1] = h * s + l * t + p * u;
-        dest[2] = i * s + m * t + q * u;
-        dest[3] = j * s + n * t + r * u;
-        dest[4] = g * v + k * w + o * x;
-        dest[5] = h * v + l * w + p * x;
-        dest[6] = i * v + m * w + q * x;
-        dest[7] = j * v + n * w + r * x;
-        dest[8] = g * y + k * z + o * A;
-        dest[9] = h * y + l * z + p * A;
-        dest[10] = i * y + m * z + q * A;
-        dest[11] = j * y + n * z + r * A;
+        dest[0] = m0 * s + m4 * t + m8 * u;
+        dest[1] = m1 * s + m5 * t + m9 * u;
+        dest[2] = m2 * s + m6 * t + m10 * u;
+        dest[3] = m3 * s + m7 * t + m11 * u;
+        dest[4] = m0 * v + m4 * w + m8 * x;
+        dest[5] = m1 * v + m5 * w + m9 * x;
+        dest[6] = m2 * v + m6 * w + m10 * x;
+        dest[7] = m3 * v + m7 * w + m11 * x;
+        dest[8] = m0 * y + m4 * z + m8 * A;
+        dest[9] = m1 * y + m5 * z + m9 * A;
+        dest[10] = m2 * y + m6 * z + m10 * A;
+        dest[11] = m3 * y + m7 * z + m11 * A;
         return dest;
     };
     this.lookAt = function (eye, center, up, dest) {
@@ -248,19 +254,19 @@ function matIV() {
         dest[0] = x0;
         dest[1] = y0;
         dest[2] = z0;
-        dest[3] = 0;
         dest[4] = x1;
         dest[5] = y1;
         dest[6] = z1;
-        dest[7] = 0;
         dest[8] = x2;
         dest[9] = y2;
         dest[10] = z2;
+        dest[12] = -(x0 * eyeX + x1 * eyeY + x2 * eyeZ);
+        dest[13] = -(y0 * eyeX + y1 * eyeY + y2 * eyeZ);
+        dest[14] = -(z0 * eyeX + z1 * eyeY + z2 * eyeZ);
+        dest[3] = 0;
+        dest[7] = 0;
         dest[11] = 0;
-        //dest[12] = -(x0 * eyeX + x1 * eyeY + x2 * eyeZ);
-        //dest[13] = -(y0 * eyeX + y1 * eyeY + y2 * eyeZ);
-        //dest[14] = -(z0 * eyeX + z1 * eyeY + z2 * eyeZ);
-        //dest[15] = 1;
+        dest[15] = 1;
         return dest;
     };
 
