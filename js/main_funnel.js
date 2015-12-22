@@ -24,9 +24,9 @@ var Camera = function (canvas) {
 Camera.prototype = {
     render: function () {
         this.count += 1;
-        this.x = Math.sin((this.count * .003 % 360 )) * 10;
-        this.y = Math.cos((this.count * .002 % 360)) * 13;
-        this.z = Math.cos((this.count * .010 % 360)) * 5;
+        this.x = Math.sin((this.count * .003 % 360 )) * 5;
+        this.y = Math.cos((this.count * .002 % 360)) * 7;
+        this.z = Math.cos((this.count * .010 % 360)) * 3;
         //this.z = (Math.sin( (this.count % 360 *.1) * Math.PI / 180))*  30 - 10
         this.cameraPosition = [this.x, this.y, this.z]
 
@@ -60,8 +60,8 @@ Funnel = function (gl, img) {
     this.scaleZ = 1;
     this.count = 0;
     this.rnd = Math.random() * 5 + 8;
-    this.rnd1 = Math.random() * 5 + 9;
-    this.rnd2 = Math.random() * 5 + 6;
+    this.rnd1 = Math.random() * 5 + 8;
+    this.rnd2 = Math.random() * 5 + 8;
     this.posRnd = Math.random() * 360;
     this.posRnd1 = Math.random() * 360;
     this.posRnd2 = Math.random() * 360;
@@ -82,9 +82,10 @@ Funnel.prototype = {
     },
     render: function () {
         this.count += this.speed
-        this.x = Math.sin((this.count + this.posRnd) / 200) * this.rnd
-        this.y = Math.cos((this.count + this.posRnd1) / 300) * this.rnd1;
-        this.z = Math.cos((this.count + this.posRnd2) / 400) * this.rnd2;
+
+        this.x = Math.sin((this.count + this.posRnd) / 200) * (Math.sin(this.count/this.rnd/10) + 1) * this.rnd
+        this.y = Math.cos((this.count + this.posRnd1) / 300) * (Math.cos(this.count/this.rnd1/20)+1) * this.rnd1
+        this.z = Math.cos((this.count + this.posRnd2) / 400) * (Math.sin(this.count/this.rnd2/30)+1) * this.rnd2
 
 
         var translatePosition = [this.x, this.y, this.z];
@@ -331,7 +332,7 @@ var World = function (canvasId) {
     this.light = new DirectionLight();
     this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
-    for(var i = 0; i < 300; i++){
+    for(var i = 0; i < 100; i++){
         var funnel = new Funnel(this.gl,ImageLoader.images["texturefunnel"]);
         this.scene3D.addChild(funnel)
     }
