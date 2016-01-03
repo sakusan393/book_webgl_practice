@@ -20,14 +20,21 @@ var Camera = function (canvas) {
     this.mat.perspective(this.fov, this.aspect, this.near, this.far, this.pMatrix);
     this.mat.multiply(this.pMatrix, this.vMatrix, this.vpMatrix);
     this.count = 0;
+    this.target = null
 }
 Camera.prototype = {
+    setTarget: function(cameraTarget){
+        this.target = cameraTarget
+    },
     render: function () {
         this.count += 1;
-        this.x = Math.sin((this.count * .003 % 360 )) * 5;
-        this.y = Math.cos((this.count * .002 % 360)) * 7;
-        this.z = Math.cos((this.count * .010 % 360)) * 3;
+        //this.x = Math.sin((this.count * .003 % 360 )) * 5;
+        //this.y = Math.cos((this.count * .002 % 360)) * 7;
+        //this.z = Math.cos((this.count * .010 % 360)) * 3;
         //this.z = (Math.sin( (this.count % 360 *.1) * Math.PI / 180))*  30 - 10
+        if(this.target){
+            this.centerPoint = [this.target.x, this.target.y, this.target.z]
+        }
         this.cameraPosition = [this.x, this.y, this.z]
 
         this.mat.lookAt(this.cameraPosition, this.centerPoint, this.cameraUp, this.vMatrix);
@@ -67,6 +74,8 @@ Funnel = function (gl, img) {
     this.posRnd2 = Math.random() * 360;
     this.speed = Math.random() * 2
 
+    this.target = null
+
     if (img) {
         this.initTexture(img);
     }
@@ -80,12 +89,16 @@ Funnel.prototype = {
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         //this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
+    setTarget: function(cameraTarget){
+        this.target = cameraTarget
+    },
+
     render: function () {
         this.count += this.speed
 
-        this.x = Math.sin((this.count + this.posRnd) / 200) * (Math.sin(this.count/this.rnd/10) + 1) * this.rnd
-        this.y = Math.cos((this.count + this.posRnd1) / 300) * (Math.cos(this.count/this.rnd1/20)+1) * this.rnd1
-        this.z = Math.cos((this.count + this.posRnd2) / 400) * (Math.sin(this.count/this.rnd2/30)+1) * this.rnd2
+        this.x = Math.sin((this.count + this.posRnd) / 200) * (Math.sin(this.count/this.rnd/10) + 1) * this.rnd + this.target.x
+        this.y = Math.cos((this.count + this.posRnd1) / 300) * (Math.cos(this.count/this.rnd1/20)+1) * this.rnd1 + this.target.y
+        this.z = Math.cos((this.count + this.posRnd2) / 400) * (Math.sin(this.count/this.rnd2/30)+1) * this.rnd2 + this.target.z
 
 
         var translatePosition = [this.x, this.y, this.z];
@@ -93,15 +106,19 @@ Funnel.prototype = {
         //this.mat.identity(this.aMatrix);
 
 
-        //this.mat.multiply(this.aMatrix,this.mMatrix, this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
-        //this.mat.lookAt2(translatePosition, [0.0,0.0,0.0], [1.0,0.0,0.0], this.mMatrix);
+        var targetPosition = {x:0,y:0,z:0};
+        if(this.target){
+            targetPosition = this.target
+        }
+        var subtractPosition = {x:targetPosition.x - this.x, y:targetPosition.y - this.y, z:targetPosition.z - this.z}
 
-        var radY = Math.atan2(-this.x, -this.z)
-        var axisY = [0.0, 1.0, 0.0];
-        var sin = -this.y / Math.sqrt(-this.x * -this.x + -this.y * -this.y + -this.z * -this.z)
+        var radY = Math.atan2(subtractPosition.x, subtractPosition.z)
+
+        var sin = -this.y / Math.sqrt(-subtractPosition.x * -subtractPosition.x + -subtractPosition.y * -subtractPosition.y + -subtractPosition.z * -subtractPosition.z)
         var radX = Math.asin(-sin)
         var axisX = [1.0, 0.0, 0.0];
+        var axisY = [0.0, 1.0, 0.0];
         this.mat.rotate(this.mMatrix, radY, axisY, this.mMatrix);
         this.mat.rotate(this.mMatrix, radX, axisX, this.mMatrix);
         this.mat.inverse(this.mMatrix, this.invMatrix);
@@ -143,9 +160,9 @@ Cokpit.prototype = {
     },
     render: function () {
         this.count += this.speed
-        //this.x = Math.sin((this.count+this.rnd)/10) * this.rnd * .14
+        //this.x = Math.sin((this.count+this.rnd) /3) * this.rnd * .5
         //this.y = Math.sin((this.count+this.rnd)/3) * this.rnd * .2
-        //this.z = Math.cos((this.count+this.rnd)/7) * this.rnd * .5
+        //this.z = Math.cos((this.count+this.rnd)/7) * this.rnd * .7
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
@@ -332,13 +349,16 @@ var World = function (canvasId) {
     this.light = new DirectionLight();
     this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
+    var cokpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
+    this.scene3D.addChild(cokpit);
+
     for(var i = 0; i < 100; i++){
         var funnel = new Funnel(this.gl,ImageLoader.images["texturefunnel"]);
+        funnel.setTarget(cokpit)
         this.scene3D.addChild(funnel)
     }
 
-    var cokpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
-    this.scene3D.addChild(cokpit)
+    this.camera.setTarget(cokpit)
 
 }
 World.prototype = {
@@ -408,7 +428,6 @@ TextureList = {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, imageElement);
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        //this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
 }
 
