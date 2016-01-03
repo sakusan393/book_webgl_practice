@@ -173,6 +173,31 @@ Cokpit.prototype = {
     }
 }
 
+Stars = function(gl){
+    this.gl = gl;
+    this.modelData = window.sphere(10, 10,4);
+    this.mat = new matIV();
+    this.mMatrix = this.mat.identity(this.mat.create());
+    this.invMatrix = this.mat.identity(this.mat.create());
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
+    this.rotationX = 0;
+    this.rotationY = 0;
+    this.rotationY = 0;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.scaleZ = 1;
+    this.count = 0;
+    this.isPoint = 1;
+
+}
+
+Stars.prototype = {
+    render:function(){
+
+    }
+}
 
 Scene3D = function (gl, camera, light) {
     this.gl = gl
@@ -216,8 +241,12 @@ Scene3D.prototype = {
             //
 
             this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
-            //// インデックスバッファによる描画
-            this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
+
+            if(this.meshList[i].mesh.isPoint){
+                this.gl.drawArrays(this.gl.POINTS,0,this.meshList[i].mesh.modelData.p.length/3)
+            }else{
+                this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
+            }
         }
         this.gl.flush();
         requestAnimationFrame(this.render.bind(this))
@@ -357,6 +386,8 @@ var World = function (canvasId) {
         funnel.setTarget(cokpit)
         this.scene3D.addChild(funnel)
     }
+    var stars = new Stars(this.gl)
+    this.scene3D.addChild(stars)
 
     this.camera.setTarget(cokpit)
 
