@@ -175,7 +175,7 @@ Cokpit.prototype = {
 
 Stars = function(gl){
     this.gl = gl;
-    this.modelData = window.sphere(10, 10,4);
+    this.modelData = window.cube2(2,.1);
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());

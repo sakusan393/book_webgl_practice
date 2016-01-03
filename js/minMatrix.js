@@ -621,6 +621,45 @@ function cube(side, color) {
     ];
     return {p: pos, n: nor, c: col, t: st, i: idx};
 }
+function cube2(side, color) {
+    var tc, hs = side * 0.5;
+    var pos = [
+        -hs, -hs, hs, hs, -hs, hs, hs, hs, hs, -hs, hs, hs,
+        -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs, -hs,
+        -hs, hs, -hs, -hs, hs, hs, hs, hs, hs, hs, hs, -hs,
+        -hs, -hs, -hs, hs, -hs, -hs, hs, -hs, hs, -hs, -hs, hs,
+        hs, -hs, -hs, hs, hs, -hs, hs, hs, hs, hs, -hs, hs,
+        -hs, -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs
+    ];
+    var nor = [
+        -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
+        -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0,
+        -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
+        -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
+        1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0,
+        -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0
+    ];
+    var col = new Array();
+    for (var i = 0; i < pos.length / 3; i++) {
+        if (color) {
+            tc = color;
+        } else {
+            tc = hsva(360 / pos.length / 3 * i, 1, 1, 1);
+        }
+        col.push(tc[0], tc[1], tc[2], tc[3]);
+    }
+    var st = [
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
+    ];
+    var idx = [
+    ];
+    return {p: pos, n: nor, c: col, t: st, i: idx};
+}
 function funnel(color) {
     var tc;
     var pos = [];

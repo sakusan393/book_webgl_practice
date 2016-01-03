@@ -13,14 +13,12 @@
     attribute vec2 texCoord;
     varying vec2 vTexCoord;
     uniform mat4 mvpMatrix;
-    //varying vec4 vColor;
     varying vec3 vNormal;
     void main(){
         vNormal = normal;
-        //vColor = color;
         vTexCoord = texCoord;
         gl_Position = mvpMatrix * vec4(position, 1.0);
-        gl_PointSize = 10.0;
+        gl_PointSize = 20.0;
     }
 
 
@@ -32,7 +30,6 @@
     uniform sampler2D texture0;
     uniform sampler2D texture1;
 
-    //varying vec4 vColor;
     varying vec3 vNormal;
     uniform vec3 ambientColor;
     uniform mat4 invMatrix;
@@ -42,7 +39,6 @@
 
     void main(){
 
-        //vec3 dest = texture2D(texture, vTexCoord).rgb;
 
         vec3 eyeDirection = eyePosition - centerPosition;
         vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
