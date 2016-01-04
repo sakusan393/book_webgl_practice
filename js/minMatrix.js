@@ -128,8 +128,7 @@ function matIV() {
                 dest[14] = mat[14];
                 dest[15] = mat[15];
             }
-        } else
-        {
+        } else {
             dest = mat;
         }
         dest[0] = m0 * s + m4 * t + m8 * u;
@@ -624,41 +623,12 @@ function cube(side, color) {
 function cube2(side, color) {
     var tc, hs = side * 0.5;
     var pos = [
-        -hs, -hs, hs, hs, -hs, hs, hs, hs, hs, -hs, hs, hs,
-        -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs, -hs,
-        -hs, hs, -hs, -hs, hs, hs, hs, hs, hs, hs, hs, -hs,
-        -hs, -hs, -hs, hs, -hs, -hs, hs, -hs, hs, -hs, -hs, hs,
-        hs, -hs, -hs, hs, hs, -hs, hs, hs, hs, hs, -hs, hs,
-        -hs, -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs
+        //-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs
     ];
-    var nor = [
-        -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
-        -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0,
-        -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
-        -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
-        1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0,
-        -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0
-    ];
-    var col = new Array();
-    for (var i = 0; i < pos.length / 3; i++) {
-        if (color) {
-            tc = color;
-        } else {
-            tc = hsva(360 / pos.length / 3 * i, 1, 1, 1);
-        }
-        col.push(tc[0], tc[1], tc[2], tc[3]);
+    for(var i = 0; i < 26; i++){
+        pos.push(5,5,5)
     }
-    var st = [
-        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
-    ];
-    var idx = [
-    ];
-    return {p: pos, n: nor, c: col, t: st, i: idx};
+    return {p: pos};
 }
 function funnel(color) {
     var tc;
@@ -696,8 +666,7 @@ function funnel(color) {
 
 
     var nor = [];
-    for(var i = 0,l = pos.length; i < l; i++)
-    {
+    for (var i = 0, l = pos.length; i < l; i++) {
         pos[i] *= 0.01
         nor.push(0)
     }
@@ -749,9 +718,9 @@ function funnel(color) {
 
     var idx = [];
     addRectangleIndices(idx, 0, 1, 2, 3);
-    addTriangleIndices(idx, 1,23,2);
-    addRectangleIndices(idx, 1,0,4,5);
-    addTriangleIndices(idx, 0,3,22);
+    addTriangleIndices(idx, 1, 23, 2);
+    addRectangleIndices(idx, 1, 0, 4, 5);
+    addTriangleIndices(idx, 0, 3, 22);
     addRectangleIndices(idx, 16, 17, 12, 13);
 
     addRectangleIndices(idx, 3, 2, 7, 6);
@@ -760,9 +729,9 @@ function funnel(color) {
     addRectangleIndices(idx, 20, 3, 6, 21);
 
     addRectangleIndices(idx, 6, 7, 8, 9);
-    addTriangleIndices(idx, 7,25,8);
+    addTriangleIndices(idx, 7, 25, 8);
     addRectangleIndices(idx, 9, 8, 11, 10);
-    addTriangleIndices(idx, 6,9,24);
+    addTriangleIndices(idx, 6, 9, 24);
     addRectangleIndices(idx, 14, 15, 19, 18);
 
 
@@ -775,12 +744,16 @@ function funnel(color) {
         idx.push(number0, number1, number2);
     }
 
-    function vec3Normalize(v, d){
+    function vec3Normalize(v, d) {
         var e, dig;
         var n = [0.0, 0.0, 0.0];
         var l = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-        if(l > 0){
-            if(!d){dig = 5;}else{dig = d;}
+        if (l > 0) {
+            if (!d) {
+                dig = 5;
+            } else {
+                dig = d;
+            }
             e = 1.0 / l;
             n[0] = Number((v[0] * e).toFixed(dig));
             n[1] = Number((v[1] * e).toFixed(dig));
@@ -789,7 +762,7 @@ function funnel(color) {
         return n;
     }
 
-    function faceNormal(v0, v1, v2){
+    function faceNormal(v0, v1, v2) {
         var n = [];
         var vec1 = [v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]];
         var vec2 = [v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]];
@@ -798,14 +771,16 @@ function funnel(color) {
         n[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];
         return vec3Normalize(n);
     }
-    function setNormal(id, fNormal){
-        if(fNormals[id] != undefined){
-            fNormals[id] = vec3Add(fNormals[id],fNormal)
-        }else{
+
+    function setNormal(id, fNormal) {
+        if (fNormals[id] != undefined) {
+            fNormals[id] = vec3Add(fNormals[id], fNormal)
+        } else {
             fNormals[id] = fNormal
         }
     }
-    function vec3Add(a,b){
+
+    function vec3Add(a, b) {
         var v = []
         v[0] = Number(a[0]) + Number(b[0]);
         v[1] = Number(a[1]) + Number(b[1])
@@ -821,27 +796,27 @@ function funnel(color) {
     //面の数
     j = idx.length;
     var fNormals = new Array();
-    for(i = 0; i < j; i+=3){
+    for (i = 0; i < j; i += 3) {
         //console.log("□a:",idx[i] ," ",pos[idx[i]*3],pos[idx[i]*3+1],pos[idx[i]*3+2])
         //console.log("◎b:",idx[i+1] ," ",pos[idx[i+1]*3],pos[idx[i+1]*3+1],pos[idx[i+1]*3+2])
         //console.log("▼c:",idx[i+2] ," ",pos[idx[i+2]*3],pos[idx[i+2]*3+1],pos[idx[i+2]*3+2])
-        var positionA = [pos[idx[i+0]*3],pos[idx[i+0]*3+1],pos[idx[i+0]*3+2]]
-        var positionB = [pos[idx[i+1]*3],pos[idx[i+1]*3+1],pos[idx[i+1]*3+2]]
-        var positionC = [pos[idx[i+2]*3],pos[idx[i+2]*3+1],pos[idx[i+2]*3+2]]
+        var positionA = [pos[idx[i + 0] * 3], pos[idx[i + 0] * 3 + 1], pos[idx[i + 0] * 3 + 2]]
+        var positionB = [pos[idx[i + 1] * 3], pos[idx[i + 1] * 3 + 1], pos[idx[i + 1] * 3 + 2]]
+        var positionC = [pos[idx[i + 2] * 3], pos[idx[i + 2] * 3 + 1], pos[idx[i + 2] * 3 + 2]]
         var fNormal = faceNormal(positionA, positionB, positionC);
 
-        setNormal(idx[i+0], fNormal)
-        setNormal(idx[i+1], fNormal)
-        setNormal(idx[i+2], fNormal)
+        setNormal(idx[i + 0], fNormal)
+        setNormal(idx[i + 1], fNormal)
+        setNormal(idx[i + 2], fNormal)
 
         //fNormals[idx[i+0]] = fNormal
         //fNormals[idx[i+1]] = fNormal
         //fNormals[idx[i+2]] = fNormal
     }
     nor = []
-    for(var i = 0; i < fNormals.length; i++){
+    for (var i = 0; i < fNormals.length; i++) {
         //console.log("fNormals.length : ", fNormals[i])
-        for(var j= 0; j <fNormals[i].length; j++ ){
+        for (var j = 0; j < fNormals[i].length; j++) {
             nor.push(Number(fNormals[i][j]))
         }
     }

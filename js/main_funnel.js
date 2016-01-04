@@ -66,6 +66,7 @@ Funnel = function (gl, img) {
     this.scaleY = 1;
     this.scaleZ = 1;
     this.count = 0;
+    this.isPoint = 0;
     this.rnd = Math.random() * 5 + 8;
     this.rnd1 = Math.random() * 5 + 8;
     this.rnd2 = Math.random() * 5 + 8;
@@ -142,6 +143,7 @@ Cokpit = function (gl, img) {
     this.scaleY = 1;
     this.scaleZ = 1;
     this.count = 0;
+    this.isPoint = 0;
     this.rnd = Math.random() * 180 + 20;
     this.speed = Math.random() * .1;
 
@@ -214,9 +216,10 @@ Scene3D = function (gl, camera, light) {
 Scene3D.prototype = {
 
     addChild: function (mesh) {
-        var vPositionBuffer = this.generateVBO(mesh.modelData.p);
-        var vNormalBuffer = this.generateVBO(mesh.modelData.n);
-        var vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
+        var vPositionBuffer,vNormalBuffer,vTexCoordBuffer
+        if(mesh.modelData.p) vPositionBuffer = this.generateVBO(mesh.modelData.p);
+        if(mesh.modelData.n) vNormalBuffer = this.generateVBO(mesh.modelData.n);
+        if(mesh.modelData.t) vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
         var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer];
         var meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
@@ -231,21 +234,26 @@ Scene3D.prototype = {
 
         //各3Dオブジェクトの描画処理
         for (var i = 0, l = this.meshList.length; i < l; i++) {
-            this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
-            this.meshList[i].mesh.render();
-            this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
 
-            this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
-            this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
-            this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
-            //
+            this.gl.uniform1i(this.uniLocation.isPoint, this.meshList[i].mesh.isPoint);
+            if(!this.meshList[i].mesh.isPoint){
+                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
+                this.meshList[i].mesh.render();
+                this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
 
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
-
-            if(this.meshList[i].mesh.isPoint){
-                this.gl.drawArrays(this.gl.POINTS,0,this.meshList[i].mesh.modelData.p.length/3)
-            }else{
+                this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
+                this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
+                this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
+                this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
+            }else{
+                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
+                this.meshList[i].mesh.render();
+                this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
+
+                this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
+                this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
+                this.gl.drawArrays(this.gl.POINTS,0,this.meshList[i].mesh.modelData.p.length/3)
             }
         }
         this.gl.flush();
@@ -277,6 +285,7 @@ Scene3D.prototype = {
         this.uniLocation.centerPosition = this.gl.getUniformLocation(this.programs, "centerPosition");
         this.uniLocation.ambientColor = this.gl.getUniformLocation(this.programs, "ambientColor");
         this.uniLocation.texture = this.gl.getUniformLocation(this.programs, "texture");
+        this.uniLocation.isPoint = this.gl.getUniformLocation(this.programs, "isPoint");
 
         // attributeLocationを取得して配列に格納する
         this.attLocation = [];
@@ -348,11 +357,15 @@ Scene3D.prototype = {
 
     setAttribute: function (vbo, attL, attS, ibo) {
         for (var i in vbo) {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vbo[i]);
-            this.gl.enableVertexAttribArray(attL[i]);
-            this.gl.vertexAttribPointer(attL[i], attS[i], this.gl.FLOAT, false, 0, 0);
+            if(vbo[i]){
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vbo[i]);
+                this.gl.enableVertexAttribArray(attL[i]);
+                this.gl.vertexAttribPointer(attL[i], attS[i], this.gl.FLOAT, false, 0, 0);
+            }
         }
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, ibo);
+        if(ibo){
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, ibo);
+        }
     },
 
     checkShaderCompile: function (shader) {
