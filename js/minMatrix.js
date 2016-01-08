@@ -625,8 +625,8 @@ function cube2(side, color) {
     var pos = [
         //-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs
     ];
-    for(var i = 0; i < 26; i++){
-        pos.push(5,5,5)
+    for(var i = 0; i < 300; i++){
+        pos.push(10*(Math.random()-0.5)+2,10*(Math.random()-0.5)+2,10*(Math.random()-0.5)+2)
     }
     return {p: pos};
 }

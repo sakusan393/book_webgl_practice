@@ -28,9 +28,9 @@ Camera.prototype = {
     },
     render: function () {
         this.count += 1;
-        //this.x = Math.sin((this.count * .003 % 360 )) * 5;
-        //this.y = Math.cos((this.count * .002 % 360)) * 7;
-        //this.z = Math.cos((this.count * .010 % 360)) * 3;
+        this.x = Math.sin((this.count * .003 % 360 )) * 5;
+        this.y = Math.cos((this.count * .002 % 360)) * 7;
+        this.z = Math.cos((this.count * .010 % 360)) * 3;
         //this.z = (Math.sin( (this.count % 360 *.1) * Math.PI / 180))*  30 - 10
         if(this.target){
             this.centerPoint = [this.target.x, this.target.y, this.target.z]
@@ -162,9 +162,9 @@ Cokpit.prototype = {
     },
     render: function () {
         this.count += this.speed
-        //this.x = Math.sin((this.count+this.rnd) /3) * this.rnd * .5
+        this.x = Math.sin((this.count+this.rnd) /3) * this.rnd * .2
         //this.y = Math.sin((this.count+this.rnd)/3) * this.rnd * .2
-        //this.z = Math.cos((this.count+this.rnd)/7) * this.rnd * .7
+        this.z = Math.cos((this.count+this.rnd)/7) * this.rnd * .1
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
@@ -357,6 +357,7 @@ Scene3D.prototype = {
 
     setAttribute: function (vbo, attL, attS, ibo) {
         for (var i in vbo) {
+            this.gl.disableVertexAttribArray(attL[i]);
             if(vbo[i]){
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vbo[i]);
                 this.gl.enableVertexAttribArray(attL[i]);
