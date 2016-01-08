@@ -56,9 +56,9 @@ Funnel = function (gl, img) {
     this.mMatrix = this.mat.identity(this.mat.create());
     this.aMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
-    this.x = 1.6;
-    this.y = 1.6;
-    this.z = .2;
+    this.x = (Math.random()-0.5)*30
+    this.y = (Math.random()-0.5)*30
+    this.z = (Math.random()-0.5)*30
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationY = 0;
@@ -73,7 +73,15 @@ Funnel = function (gl, img) {
     this.posRnd = Math.random() * 360;
     this.posRnd1 = Math.random() * 360;
     this.posRnd2 = Math.random() * 360;
-    this.speed = Math.random() * 2
+    this.speed = Math.random() * 2;
+
+    this.speedRatio = {},this.ratio = {}
+    this.speedRatio.x = Math.random() * 30 + 50;
+    this.speedRatio.y = Math.random() * 30 + 50;
+    this.speedRatio.z = Math.random() * 30 + 50;
+    this.ratio.x = 0.002 + Math.random() * 0.005;
+    this.ratio.y = 0.002 + Math.random() * 0.005;
+    this.ratio.z = 0.002 + Math.random() * 0.005;
 
     this.target = null
 
@@ -97,10 +105,9 @@ Funnel.prototype = {
     render: function () {
         this.count += this.speed
 
-        this.x = Math.sin((this.count + this.posRnd) / 200) * (Math.sin(this.count/this.rnd/10) + 1) * this.rnd + this.target.x
-        this.y = Math.cos((this.count + this.posRnd1) / 300) * (Math.cos(this.count/this.rnd1/20)+1) * this.rnd1 + this.target.y
-        this.z = Math.cos((this.count + this.posRnd2) / 400) * (Math.sin(this.count/this.rnd2/30)+1) * this.rnd2 + this.target.z
-
+        //this.x = Math.sin((this.count + this.posRnd) / 200) * (Math.sin(this.count/this.rnd/10) + 1) * this.rnd + this.target.x
+        //this.y = Math.cos((this.count + this.posRnd1) / 300) * (Math.cos(this.count/this.rnd1/20)+1) * this.rnd1 + this.target.y
+        //this.z = Math.cos((this.count + this.posRnd2) / 400) * (Math.sin(this.count/this.rnd2/30)+1) * this.rnd2 + this.target.z
 
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
@@ -144,8 +151,12 @@ Cokpit = function (gl, img) {
     this.scaleZ = 1;
     this.count = 0;
     this.isPoint = 0;
-    this.rnd = Math.random() * 180 + 20;
-    this.speed = Math.random() * .1;
+    this.gainRatio = 100
+    this.rnd = Math.random() * 10 + 30
+    this.rnd1 = Math.random() * 10 + 30
+    this.rnd2 = Math.random() * 10 + 30
+    this.rnd3 = Math.random() * 10 + 30
+    this.speed = .06
 
     if (img) {
         this.initTexture(img);
@@ -161,10 +172,10 @@ Cokpit.prototype = {
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
     render: function () {
-        this.count += this.speed
-        this.x = Math.sin((this.count+this.rnd) /3) * this.rnd * .2
-        //this.y = Math.sin((this.count+this.rnd)/3) * this.rnd * .2
-        this.z = Math.cos((this.count+this.rnd)/7) * this.rnd * .1
+        //this.count += this.speed
+        //this.x = Math.sin((this.count+this.gainRatio) /3) * this.gainRatio * .2
+        //this.y = Math.sin((this.count+this.gainRatio)/3) * this.gainRatio * .2
+        //this.z = Math.cos((this.count+this.gainRatio)/7) * this.gainRatio * .1
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
@@ -257,7 +268,6 @@ Scene3D.prototype = {
             }
         }
         this.gl.flush();
-        requestAnimationFrame(this.render.bind(this))
     },
 
     initWebgl: function () {
@@ -392,19 +402,23 @@ var World = function (canvasId) {
     this.light = new DirectionLight();
     this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
-    var cokpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
-    this.scene3D.addChild(cokpit);
+    this.cockpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
+    this.scene3D.addChild(this.cockpit);
 
-    for(var i = 0; i < 100; i++){
+    this.funnellArray = [];
+    this.funnelLength = 100;
+    for(var i = 0; i < this.funnelLength; i++){
         var funnel = new Funnel(this.gl,ImageLoader.images["texturefunnel"]);
-        funnel.setTarget(cokpit)
+        funnel.setTarget(this.cockpit);
+        this.funnellArray.push(funnel);
         this.scene3D.addChild(funnel)
     }
-    var stars = new Stars(this.gl)
-    this.scene3D.addChild(stars)
+    var stars = new Stars(this.gl);
+    this.scene3D.addChild(stars);
 
-    this.camera.setTarget(cokpit)
+    this.camera.setTarget(this.cockpit);
 
+    this.enterFrameHandler()
 }
 World.prototype = {
 
@@ -429,7 +443,27 @@ World.prototype = {
     setCanvasSize: function () {
         this.canvas.width = document.documentElement.clientWidth;
         this.canvas.height = document.documentElement.clientHeight;
+    },
+    enterFrameHandler: function(){
+        this.scene3D.render();
+
+
+        this.cockpit.count+=this.cockpit.speed / 3
+        this.cockpit.x = Math.sin((this.cockpit.count+this.cockpit.rnd1) /3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count/1.5)+1)
+        //this.cockpit.y = Math.cos((this.cockpit.count+this.cockpit.rnd) /3) * this.cockpit.gainRatio * .02;
+        this.cockpit.z = Math.cos((this.cockpit.count+this.cockpit.rnd2) /7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count)+1)
+
+        for(var i = 0; i < this.funnelLength; i++){
+            this.funnellArray[i].count+=this.funnellArray[i].speed;
+            this.funnellArray[i].x += (this.cockpit.x - this.funnellArray[i].x) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.x) + 1) * this.funnellArray[i].ratio.x;
+            //this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
+            this.funnellArray[i].z += (this.cockpit.z - this.funnellArray[i].z) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.z + this.funnellArray[i].speedRatio.z) + 1) * this.funnellArray[i].ratio.z;
+        }
+
+
+        requestAnimationFrame(this.enterFrameHandler.bind(this))
     }
+
 }
 
 
