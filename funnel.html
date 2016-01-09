@@ -18,7 +18,7 @@
         vNormal = normal;
         vTexCoord = texCoord;
         gl_Position = mvpMatrix * vec4(position, 1.0);
-        gl_PointSize = 2.0;
+        gl_PointSize = 3.0;
     }
 
     </script>
@@ -50,7 +50,7 @@
             vec3 dest = texture2D(texture1, vTexCoord).rgb * diff + spec + ambientColor.rgb;
             destColor = vec4(dest, 1.0);
         }else{
-            destColor = vec4(.5,.5,.7,1);
+            destColor = vec4(.7,.7,.9,.9);
         }
         gl_FragColor = destColor;
     }

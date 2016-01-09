@@ -227,12 +227,12 @@ Scene3D = function (gl, camera, light) {
 Scene3D.prototype = {
 
     addChild: function (mesh) {
-        var vPositionBuffer,vNormalBuffer,vTexCoordBuffer
+        var vPositionBuffer,vNormalBuffer,vTexCoordBuffer,meshIndexBuffer;
         if(mesh.modelData.p) vPositionBuffer = this.generateVBO(mesh.modelData.p);
         if(mesh.modelData.n) vNormalBuffer = this.generateVBO(mesh.modelData.n);
         if(mesh.modelData.t) vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
         var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer];
-        var meshIndexBuffer = this.generateIBO(mesh.modelData.i);
+        if(mesh.modelData.i) meshIndexBuffer  = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
         this.meshList.push(obj)
     },
