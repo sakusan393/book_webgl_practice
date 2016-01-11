@@ -3,7 +3,7 @@ var Camera = function (canvas) {
     this.centerPoint = [0.0, 0.0, 0.0];    // 注視点
     this.x = 0
     this.y = 0
-    this.z = 20
+    this.z = 60
     this.cameraPosition = [this.x, this.y, this.z]; // カメラの位置
     this.cameraUp = [0.0, 1.0, 0.0];       // カメラの上方向
     this.mat = new matIV();
@@ -27,11 +27,7 @@ Camera.prototype = {
         this.target = cameraTarget
     },
     render: function () {
-        this.count += 1;
-        this.x = Math.sin((this.count * .003 % 360 )) * 5;
-        this.y = Math.cos((this.count * .002 % 360)) * 7;
-        this.z = Math.cos((this.count * .010 % 360)) * 3;
-        //this.z = (Math.sin( (this.count % 360 *.1) * Math.PI / 180))*  30 - 10
+
         if(this.target){
             this.centerPoint = [this.target.x, this.target.y, this.target.z]
         }
@@ -117,13 +113,15 @@ Funnel.prototype = {
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
         var targetPosition = {x:0,y:0,z:0};
         if(this.target){
-            targetPosition = this.target
+            targetPosition.x = this.target.x;
+            targetPosition.y = this.target.y;
+            targetPosition.z = this.target.z;
         }
         var subtractPosition = {x:targetPosition.x - this.x, y:targetPosition.y - this.y, z:targetPosition.z - this.z}
 
         var radY = Math.atan2(subtractPosition.x, subtractPosition.z)
 
-        var sin = -this.y / Math.sqrt(-subtractPosition.x * -subtractPosition.x + -subtractPosition.y * -subtractPosition.y + -subtractPosition.z * -subtractPosition.z)
+        var sin = subtractPosition.y / Math.sqrt(subtractPosition.x * subtractPosition.x + subtractPosition.y * subtractPosition.y + subtractPosition.z * subtractPosition.z)
         var radX = Math.asin(-sin)
         var axisX = [1.0, 0.0, 0.0];
         var axisY = [0.0, 1.0, 0.0];
@@ -410,6 +408,7 @@ var World = function (canvasId) {
     for(var i = 0; i < this.funnelLength; i++){
         var funnel = new Funnel(this.gl,ImageLoader.images["texturefunnel"]);
         funnel.setTarget(this.cockpit);
+        //funnel.x = 0, funnel.y = 1,funnel.z = -5
         this.funnellArray.push(funnel);
         this.scene3D.addChild(funnel)
     }
@@ -434,9 +433,6 @@ World.prototype = {
             alert("no support webgl");
             return null
         }
-        //this.canvas.width  = 500;
-        //this.canvas.height = 500;
-        //
 
         return this.gl
     },
@@ -447,16 +443,20 @@ World.prototype = {
     enterFrameHandler: function(){
         this.scene3D.render();
 
+        this.camera.count += 1;
+        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        this.camera.z = Math.cos((this.camera.count * .010 % 360)) * 3;
 
         this.cockpit.count+=this.cockpit.speed / 3
         this.cockpit.x = Math.sin((this.cockpit.count+this.cockpit.rnd1) /3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count/1.5)+1)
-        //this.cockpit.y = Math.cos((this.cockpit.count+this.cockpit.rnd) /3) * this.cockpit.gainRatio * .02;
+        this.cockpit.y = Math.cos((this.cockpit.count+this.cockpit.rnd) /3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count)+1.3)
         this.cockpit.z = Math.cos((this.cockpit.count+this.cockpit.rnd2) /7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count)+1)
 
         for(var i = 0; i < this.funnelLength; i++){
             this.funnellArray[i].count+=this.funnellArray[i].speed;
             this.funnellArray[i].x += (this.cockpit.x - this.funnellArray[i].x) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.x) + 1) * this.funnellArray[i].ratio.x;
-            //this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
+            this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
             this.funnellArray[i].z += (this.cockpit.z - this.funnellArray[i].z) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.z + this.funnellArray[i].speedRatio.z) + 1) * this.funnellArray[i].ratio.z;
         }
 
@@ -522,7 +522,6 @@ ImageLoader = {
                 counter++;
                 id = this.src.split("/")[this.src.split("/").length-1].split(".")[0]
                 ImageLoader.images[id] = this;
-                console.log(ImageLoader.images[id])
                 if (counter >= ImageLoader.length) {
                     callback()
                 }
