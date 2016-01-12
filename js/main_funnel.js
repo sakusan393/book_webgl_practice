@@ -23,12 +23,12 @@ var Camera = function (canvas) {
     this.target = null
 }
 Camera.prototype = {
-    setTarget: function(cameraTarget){
+    setTarget: function (cameraTarget) {
         this.target = cameraTarget
     },
     render: function () {
 
-        if(this.target){
+        if (this.target) {
             this.centerPoint = [this.target.x, this.target.y, this.target.z]
         }
         this.cameraPosition = [this.x, this.y, this.z]
@@ -45,16 +45,36 @@ var DirectionLight = function () {
 }
 DirectionLight.prototype = {}
 
+Beam = function(gl){
+    this.gl = gl;
+    this.modelData = window.beam();
+    this.mat = new matIV();
+    this.mMatrix = this.mat.identity(this.mat.create());
+    this.invMatrix = this.mat.identity(this.mat.create());
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
+    this.rotationX = 0;
+    this.rotationY = 0;
+    this.rotationY = 0;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.scaleZ = 1;
+    this.count = 0;
+}
+Beam.prototype = {
+
+}
+
 Funnel = function (gl, img) {
     this.gl = gl;
     this.modelData = window.funnel();
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
-    this.aMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
-    this.x = (Math.random()-0.5)*30
-    this.y = (Math.random()-0.5)*30
-    this.z = (Math.random()-0.5)*30
+    this.x = (Math.random() - 0.5) * 30
+    this.y = (Math.random() - 0.5) * 30
+    this.z = (Math.random() - 0.5) * 30
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationY = 0;
@@ -71,7 +91,7 @@ Funnel = function (gl, img) {
     this.posRnd2 = Math.random() * 360;
     this.speed = Math.random() * 2;
 
-    this.speedRatio = {},this.ratio = {}
+    this.speedRatio = {}, this.ratio = {}
     this.speedRatio.x = Math.random() * 30 + 50;
     this.speedRatio.y = Math.random() * 30 + 50;
     this.speedRatio.z = Math.random() * 30 + 50;
@@ -85,6 +105,7 @@ Funnel = function (gl, img) {
         this.initTexture(img);
     }
 }
+
 Funnel.prototype = {
     initTexture: function (img) {
         // テクスチャオブジェクトの生成
@@ -94,35 +115,31 @@ Funnel.prototype = {
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         //this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
-    setTarget: function(cameraTarget){
+    setTarget: function (cameraTarget) {
         this.target = cameraTarget
     },
 
     render: function () {
         this.count += this.speed
 
-        //this.x = Math.sin((this.count + this.posRnd) / 200) * (Math.sin(this.count/this.rnd/10) + 1) * this.rnd + this.target.x
-        //this.y = Math.cos((this.count + this.posRnd1) / 300) * (Math.cos(this.count/this.rnd1/20)+1) * this.rnd1 + this.target.y
-        //this.z = Math.cos((this.count + this.posRnd2) / 400) * (Math.sin(this.count/this.rnd2/30)+1) * this.rnd2 + this.target.z
-
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
-        //this.mat.identity(this.aMatrix);
-
-
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
-        var targetPosition = {x:0,y:0,z:0};
-        if(this.target){
+        var targetPosition = {x: 0, y: 0, z: 0};
+        if (this.target) {
             targetPosition.x = this.target.x;
             targetPosition.y = this.target.y;
             targetPosition.z = this.target.z;
         }
-        var subtractPosition = {x:targetPosition.x - this.x, y:targetPosition.y - this.y, z:targetPosition.z - this.z}
-
-        var radY = Math.atan2(subtractPosition.x, subtractPosition.z)
+        var subtractPosition = {
+            x: targetPosition.x - this.x,
+            y: targetPosition.y - this.y,
+            z: targetPosition.z - this.z
+        }
 
         var sin = subtractPosition.y / Math.sqrt(subtractPosition.x * subtractPosition.x + subtractPosition.y * subtractPosition.y + subtractPosition.z * subtractPosition.z)
         var radX = Math.asin(-sin)
+        var radY = Math.atan2(subtractPosition.x, subtractPosition.z)
         var axisX = [1.0, 0.0, 0.0];
         var axisY = [0.0, 1.0, 0.0];
         this.mat.rotate(this.mMatrix, radY, axisY, this.mMatrix);
@@ -133,10 +150,9 @@ Funnel.prototype = {
 }
 Cokpit = function (gl, img) {
     this.gl = gl;
-    this.modelData = window.sphere(10, 10,.3);
+    this.modelData = window.sphere(10, 10, .3);
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
-
     this.invMatrix = this.mat.identity(this.mat.create());
     this.x = 0;
     this.y = 0;
@@ -170,10 +186,6 @@ Cokpit.prototype = {
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
     render: function () {
-        //this.count += this.speed
-        //this.x = Math.sin((this.count+this.gainRatio) /3) * this.gainRatio * .2
-        //this.y = Math.sin((this.count+this.gainRatio)/3) * this.gainRatio * .2
-        //this.z = Math.cos((this.count+this.gainRatio)/7) * this.gainRatio * .1
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
@@ -184,9 +196,9 @@ Cokpit.prototype = {
     }
 }
 
-Stars = function(gl){
+Stars = function (gl) {
     this.gl = gl;
-    this.modelData = window.cube2(2,.1);
+    this.modelData = window.cube2(2, .1);
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
@@ -201,11 +213,10 @@ Stars = function(gl){
     this.scaleZ = 1;
     this.count = 0;
     this.isPoint = 1;
-
 }
 
 Stars.prototype = {
-    render:function(){
+    render: function () {
 
     }
 }
@@ -225,12 +236,12 @@ Scene3D = function (gl, camera, light) {
 Scene3D.prototype = {
 
     addChild: function (mesh) {
-        var vPositionBuffer,vNormalBuffer,vTexCoordBuffer,meshIndexBuffer;
-        if(mesh.modelData.p) vPositionBuffer = this.generateVBO(mesh.modelData.p);
-        if(mesh.modelData.n) vNormalBuffer = this.generateVBO(mesh.modelData.n);
-        if(mesh.modelData.t) vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
+        var vPositionBuffer, vNormalBuffer, vTexCoordBuffer, meshIndexBuffer;
+        if (mesh.modelData.p) vPositionBuffer = this.generateVBO(mesh.modelData.p);
+        if (mesh.modelData.n) vNormalBuffer = this.generateVBO(mesh.modelData.n);
+        if (mesh.modelData.t) vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
         var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer];
-        if(mesh.modelData.i) meshIndexBuffer  = this.generateIBO(mesh.modelData.i);
+        if (mesh.modelData.i) meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
         this.meshList.push(obj)
     },
@@ -245,7 +256,7 @@ Scene3D.prototype = {
         for (var i = 0, l = this.meshList.length; i < l; i++) {
 
             this.gl.uniform1i(this.uniLocation.isPoint, this.meshList[i].mesh.isPoint);
-            if(!this.meshList[i].mesh.isPoint){
+            if (!this.meshList[i].mesh.isPoint) {
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
                 this.meshList[i].mesh.render();
                 this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
@@ -255,14 +266,14 @@ Scene3D.prototype = {
                 this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
                 this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
-            }else{
+            } else {
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
                 this.meshList[i].mesh.render();
                 this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
 
                 this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
-                this.gl.drawArrays(this.gl.POINTS,0,this.meshList[i].mesh.modelData.p.length/3)
+                this.gl.drawArrays(this.gl.POINTS, 0, this.meshList[i].mesh.modelData.p.length / 3)
             }
         }
         this.gl.flush();
@@ -366,13 +377,13 @@ Scene3D.prototype = {
     setAttribute: function (vbo, attL, attS, ibo) {
         for (var i in vbo) {
             this.gl.disableVertexAttribArray(attL[i]);
-            if(vbo[i]){
+            if (vbo[i]) {
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vbo[i]);
                 this.gl.enableVertexAttribArray(attL[i]);
                 this.gl.vertexAttribPointer(attL[i], attS[i], this.gl.FLOAT, false, 0, 0);
             }
         }
-        if(ibo){
+        if (ibo) {
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, ibo);
         }
     },
@@ -390,7 +401,6 @@ Scene3D.prototype = {
             this.gl.useProgram(program);
         }
     }
-
 };
 
 
@@ -405,8 +415,8 @@ var World = function (canvasId) {
 
     this.funnellArray = [];
     this.funnelLength = 100;
-    for(var i = 0; i < this.funnelLength; i++){
-        var funnel = new Funnel(this.gl,ImageLoader.images["texturefunnel"]);
+    for (var i = 0; i < this.funnelLength; i++) {
+        var funnel = new Funnel(this.gl, ImageLoader.images["texturefunnel"]);
         funnel.setTarget(this.cockpit);
         //funnel.x = 0, funnel.y = 1,funnel.z = -5
         this.funnellArray.push(funnel);
@@ -433,14 +443,13 @@ World.prototype = {
             alert("no support webgl");
             return null
         }
-
         return this.gl
     },
     setCanvasSize: function () {
         this.canvas.width = document.documentElement.clientWidth;
         this.canvas.height = document.documentElement.clientHeight;
     },
-    enterFrameHandler: function(){
+    enterFrameHandler: function () {
         this.scene3D.render();
 
         this.camera.count += 1;
@@ -448,22 +457,19 @@ World.prototype = {
         this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
         this.camera.z = Math.cos((this.camera.count * .010 % 360)) * 3;
 
-        this.cockpit.count+=this.cockpit.speed / 3
-        this.cockpit.x = Math.sin((this.cockpit.count+this.cockpit.rnd1) /3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count/1.5)+1)
-        this.cockpit.y = Math.cos((this.cockpit.count+this.cockpit.rnd) /3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count)+1.3)
-        this.cockpit.z = Math.cos((this.cockpit.count+this.cockpit.rnd2) /7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count)+1)
+        this.cockpit.count += this.cockpit.speed / 3
+        this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
+        this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
+        this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
 
-        for(var i = 0; i < this.funnelLength; i++){
-            this.funnellArray[i].count+=this.funnellArray[i].speed;
+        for (var i = 0; i < this.funnelLength; i++) {
+            this.funnellArray[i].count += this.funnellArray[i].speed;
             this.funnellArray[i].x += (this.cockpit.x - this.funnellArray[i].x) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.x) + 1) * this.funnellArray[i].ratio.x;
             this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
             this.funnellArray[i].z += (this.cockpit.z - this.funnellArray[i].z) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.z + this.funnellArray[i].speedRatio.z) + 1) * this.funnellArray[i].ratio.z;
         }
-
-
         requestAnimationFrame(this.enterFrameHandler.bind(this))
     }
-
 }
 
 
@@ -520,7 +526,7 @@ ImageLoader = {
             var counter = 0;
             img.onload = function () {
                 counter++;
-                id = this.src.split("/")[this.src.split("/").length-1].split(".")[0]
+                id = this.src.split("/")[this.src.split("/").length - 1].split(".")[0]
                 ImageLoader.images[id] = this;
                 if (counter >= ImageLoader.length) {
                     callback()
