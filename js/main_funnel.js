@@ -40,7 +40,7 @@ Camera.prototype = {
 }
 var DirectionLight = function () {
     // ビュー座標変換行列
-    this.lightPosition = [10.0, 10.0, 10.0];
+    this.lightDirection = [1.0, 1.0, 1.0];
     this.ambientColor = [0.0, 0.0, 0.1];
 }
 DirectionLight.prototype = {}
@@ -303,7 +303,6 @@ Scene3D.prototype = {
         this.uniLocation.eyePosition = this.gl.getUniformLocation(this.programs, "eyePosition");
         this.uniLocation.centerPosition = this.gl.getUniformLocation(this.programs, "centerPosition");
         this.uniLocation.ambientColor = this.gl.getUniformLocation(this.programs, "ambientColor");
-        this.uniLocation.texture = this.gl.getUniformLocation(this.programs, "texture");
         this.uniLocation.isPoint = this.gl.getUniformLocation(this.programs, "isPoint");
 
         // attributeLocationを取得して配列に格納する
@@ -318,11 +317,9 @@ Scene3D.prototype = {
         this.attStride[1] = 3;
         this.attStride[2] = 2;
 
-        this.gl.uniform3fv(this.uniLocation.lightPosition, this.light.lightPosition);
-        this.gl.uniform3fv(this.uniLocation.eyePosition, this.camera.cameraPosition);
-        this.gl.uniform3fv(this.uniLocation.centerPoint, this.camera.centerPoint);
+        //モデルに左右しない固定情報を先に転送する
+        this.gl.uniform3fv(this.uniLocation.lightDirection, this.light.lightDirection);
         this.gl.uniform3fv(this.uniLocation.ambientColor, this.light.ambientColor);
-        this.gl.uniform1i(this.uniLocation.texture, 0);
     },
     createShaderProgram: function (vertexShaderSource, fragmentShaderSource) {
         //shaderオブジェクトを生成
