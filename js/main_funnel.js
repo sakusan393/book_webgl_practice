@@ -72,6 +72,10 @@ Funnel = function (gl, img) {
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
+
+    this.q = new qtnIV();
+    this.qtn = this.q.identity(this.q.create());
+
     this.x = (Math.random() - 0.5) * 30
     this.y = (Math.random() - 0.5) * 30
     this.z = (Math.random() - 0.5) * 30
@@ -137,6 +141,7 @@ Funnel.prototype = {
             z: targetPosition.z - this.z
         }
 
+        //オイラー角による向き制御
         var sin = subtractPosition.y / Math.sqrt(subtractPosition.x * subtractPosition.x + subtractPosition.y * subtractPosition.y + subtractPosition.z * subtractPosition.z)
         var radX = Math.asin(-sin)
         var radY = Math.atan2(subtractPosition.x, subtractPosition.z)
@@ -144,6 +149,9 @@ Funnel.prototype = {
         var axisY = [0.0, 1.0, 0.0];
         this.mat.rotate(this.mMatrix, radY, axisY, this.mMatrix);
         this.mat.rotate(this.mMatrix, radX, axisX, this.mMatrix);
+
+        this.qtn
+
         this.mat.inverse(this.mMatrix, this.invMatrix);
     }
 
@@ -287,6 +295,11 @@ Scene3D.prototype = {
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
 
+        //裏面をカリング(描画しない)
+        this.gl.enable(this.gl.CULL_FACE);
+        this.gl.cullFace(this.gl.BACK);
+
+        //色と深度の初期化
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
         //シェーダーの生成
