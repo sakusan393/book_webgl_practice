@@ -621,7 +621,7 @@ function cube(side, color) {
     return {p: pos, n: nor, c: col, t: st, i: idx};
 }
 function beam(side, color) {
-    var tc, hs = side * 0.5;
+    var tc, hs = 1 * 0.5;
     var pos = [
         -hs, -hs, hs,
         hs, -hs, hs,
@@ -898,7 +898,6 @@ function funnel(color) {
     //    }
     //    nor.push(vec3Normalize(a));
     //}
-
 
     return {p: pos, n: nor, c: col, t: st, i: idx};
 }

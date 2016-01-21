@@ -3,7 +3,7 @@ var Camera = function (canvas) {
     this.centerPoint = [0.0, 0.0, 0.0];    // 注視点
     this.x = 0
     this.y = 0
-    this.z = 60
+    this.z = 20
     this.cameraPosition = [this.x, this.y, this.z]; // カメラの位置
     this.cameraUp = [0.0, 1.0, 0.0];       // カメラの上方向
     this.mat = new matIV();
@@ -45,8 +45,9 @@ var DirectionLight = function () {
 }
 DirectionLight.prototype = {}
 
-Beam = function(gl){
+Beam = function(gl,parent){
     this.gl = gl;
+    this.parent = parent
     this.modelData = window.beam(2,[1,1,0,1])
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
@@ -57,15 +58,34 @@ Beam = function(gl){
     this.z = 0;
     this.rotationX = 0;
     this.rotationY = 0;
-    this.rotationY = 0;
-    this.scaleX = 1;
-    this.scaleY = 1;
-    this.scaleZ = 1;
+    this.rotationZ = 0;
+    this.scaleX = .15;
+    this.scaleY = .02;
+    this.scaleZ = 1.5;
     this.count = 0;
+
+    var self = this
+    setTimeout(function(){
+        self.parent.removeChild(self)
+    },1000)
 }
 Beam.prototype = {
     render:function(){
+        var translatePosition = [this.x, this.y, this.z];
+        this.mat.identity(this.mMatrix);
+        this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
 
+        var radian = (90 % 360) * Math.PI / 180;
+        var axis = [1.0, 0.0, 0.0];
+        this.mat.rotate(this.mMatrix, radian, axis, this.mMatrix);
+
+
+        var scale = [this.scaleX, this.scaleY , this.scaleZ]
+        this.mat.scale(this.mMatrix, scale, this.mMatrix);
+    },
+
+    dispose:function(){
+        this.parent.removeChild(this)
     }
 }
 
@@ -275,7 +295,21 @@ Scene3D.prototype = {
         var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer,vColorBuffer];
         if (mesh.modelData.i) meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
+        mesh.index = this.meshList.length;
         this.meshList.push(obj)
+    },
+    removeChild: function (mesh) {
+        var length = this.meshList.length;
+        for(var i=0; i<length; i++){
+            if(this.meshList[i] && this.meshList[i].mesh){
+                if(this.meshList[i].mesh.index == mesh.index) {
+                    this.meshList[i].vertexBufferList = null;
+                    this.meshList[i].indexBuffer = null;
+                    this.meshList[i].mesh = null;
+                    this.meshList.splice(i, 1);
+                }
+            }
+        }
     },
 
     render: function () {
@@ -488,24 +522,31 @@ World.prototype = {
         }
         var stars = new Stars(this.gl);
         this.scene3D.addChild(stars);
-        this.scene3D.addChild(new Beam(this.gl));
+
+        //this.camera.setTarget(this.cockpit);
 
 
+        var self = this
+        var clickHandler = function(){
+            console.log(this)
+            var beam = new Beam(this.gl,this.scene3D);
+            beam.x = (Math.random()-0.5) * 2
+            this.scene3D.addChild(beam);
+        }
 
-        this.camera.setTarget(this.cockpit);
+        document.addEventListener("click" , clickHandler.bind(self))
 
         this.enterFrameHandler()
     },
 
     enterFrameHandler: function () {
-        this.scene3D.render();
 
         this.camera.count += 1;
-        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
-        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        this.camera.z = Math.cos((this.camera.count * .010 % 360)) * 3;
+        //this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        //this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        //this.camera.z = Math.cos((this.camera.count * .010 % 360)) * 3;
 
-        this.cockpit.count += this.cockpit.speed / 3
+        this.cockpit.count += this.cockpit.speed / 3;
         this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
         this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
         this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
@@ -517,6 +558,7 @@ World.prototype = {
             this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
             this.funnellArray[i].z += (this.cockpit.z - this.funnellArray[i].z) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.z + this.funnellArray[i].speedRatio.z) + 1) * this.funnellArray[i].ratio.z;
         }
+        this.scene3D.render();
         requestAnimationFrame(this.enterFrameHandler.bind(this))
     }
 }
