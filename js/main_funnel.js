@@ -45,17 +45,21 @@ var DirectionLight = function () {
 }
 DirectionLight.prototype = {}
 
-Beam = function(gl,parent){
+Beam = function(gl,parent,target,ball){
     this.gl = gl;
     this.parent = parent
+    this.target = target
+    this.ball = ball
     this.modelData = window.beam(2,[1,1,0,1])
     this.mat = new matIV();
+    this.q = new qtnIV();
+    this.qtn = this.q.identity(this.q.create());
     this.mMatrix = this.mat.identity(this.mat.create());
     this.qMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
+    this.x = target.x;
+    this.y = target.y;
+    this.z = target.z;
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationZ = 0;
@@ -63,27 +67,43 @@ Beam = function(gl,parent){
     this.scaleY = .02;
     this.scaleZ = 1.5;
     this.count = 0;
+    this.lifeCycle = 50;
 
-    var self = this
-    setTimeout(function(){
-        self.parent.removeChild(self)
-    },1000)
+    this.defaultPosture = [0,0,1];
+    //クォータニオンによる姿勢制御
+    var lookVector = vec3.subtract([],[ this.ball.x, this.ball.y, this.ball.z],[this.x, this.y, this.z])
+    //回転軸(外積)
+    var rotationAxis = vec3.cross([],lookVector, this.defaultPosture);
+    vec3.normalize(rotationAxis,rotationAxis);
+
+    this.angleX = this.x
+    this.angleY = this.y
+    this.angleZ = this.z
+    //なす角(radian)
+    var qAngle = Math.acos(vec3.dot(lookVector,this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
+    this.q.rotate(qAngle, rotationAxis, this.qtn);
+    this.mat.identity(this.qMatrix);
+    this.q.toMatIV(this.qtn, this.qMatrix);
 }
+
 Beam.prototype = {
     render:function(){
+        this.x+=this.angleX*0.5
+        this.y+=this.angleY*.5
+        this.z+=this.angleZ*.5
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
-
-        var radian = (90 % 360) * Math.PI / 180;
-        var axis = [1.0, 0.0, 0.0];
-        this.mat.rotate(this.mMatrix, radian, axis, this.mMatrix);
-
+        this.mat.multiply(this.mMatrix, this.qMatrix, this.mMatrix)
 
         var scale = [this.scaleX, this.scaleY , this.scaleZ]
         this.mat.scale(this.mMatrix, scale, this.mMatrix);
-    },
 
+        this.lifeCycle--;
+        if(this.lifeCycle < 0){
+            requestAnimationFrame(this.dispose.bind(this))
+        }
+    },
     dispose:function(){
         this.parent.removeChild(this)
     }
@@ -528,10 +548,12 @@ World.prototype = {
 
         var self = this
         var clickHandler = function(){
-            console.log(this)
-            var beam = new Beam(this.gl,this.scene3D);
-            beam.x = (Math.random()-0.5) * 2
-            this.scene3D.addChild(beam);
+
+            for (var i = 0; i < this.funnelLength; i++) {
+                var beam = new Beam(this.gl,this.scene3D,this.funnellArray[i],this.cockpit);
+                this.scene3D.addChild(beam);
+            }
+
         }
 
         document.addEventListener("click" , clickHandler.bind(self))
