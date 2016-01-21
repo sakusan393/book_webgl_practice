@@ -47,7 +47,7 @@ DirectionLight.prototype = {}
 
 Beam = function(gl){
     this.gl = gl;
-    this.modelData = window.cube(3,[0xFF,0xFF,0,0xFF])
+    this.modelData = window.cube(3)
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
     this.qMatrix = this.mat.identity(this.mat.create());
@@ -463,6 +463,8 @@ World.prototype = {
         this.canvas.width = document.documentElement.clientWidth;
         this.canvas.height = document.documentElement.clientHeight;
     },
+
+
     init: function(){
 
         this.camera = new Camera(this.canvas);
@@ -483,6 +485,9 @@ World.prototype = {
         }
         var stars = new Stars(this.gl);
         this.scene3D.addChild(stars);
+        this.scene3D.addChild(new Beam(this.gl));
+
+
 
         this.camera.setTarget(this.cockpit);
 
