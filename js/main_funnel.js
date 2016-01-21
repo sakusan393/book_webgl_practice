@@ -47,9 +47,10 @@ DirectionLight.prototype = {}
 
 Beam = function(gl){
     this.gl = gl;
-    this.modelData = window.beam();
+    this.modelData = window.cube(3,[0xFF,0xFF,0,0xFF])
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
+    this.qMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
     this.x = 0;
     this.y = 0;
@@ -63,7 +64,9 @@ Beam = function(gl){
     this.count = 0;
 }
 Beam.prototype = {
+    render:function(){
 
+    }
 }
 
 Funnel = function (gl, img) {
@@ -226,7 +229,7 @@ Cokpit.prototype = {
 
 Stars = function (gl) {
     this.gl = gl;
-    this.modelData = window.cube2(2, .1);
+    this.modelData = window.star(2, .1);
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
@@ -438,31 +441,10 @@ Scene3D.prototype = {
 
 var World = function (canvasId) {
     this.gl = this.initWebglContext(canvasId);
-    this.camera = new Camera(this.canvas);
-    this.light = new DirectionLight();
-    this.scene3D = new Scene3D(this.gl, this.camera, this.light);
-
-    this.cockpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
-    this.scene3D.addChild(this.cockpit);
-
-    this.funnellArray = [];
-    this.funnelLength = 100;
-    for (var i = 0; i < this.funnelLength; i++) {
-        var funnel = new Funnel(this.gl, ImageLoader.images["texturefunnel"]);
-        funnel.setTarget(this.cockpit);
-        //funnel.x = 0, funnel.y = 1,funnel.z = -5
-        this.funnellArray.push(funnel);
-        this.scene3D.addChild(funnel)
-    }
-    var stars = new Stars(this.gl);
-    this.scene3D.addChild(stars);
-
-    this.camera.setTarget(this.cockpit);
-
-    this.enterFrameHandler()
+    this.init();
 }
-World.prototype = {
 
+World.prototype = {
     initWebglContext: function (canvasId) {
 
         this.canvas = document.createElement("canvas");
@@ -481,6 +463,32 @@ World.prototype = {
         this.canvas.width = document.documentElement.clientWidth;
         this.canvas.height = document.documentElement.clientHeight;
     },
+    init: function(){
+
+        this.camera = new Camera(this.canvas);
+        this.light = new DirectionLight();
+        this.scene3D = new Scene3D(this.gl, this.camera, this.light);
+
+        this.cockpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
+        this.scene3D.addChild(this.cockpit);
+
+        this.funnellArray = [];
+        this.funnelLength = 100;
+        for (var i = 0; i < this.funnelLength; i++) {
+            var funnel = new Funnel(this.gl, ImageLoader.images["texturefunnel"]);
+            funnel.setTarget(this.cockpit);
+            //funnel.x = 0, funnel.y = 1,funnel.z = -5
+            this.funnellArray.push(funnel);
+            this.scene3D.addChild(funnel)
+        }
+        var stars = new Stars(this.gl);
+        this.scene3D.addChild(stars);
+
+        this.camera.setTarget(this.cockpit);
+
+        this.enterFrameHandler()
+    },
+
     enterFrameHandler: function () {
         this.scene3D.render();
 
