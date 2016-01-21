@@ -77,7 +77,7 @@ Funnel = function (gl, img) {
     this.z = (Math.random() - 0.5) * 30
     this.rotationX = 0;
     this.rotationY = 0;
-    this.rotationY = 0;
+    this.rotationZ = Math.random()* 360
     this.scaleX = 1;
     this.scaleY = 1;
     this.scaleZ = 1;
@@ -139,11 +139,15 @@ Funnel.prototype = {
 
         var sin = subtractPosition.y / Math.sqrt(subtractPosition.x * subtractPosition.x + subtractPosition.y * subtractPosition.y + subtractPosition.z * subtractPosition.z)
         var radX = Math.asin(-sin)
-        var radY = Math.atan2(subtractPosition.x, subtractPosition.z)
+        var radY = Math.atan2(subtractPosition.x, subtractPosition.z);
+        var radZ = Math.PI / 180 * this.rotationZ;
         var axisX = [1.0, 0.0, 0.0];
         var axisY = [0.0, 1.0, 0.0];
+        var axisZ = [0.0, 0.0, 1.0];
+
         this.mat.rotate(this.mMatrix, radY, axisY, this.mMatrix);
         this.mat.rotate(this.mMatrix, radX, axisX, this.mMatrix);
+        this.mat.rotate(this.mMatrix, radZ, axisZ, this.mMatrix);
         this.mat.inverse(this.mMatrix, this.invMatrix);
     }
 
@@ -159,7 +163,7 @@ Cokpit = function (gl, img) {
     this.z = 0;
     this.rotationX = 0;
     this.rotationY = 0;
-    this.rotationY = 0;
+    this.rotationZ = 0;
     this.scaleX = 1;
     this.scaleY = 1;
     this.scaleZ = 1;
@@ -461,6 +465,7 @@ World.prototype = {
 
         for (var i = 0; i < this.funnelLength; i++) {
             this.funnellArray[i].count += this.funnellArray[i].speed;
+            this.funnellArray[i].rotationZ = Math.sin(this.funnellArray[i].count/ this.funnellArray[i].speedRatio.y) * this.funnellArray[i].speedRatio.z
             this.funnellArray[i].x += (this.cockpit.x - this.funnellArray[i].x) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.x) + 1) * this.funnellArray[i].ratio.x;
             this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
             this.funnellArray[i].z += (this.cockpit.z - this.funnellArray[i].z) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.z + this.funnellArray[i].speedRatio.z) + 1) * this.funnellArray[i].ratio.z;
