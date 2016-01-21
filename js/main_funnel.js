@@ -47,7 +47,7 @@ DirectionLight.prototype = {}
 
 Beam = function(gl){
     this.gl = gl;
-    this.modelData = window.cube(3)
+    this.modelData = window.beam(2,[1,1,0,1])
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
     this.qMatrix = this.mat.identity(this.mat.create());
@@ -267,11 +267,12 @@ Scene3D = function (gl, camera, light) {
 Scene3D.prototype = {
 
     addChild: function (mesh) {
-        var vPositionBuffer, vNormalBuffer, vTexCoordBuffer, meshIndexBuffer;
+        var vPositionBuffer, vNormalBuffer, vTexCoordBuffer,vColorBuffer,meshIndexBuffer;
         if (mesh.modelData.p) vPositionBuffer = this.generateVBO(mesh.modelData.p);
         if (mesh.modelData.n) vNormalBuffer = this.generateVBO(mesh.modelData.n);
         if (mesh.modelData.t) vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
-        var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer];
+        if (mesh.modelData.c) vColorBuffer = this.generateVBO(mesh.modelData.c);
+        var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer,vColorBuffer];
         if (mesh.modelData.i) meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
         this.meshList.push(obj)
@@ -348,12 +349,14 @@ Scene3D.prototype = {
         this.attLocation[0] = this.gl.getAttribLocation(this.programs, 'position');
         this.attLocation[1] = this.gl.getAttribLocation(this.programs, 'normal');
         this.attLocation[2] = this.gl.getAttribLocation(this.programs, 'texCoord');
+        this.attLocation[3] = this.gl.getAttribLocation(this.programs, 'color');
 
         // attributeのストライドを配列に格納しておく
         this.attStride = [];
         this.attStride[0] = 3;
         this.attStride[1] = 3;
         this.attStride[2] = 2;
+        this.attStride[3] = 4;
 
         //モデルに左右しない固定情報を先に転送する
         this.gl.uniform3fv(this.uniLocation.lightDirection, this.light.lightDirection);
