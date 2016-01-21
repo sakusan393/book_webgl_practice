@@ -75,6 +75,7 @@ Funnel = function (gl, img) {
 
     this.q = new qtnIV();
     this.qtn = this.q.identity(this.q.create());
+    this.qMatrix = this.mat.identity(this.mat.create());
 
     this.x = (Math.random() - 0.5) * 30
     this.y = (Math.random() - 0.5) * 30
@@ -95,7 +96,9 @@ Funnel = function (gl, img) {
     this.posRnd2 = Math.random() * 360;
     this.speed = Math.random() * 2;
 
-    this.speedRatio = {}, this.ratio = {}
+    this.defaultPosture = [0,0,1];
+
+    this.speedRatio = {}, this.ratio = {};
     this.speedRatio.x = Math.random() * 30 + 50;
     this.speedRatio.y = Math.random() * 30 + 50;
     this.speedRatio.z = Math.random() * 30 + 50;
@@ -135,26 +138,39 @@ Funnel.prototype = {
             targetPosition.y = this.target.y;
             targetPosition.z = this.target.z;
         }
-        var subtractPosition = {
-            x: targetPosition.x - this.x,
-            y: targetPosition.y - this.y,
-            z: targetPosition.z - this.z
-        }
 
-        //オイラー角による向き制御
-        var sin = subtractPosition.y / Math.sqrt(subtractPosition.x * subtractPosition.x + subtractPosition.y * subtractPosition.y + subtractPosition.z * subtractPosition.z)
-        var radX = Math.asin(-sin)
-        var radY = Math.atan2(subtractPosition.x, subtractPosition.z);
-        var radZ = Math.PI / 180 * this.rotationZ;
-        var axisX = [1.0, 0.0, 0.0];
-        var axisY = [0.0, 1.0, 0.0];
-        var axisZ = [0.0, 0.0, 1.0];
 
-        this.mat.rotate(this.mMatrix, radY, axisY, this.mMatrix);
-        this.mat.rotate(this.mMatrix, radX, axisX, this.mMatrix);
-        this.mat.rotate(this.mMatrix, radZ, axisZ, this.mMatrix);
+        ////オイラー角による向き制御
+        //var subtractPosition = {
+        //    x: targetPosition.x - this.x,
+        //    y: targetPosition.y - this.y,
+        //    z: targetPosition.z - this.z
+        //}
+        //var sin = subtractPosition.y / Math.sqrt(subtractPosition.x * subtractPosition.x + subtractPosition.y * subtractPosition.y + subtractPosition.z * subtractPosition.z)
+        //var radX = Math.asin(-sin)
+        //var radY = Math.atan2(subtractPosition.x, subtractPosition.z);
+        //var radZ = Math.PI / 180 * this.rotationZ;
+        //var axisX = [1.0, 0.0, 0.0];
+        //var axisY = [0.0, 1.0, 0.0];
+        //var axisZ = [0.0, 0.0, 1.0];
+        //this.mat.rotate(this.mMatrix, radY, axisY, this.mMatrix);
+        //this.mat.rotate(this.mMatrix, radX, axisX, this.mMatrix);
+        //this.mat.rotate(this.mMatrix, radZ, axisZ, this.mMatrix);
 
-        this.qtn
+
+        //クォータニオンによる姿勢制御
+        var lookVector = vec3.subtract([],[targetPosition.x,targetPosition.y,targetPosition.z],[this.x, this.y, this.z])
+        //回転軸(外積)
+        var rotationAxis = vec3.cross([],lookVector, this.defaultPosture);
+        vec3.normalize(rotationAxis,rotationAxis);
+
+        //なす角(radian)
+        var qAngle = Math.acos(vec3.dot(lookVector,this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
+        this.q.rotate(qAngle, rotationAxis, this.qtn);
+        this.mat.identity(this.qMatrix);
+        this.q.toMatIV(this.qtn, this.qMatrix)
+        this.mat.multiply(this.mMatrix, this.qMatrix, this.mMatrix)
+
 
         this.mat.inverse(this.mMatrix, this.invMatrix);
     }
@@ -269,6 +285,10 @@ Scene3D.prototype = {
 
             this.gl.uniform1i(this.uniLocation.isPoint, this.meshList[i].mesh.isPoint);
             if (!this.meshList[i].mesh.isPoint) {
+                //裏面をカリング(描画しない)
+                this.gl.enable(this.gl.CULL_FACE);
+                this.gl.cullFace(this.gl.BACK);
+
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
                 this.meshList[i].mesh.render();
                 this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
@@ -278,6 +298,8 @@ Scene3D.prototype = {
                 this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
                 this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
+
+                this.gl.disable(this.gl.CULL_FACE);
             } else {
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
                 this.meshList[i].mesh.render();
@@ -298,10 +320,6 @@ Scene3D.prototype = {
         this.gl.clearDepth(1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
-
-        //裏面をカリング(描画しない)
-        this.gl.enable(this.gl.CULL_FACE);
-        this.gl.cullFace(this.gl.BACK);
 
         //色と深度の初期化
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
