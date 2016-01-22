@@ -71,16 +71,14 @@ Beam = function(gl,parent,target,ball){
 
     this.defaultPosture = [0,0,1];
     //クォータニオンによる姿勢制御
-    var lookVector = vec3.subtract([],[ this.ball.x, this.ball.y, this.ball.z],[this.x, this.y, this.z])
+    this.lookVector = vec3.subtract([],[ this.ball.x, this.ball.y, this.ball.z],[this.x, this.y, this.z])
     //回転軸(外積)
-    var rotationAxis = vec3.cross([],lookVector, this.defaultPosture);
+    var rotationAxis = vec3.cross([],this.lookVector, this.defaultPosture);
     vec3.normalize(rotationAxis,rotationAxis);
 
-    this.angleX = this.x
-    this.angleY = this.y
-    this.angleZ = this.z
+    this.angleArray = [this.x, this.y, this.z];
     //なす角(radian)
-    var qAngle = Math.acos(vec3.dot(lookVector,this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
+    var qAngle = Math.acos(vec3.dot(this.lookVector,this.defaultPosture) / vec3.length(this.lookVector) * vec3.length(this.defaultPosture))
     this.q.rotate(qAngle, rotationAxis, this.qtn);
     this.mat.identity(this.qMatrix);
     this.q.toMatIV(this.qtn, this.qMatrix);
@@ -88,9 +86,10 @@ Beam = function(gl,parent,target,ball){
 
 Beam.prototype = {
     render:function(){
-        this.x+=this.angleX*0.5
-        this.y+=this.angleY*.5
-        this.z+=this.angleZ*.5
+        vec3.normalize(this.lookVector,this.lookVector)
+        this.x+=this.lookVector[0]*.5
+        this.y+=this.lookVector[1]*.5
+        this.z+=this.lookVector[2]*.5
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
