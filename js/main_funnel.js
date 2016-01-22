@@ -67,8 +67,8 @@ Beam = function(gl,parent,target,ball){
     this.scaleY = .02;
     this.scaleZ = 1.5;
     this.count = 0;
-    this.lifeCycle = 50;
-    this.speed = 0.7;
+    this.lifeCycle = 80;
+    this.speed = .9;
 
     this.defaultPosture = [0,0,1];
     //クォータニオンによる姿勢制御
@@ -547,7 +547,7 @@ World.prototype = {
         var stars = new Stars(this.gl);
         this.scene3D.addChild(stars);
 
-        //this.camera.setTarget(this.cockpit);
+        this.camera.setTarget(this.cockpit);
 
 
         var self = this
@@ -567,9 +567,9 @@ World.prototype = {
     enterFrameHandler: function () {
 
         this.camera.count += 1;
-        //this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
-        //this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        //this.camera.z = Math.cos((this.camera.count * .010 % 360)) * 3;
+        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        this.camera.z = Math.cos((this.camera.count * .010 % 360)) * 3;
 
         this.cockpit.count += this.cockpit.speed / 3;
         this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
