@@ -50,7 +50,7 @@ Beam = function(gl,parent,target,ball){
     this.parent = parent
     this.target = target
     this.ball = ball
-    this.modelData = window.beam(2,[1,1,0,1])
+    this.modelData = window.beam(2,[1,1,0,0.5])
     this.mat = new matIV();
     this.q = new qtnIV();
     this.qtn = this.q.identity(this.q.create());
@@ -68,6 +68,7 @@ Beam = function(gl,parent,target,ball){
     this.scaleZ = 1.5;
     this.count = 0;
     this.lifeCycle = 50;
+    this.speed = 0.7;
 
     this.defaultPosture = [0,0,1];
     //クォータニオンによる姿勢制御
@@ -87,9 +88,9 @@ Beam = function(gl,parent,target,ball){
 Beam.prototype = {
     render:function(){
         vec3.normalize(this.lookVector,this.lookVector)
-        this.x+=this.lookVector[0]*.5
-        this.y+=this.lookVector[1]*.5
-        this.z+=this.lookVector[2]*.5
+        this.x+=this.lookVector[0]*this.speed
+        this.y+=this.lookVector[1]*this.speed
+        this.z+=this.lookVector[2]*this.speed
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
@@ -378,6 +379,10 @@ Scene3D.prototype = {
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
 
+        //アルファブレンディングの有効化
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFuncSeparate(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA, this.gl.ONE, this.gl.ONE);
+
         //色と深度の初期化
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
@@ -504,8 +509,8 @@ World.prototype = {
     initWebglContext: function (canvasId) {
 
         this.canvas = document.createElement("canvas");
-        this.canvas.setAttribute("id", "canvasId")
-        document.body.appendChild(this.canvas)
+        this.canvas.setAttribute("id", "canvasId");
+        document.body.appendChild(this.canvas);
         this.setCanvasSize();
 
         this.gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
@@ -554,8 +559,7 @@ World.prototype = {
             }
 
         }
-
-        document.addEventListener("click" , clickHandler.bind(self))
+        document.getElementById("canvasId").addEventListener("click" , clickHandler.bind(self))
 
         this.enterFrameHandler()
     },
