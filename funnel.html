@@ -30,6 +30,7 @@
     varying vec2 vTexCoord;
     uniform int isPoint;
     uniform sampler2D texture;
+    uniform float alpha;
 
     varying vec3 vNormal;
     varying vec4 vColor;
@@ -52,7 +53,7 @@
             vec3 dest = texture2D(texture, vTexCoord).rgb * diff + spec + ambientColor.rgb;
             destColor = vec4(dest, 1.0);
             if(!bool(vTexCoord)){
-                destColor = vColor;
+                destColor = vec4(vec3(vColor.xyz) , alpha);
             }
         }else{
             destColor = vec4(.7,.7,.9,.9);

@@ -64,11 +64,13 @@ Beam = function(gl,parent,target,ball){
     this.rotationY = 0;
     this.rotationZ = 0;
     this.scaleX = .15;
-    this.scaleY = .02;
+    this.scaleY = .06;
     this.scaleZ = 1.5;
+    this.alpha = 1.0;
     this.count = 0;
-    this.lifeCycle = 80;
-    this.speed = .9;
+    this.life = 50;
+    this.currentLife = this.life;
+    this.speed = 1;
 
     this.defaultPosture = [0,0,1];
     //クォータニオンによる姿勢制御
@@ -88,19 +90,21 @@ Beam = function(gl,parent,target,ball){
 Beam.prototype = {
     render:function(){
         vec3.normalize(this.lookVector,this.lookVector)
-        this.x+=this.lookVector[0]*this.speed
-        this.y+=this.lookVector[1]*this.speed
-        this.z+=this.lookVector[2]*this.speed
+        this.x+=this.lookVector[0]*this.speed;
+        this.y+=this.lookVector[1]*this.speed;
+        this.z+=this.lookVector[2]*this.speed;
         var translatePosition = [this.x, this.y, this.z];
         this.mat.identity(this.mMatrix);
         this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
-        this.mat.multiply(this.mMatrix, this.qMatrix, this.mMatrix)
+        this.mat.multiply(this.mMatrix, this.qMatrix, this.mMatrix);
 
         var scale = [this.scaleX, this.scaleY , this.scaleZ]
         this.mat.scale(this.mMatrix, scale, this.mMatrix);
 
-        this.lifeCycle--;
-        if(this.lifeCycle < 0){
+        this.currentLife--;
+        var percent = (this.currentLife / this.life > 0.5)? 0.5: this.currentLife / this.life;
+        this.alpha = percent;
+        if(this.currentLife < 0){
             requestAnimationFrame(this.dispose.bind(this))
         }
     },
@@ -341,6 +345,7 @@ Scene3D.prototype = {
         //各3Dオブジェクトの描画処理
         for (var i = 0, l = this.meshList.length; i < l; i++) {
 
+            this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
             this.gl.uniform1i(this.uniLocation.isPoint, this.meshList[i].mesh.isPoint);
             if (!this.meshList[i].mesh.isPoint) {
                 //裏面をカリング(描画しない)
@@ -401,6 +406,7 @@ Scene3D.prototype = {
         this.uniLocation.centerPosition = this.gl.getUniformLocation(this.programs, "centerPosition");
         this.uniLocation.ambientColor = this.gl.getUniformLocation(this.programs, "ambientColor");
         this.uniLocation.isPoint = this.gl.getUniformLocation(this.programs, "isPoint");
+        this.uniLocation.alpha = this.gl.getUniformLocation(this.programs, "alpha");
 
         // attributeLocationを取得して配列に格納する
         this.attLocation = [];
