@@ -47,9 +47,9 @@ DirectionLight.prototype = {}
 
 Beam = function(gl,parent,target,ball){
     this.gl = gl;
-    this.parent = parent
-    this.target = target
-    this.ball = ball
+    this.parent = parent;
+    this.target = target;
+    this.ball = ball;
     this.modelData = window.beam(2,[1,1,0,0.5])
     this.mat = new matIV();
     this.q = new qtnIV();
@@ -57,38 +57,43 @@ Beam = function(gl,parent,target,ball){
     this.mMatrix = this.mat.identity(this.mat.create());
     this.qMatrix = this.mat.identity(this.mat.create());
     this.invMatrix = this.mat.identity(this.mat.create());
-    this.x = target.x;
-    this.y = target.y;
-    this.z = target.z;
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationZ = 0;
     this.scaleX = .15;
-    this.scaleY = .06;
-    this.scaleZ = 1.5;
-    this.alpha = 1.0;
-    this.count = 0;
+    this.scaleY = .03;
+    this.scaleZ = 3;
     this.life = 50;
+    this.startAlpha = 0.4;
     this.currentLife = this.life;
     this.speed = 1;
 
     this.defaultPosture = [0,0,1];
-    //クォータニオンによる姿勢制御
-    this.lookVector = vec3.subtract([],[ this.ball.x, this.ball.y, this.ball.z],[this.x, this.y, this.z])
-    //回転軸(外積)
-    var rotationAxis = vec3.cross([],this.lookVector, this.defaultPosture);
-    vec3.normalize(rotationAxis,rotationAxis);
-
-    this.angleArray = [this.x, this.y, this.z];
-    //なす角(radian)
-    var qAngle = Math.acos(vec3.dot(this.lookVector,this.defaultPosture) / vec3.length(this.lookVector) * vec3.length(this.defaultPosture))
-    this.q.rotate(qAngle, rotationAxis, this.qtn);
-    this.mat.identity(this.qMatrix);
-    this.q.toMatIV(this.qtn, this.qMatrix);
 }
 
 Beam.prototype = {
+    init:function(){
+        this.x = this.target.x;
+        this.y = this.target.y;
+        this.z = this.target.z;
+        this.alpha = this.startAlpha;
+        this.currentLife = this.life;
+        //クォータニオンによる姿勢制御
+        this.lookVector = vec3.subtract([],[ this.ball.x, this.ball.y, this.ball.z],[this.x, this.y, this.z])
+        //回転軸(外積)
+        var rotationAxis = vec3.cross([],this.lookVector, this.defaultPosture);
+        vec3.normalize(rotationAxis,rotationAxis);
+
+        this.angleArray = [this.x, this.y, this.z];
+        //なす角(radian)
+        var qAngle = Math.acos(vec3.dot(this.lookVector,this.defaultPosture) / vec3.length(this.lookVector) * vec3.length(this.defaultPosture))
+        this.q.rotate(qAngle, rotationAxis, this.qtn);
+        this.mat.identity(this.qMatrix);
+        this.q.toMatIV(this.qtn, this.qMatrix);
+    },
     render:function(){
+        var percent = (this.currentLife / this.life > this.startAlpha)? this.startAlpha: this.currentLife / this.life;
+        this.alpha = percent;
         vec3.normalize(this.lookVector,this.lookVector)
         this.x+=this.lookVector[0]*this.speed;
         this.y+=this.lookVector[1]*this.speed;
@@ -102,8 +107,6 @@ Beam.prototype = {
         this.mat.scale(this.mMatrix, scale, this.mMatrix);
 
         this.currentLife--;
-        var percent = (this.currentLife / this.life > 0.5)? 0.5: this.currentLife / this.life;
-        this.alpha = percent;
         if(this.currentLife < 0){
             requestAnimationFrame(this.dispose.bind(this))
         }
@@ -113,8 +116,10 @@ Beam.prototype = {
     }
 }
 
-Funnel = function (gl, img) {
+Funnel = function (gl,scene3D, lookTarget,img) {
     this.gl = gl;
+    this.scene3D = scene3D;
+    this.target = lookTarget
     this.modelData = window.funnel();
     this.mat = new matIV();
     this.mMatrix = this.mat.identity(this.mat.create());
@@ -138,9 +143,6 @@ Funnel = function (gl, img) {
     this.rnd = Math.random() * 5 + 8;
     this.rnd1 = Math.random() * 5 + 8;
     this.rnd2 = Math.random() * 5 + 8;
-    this.posRnd = Math.random() * 360;
-    this.posRnd1 = Math.random() * 360;
-    this.posRnd2 = Math.random() * 360;
     this.speed = Math.random() * 2;
 
     this.defaultPosture = [0,0,1];
@@ -153,7 +155,14 @@ Funnel = function (gl, img) {
     this.ratio.y = 0.002 + Math.random() * 0.005;
     this.ratio.z = 0.002 + Math.random() * 0.005;
 
-    this.target = null
+    this.beamLength = 20;
+    this.beamArray = [];
+    this.curentBeamIndex = 0;
+    this.currentBeam = null;
+
+    for(var i = 0; i < this.beamLength; i++){
+        this.beamArray[i] = new Beam(this.gl,this.scene3D,this,this.target);
+    }
 
     if (img) {
         this.initTexture(img);
@@ -172,6 +181,14 @@ Funnel.prototype = {
     setTarget: function (cameraTarget) {
         this.target = cameraTarget
     },
+    setBeam: function(){
+        this.curentBeamIndex++;
+        if(this.curentBeamIndex >= this.beamLength) {
+            this.curentBeamIndex = 0;
+        }
+        this.currentBeam = this.beamArray[this.curentBeamIndex];
+        this.currentBeam.init()
+    },
 
     render: function () {
         this.count += this.speed
@@ -185,7 +202,6 @@ Funnel.prototype = {
             targetPosition.y = this.target.y;
             targetPosition.z = this.target.z;
         }
-
 
         ////オイラー角による向き制御
         //var subtractPosition = {
@@ -542,11 +558,9 @@ World.prototype = {
         this.scene3D.addChild(this.cockpit);
 
         this.funnellArray = [];
-        this.funnelLength = 100;
+        this.funnelLength = 20;
         for (var i = 0; i < this.funnelLength; i++) {
-            var funnel = new Funnel(this.gl, ImageLoader.images["texturefunnel"]);
-            funnel.setTarget(this.cockpit);
-            //funnel.x = 0, funnel.y = 1,funnel.z = -5
+            var funnel = new Funnel(this.gl,this.scene3D, this.cockpit,ImageLoader.images["texturefunnel"]);
             this.funnellArray.push(funnel);
             this.scene3D.addChild(funnel)
         }
@@ -557,15 +571,13 @@ World.prototype = {
 
 
         var self = this
-        var clickHandler = function(){
-
-            for (var i = 0; i < this.funnelLength; i++) {
-                var beam = new Beam(this.gl,this.scene3D,this.funnellArray[i],this.cockpit);
-                this.scene3D.addChild(beam);
+        setInterval( function(){
+            for (var i = 0; i < self.funnelLength; i++) {
+                self.funnellArray[i].setBeam();
+                var beam = self.funnellArray[i].currentBeam;
+                self.scene3D.addChild(beam);
             }
-
-        }
-        document.getElementById("canvasId").addEventListener("click" , clickHandler.bind(self))
+        },100);
 
         this.enterFrameHandler()
     },
