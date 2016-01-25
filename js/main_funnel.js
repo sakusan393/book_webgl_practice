@@ -19,16 +19,16 @@ var Camera = function (canvas) {
     mat4.perspective(this.pMatrix,this.fov, this.aspect, this.near, this.far);
     mat4.multiply(this.vpMatrix,this.pMatrix, this.vMatrix);
     this.count = 0;
-    this.target = null
+    this.parent = null
 }
 Camera.prototype = {
     setTarget: function (cameraTarget) {
-        this.target = cameraTarget
+        this.parent = cameraTarget
     },
     render: function () {
 
-        if (this.target) {
-            this.centerPoint = [this.target.x, this.target.y, this.target.z]
+        if (this.parent) {
+            this.centerPoint = [this.parent.x, this.parent.y, this.parent.z]
         }
         this.cameraPosition = [this.x, this.y, this.z]
 
@@ -44,11 +44,11 @@ var DirectionLight = function () {
 }
 DirectionLight.prototype = {}
 
-Beam = function(gl,parent,target,ball){
+Beam = function(gl,scene3D,funnel,cockpit){
     this.gl = gl;
-    this.parent = parent;
-    this.target = target;
-    this.ball = ball;
+    this.scene3D = scene3D;
+    this.parent = funnel;
+    this.target = cockpit;
     this.modelData = window.beam(2,[1,1,0,0.5])
     this.qtn = quat.identity(quat.create());
     this.mMatrix = mat4.identity(mat4.create());
@@ -64,19 +64,20 @@ Beam = function(gl,parent,target,ball){
     this.startAlpha = 0.4;
     this.currentLife = this.life;
     this.speed = 1;
+    this.index = 0;
 
     this.defaultPosture = [0,0,1];
 }
 
 Beam.prototype = {
     init:function(){
-        this.x = this.target.x;
-        this.y = this.target.y;
-        this.z = this.target.z;
+        this.x = this.parent.x;
+        this.y = this.parent.y;
+        this.z = this.parent.z;
         this.alpha = this.startAlpha;
         this.currentLife = this.life;
         //クォータニオンによる姿勢制御
-        this.lookVector = vec3.subtract([],[ this.ball.x, this.ball.y, this.ball.z],[this.x, this.y, this.z])
+        this.lookVector = vec3.subtract([],[ this.target.x, this.target.y, this.target.z],[this.x, this.y, this.z])
         //回転軸(外積)
         var rotationAxis = vec3.cross([],this.lookVector, this.defaultPosture);
         vec3.normalize(rotationAxis,rotationAxis);
@@ -109,14 +110,14 @@ Beam.prototype = {
         }
     },
     dispose:function(){
-        this.parent.removeChild(this)
+        this.scene3D.removeChild(this)
     }
 }
 
 Funnel = function (gl,scene3D, lookTarget,img) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.target = lookTarget
+    this.parent = lookTarget
     this.modelData = window.funnel();
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
@@ -156,7 +157,7 @@ Funnel = function (gl,scene3D, lookTarget,img) {
     this.currentBeam = null;
 
     for(var i = 0; i < this.beamLength; i++){
-        this.beamArray[i] = new Beam(this.gl,this.scene3D,this,this.target);
+        this.beamArray[i] = new Beam(this.gl,this.scene3D,this,this.parent);
     }
 
     if (img) {
@@ -174,7 +175,7 @@ Funnel.prototype = {
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
     setTarget: function (cameraTarget) {
-        this.target = cameraTarget
+        this.parent = cameraTarget
     },
     shoot: function(){
         this.curentBeamIndex++;
@@ -192,10 +193,10 @@ Funnel.prototype = {
         mat4.identity(this.mMatrix);
         mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
         var targetPosition = {x: 0, y: 0, z: 0};
-        if (this.target) {
-            targetPosition.x = this.target.x;
-            targetPosition.y = this.target.y;
-            targetPosition.z = this.target.z;
+        if (this.parent) {
+            targetPosition.x = this.parent.x;
+            targetPosition.y = this.parent.y;
+            targetPosition.z = this.parent.z;
         }
 
         //オイラー角による向き制御
