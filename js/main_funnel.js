@@ -97,11 +97,11 @@ Beam.prototype = {
         this.z+=this.lookVector[2]*this.speed;
         var translatePosition = [this.x, this.y, this.z];
         mat4.identity(this.mMatrix);
-        mat4.translate(this.mMatrix, translatePosition, this.mMatrix);
+        mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
         mat4.multiply(this.mMatrix, this.qMatrix, this.mMatrix);
 
         var scale = [this.scaleX, this.scaleY , this.scaleZ]
-        mat4.scale(this.mMatrix, scale, this.mMatrix);
+        mat4.scale(this.mMatrix, this.mMatrix, scale);
 
         this.currentLife--;
         if(this.currentLife < 0){
@@ -190,7 +190,7 @@ Funnel.prototype = {
 
         var translatePosition = [this.x, this.y, this.z];
         mat4.identity(this.mMatrix);
-        mat4.translate(this.mMatrix, translatePosition, this.mMatrix);
+        mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
         var targetPosition = {x: 0, y: 0, z: 0};
         if (this.target) {
             targetPosition.x = this.target.x;
@@ -198,7 +198,7 @@ Funnel.prototype = {
             targetPosition.z = this.target.z;
         }
 
-        ////オイラー角による向き制御
+        //オイラー角による向き制御
         //var subtractPosition = {
         //    x: targetPosition.x - this.x,
         //    y: targetPosition.y - this.y,
@@ -211,9 +211,9 @@ Funnel.prototype = {
         //var axisX = [1.0, 0.0, 0.0];
         //var axisY = [0.0, 1.0, 0.0];
         //var axisZ = [0.0, 0.0, 1.0];
-        //mat4.rotate(this.mMatrix, radY, axisY, this.mMatrix);
-        //mat4.rotate(this.mMatrix, radX, axisX, this.mMatrix);
-        //mat4.rotate(this.mMatrix, radZ, axisZ, this.mMatrix);
+        //mat4.rotate(this.mMatrix, this.mMatrix, radY, axisY);
+        //mat4.rotate(this.mMatrix, this.mMatrix, radX, axisX);
+        //mat4.rotate(this.mMatrix, this.mMatrix, radZ, axisZ);
 
 
         //クォータニオンによる姿勢制御
@@ -224,11 +224,10 @@ Funnel.prototype = {
 
         //なす角(radian)
         var qAngle = Math.acos(vec3.dot(lookVector,this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
-        quat.setAxisAngle(this.qtn ,qAngle, rotationAxis);
+        quat.setAxisAngle(this.qtn  ,rotationAxis,-qAngle);
         mat4.identity(this.qMatrix);
         mat4.fromQuat(this.qMatrix , this.qtn);
-        mat4.multiply(this.mMatrix, this.qMatrix, this.mMatrix)
-
+        mat4.multiply(this.mMatrix, this.mMatrix, this.qMatrix);
 
         mat4.invert(this.invMatrix , this.mMatrix);
     }
@@ -250,11 +249,11 @@ Cokpit = function (gl, img) {
     this.scaleZ = 1;
     this.count = 0;
     this.isPoint = 0;
-    this.gainRatio = 100
-    this.rnd = Math.random() * 10 + 30
-    this.rnd1 = Math.random() * 10 + 30
-    this.rnd2 = Math.random() * 10 + 30
-    this.rnd3 = Math.random() * 10 + 30
+    this.gainRatio = 100;
+    this.rnd = Math.random() * 10 + 30;
+    this.rnd1 = Math.random() * 10 + 30;
+    this.rnd2 = Math.random() * 10 + 30;
+    this.rnd3 = Math.random() * 10 + 30;
     this.speed = .06
 
     if (img) {
@@ -273,7 +272,7 @@ Cokpit.prototype = {
     render: function () {
         var translatePosition = [this.x, this.y, this.z];
         mat4.identity(this.mMatrix);
-        mat4.translate(this.mMatrix, translatePosition, this.mMatrix);
+        mat4.translate(this.mMatrix, this.mMatrix,translatePosition);
         //var radians = (0 % 360) * Math.PI / 180;
         //var axis = [1.0, 0.0, 0.0];
         //mat4.rotate(this.mMatrix, radians, axis, this.mMatrix);
@@ -311,9 +310,9 @@ Scene3D = function (gl, camera, light) {
     this.light = light;
     this.meshList = [];
     this.mvpMatrix = mat4.identity(mat4.create());
-    this.count = 0
+    this.count = 0;
     this.initWebgl();
-    this.generateTexture(ImageLoader.images)
+    this.generateTexture(ImageLoader.images);
     this.render()
 }
 Scene3D.prototype = {
@@ -328,6 +327,7 @@ Scene3D.prototype = {
         if (mesh.modelData.i) meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
         mesh.index = this.meshList.length;
+        console.log(obj)
         this.meshList.push(obj)
     },
     removeChild: function (mesh) {
@@ -556,18 +556,18 @@ World.prototype = {
             this.funnellArray.push(funnel);
             this.scene3D.addChild(funnel)
         }
+
         var stars = new Stars(this.gl);
         this.scene3D.addChild(stars);
 
         this.camera.setTarget(this.cockpit);
-
 
         var self = this
         setInterval( function(){
             for (var i = 0; i < self.funnelLength; i++) {
                 self.funnellArray[i].setBeam();
                 var beam = self.funnellArray[i].currentBeam;
-                self.scene3D.addChild(beam);
+                //self.scene3D.addChild(beam);
             }
         },100);
 
@@ -605,9 +605,8 @@ window.onload = function () {
     var loadCompleteHandler = function () {
 
         for (var val in ImageLoader.images) {
-            console.log("loaded", ImageLoader.images["texturefunnel"]);
+            console.log("loaded", ImageLoader.images[val]);
         }
-
         //ドキュメントクラス的なもの canvasのIDを渡す
         new World()
     }
@@ -616,7 +615,6 @@ window.onload = function () {
     var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
-
 }
 
 TextureList = {
