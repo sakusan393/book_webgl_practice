@@ -339,6 +339,7 @@ Scene3D.prototype = {
                     this.meshList[i].indexBuffer = null;
                     this.meshList[i].mesh = null;
                     this.meshList.splice(i, 1);
+                    return
                 }
             }
         }
