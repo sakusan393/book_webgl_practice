@@ -6,19 +6,18 @@ var Camera = function (canvas) {
     this.z = 20
     this.cameraPosition = [this.x, this.y, this.z]; // カメラの位置
     this.cameraUp = [0.0, 1.0, 0.0];       // カメラの上方向
-    this.mat = new matIV();
-    this.vMatrix = this.mat.identity(this.mat.create());
-    this.pMatrix = this.mat.identity(this.mat.create());
-    this.vpMatrix = this.mat.identity(this.mat.create());
-    this.mat.lookAt(this.cameraPosition, this.centerPoint, this.cameraUp, this.vMatrix);
+    this.vMatrix = mat4.identity(mat4.create());
+    this.pMatrix = mat4.identity(mat4.create());
+    this.vpMatrix = mat4.identity(mat4.create());
+    mat4.lookAt(this.vMatrix,this.cameraPosition, this.centerPoint, this.cameraUp);
 
     // プロジェクションのための情報を揃える
     this.fov = 45;                             // 視野角
     this.aspect = canvas.width / canvas.height; // アスペクト比
     this.near = 0.1;                            // 空間の最前面
     this.far = 200.0;                            // 空間の奥行き終端
-    this.mat.perspective(this.fov, this.aspect, this.near, this.far, this.pMatrix);
-    this.mat.multiply(this.pMatrix, this.vMatrix, this.vpMatrix);
+    mat4.perspective(this.pMatrix,this.fov, this.aspect, this.near, this.far);
+    mat4.multiply(this.vpMatrix,this.pMatrix, this.vMatrix);
     this.count = 0;
     this.target = null
 }
@@ -33,9 +32,9 @@ Camera.prototype = {
         }
         this.cameraPosition = [this.x, this.y, this.z]
 
-        this.mat.lookAt(this.cameraPosition, this.centerPoint, this.cameraUp, this.vMatrix);
-        this.mat.perspective(this.fov, this.aspect, this.near, this.far, this.pMatrix);
-        this.mat.multiply(this.pMatrix, this.vMatrix, this.vpMatrix);
+        mat4.lookAt(this.vMatrix, this.cameraPosition, this.centerPoint, this.cameraUp);
+        mat4.perspective(this.pMatrix , this.fov, this.aspect, this.near, this.far);
+        mat4.multiply(this.vpMatrix , this.pMatrix, this.vMatrix);
     }
 }
 var DirectionLight = function () {
@@ -51,12 +50,10 @@ Beam = function(gl,parent,target,ball){
     this.target = target;
     this.ball = ball;
     this.modelData = window.beam(2,[1,1,0,0.5])
-    this.mat = new matIV();
-    this.q = new qtnIV();
-    this.qtn = this.q.identity(this.q.create());
-    this.mMatrix = this.mat.identity(this.mat.create());
-    this.qMatrix = this.mat.identity(this.mat.create());
-    this.invMatrix = this.mat.identity(this.mat.create());
+    this.qtn = quat.identity(quat.create());
+    this.mMatrix = mat4.identity(mat4.create());
+    this.qMatrix = mat4.identity(mat4.create());
+    this.invMatrix = mat4.identity(mat4.create());
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationZ = 0;
@@ -87,9 +84,9 @@ Beam.prototype = {
         this.angleArray = [this.x, this.y, this.z];
         //なす角(radian)
         var qAngle = Math.acos(vec3.dot(this.lookVector,this.defaultPosture) / vec3.length(this.lookVector) * vec3.length(this.defaultPosture))
-        this.q.rotate(qAngle, rotationAxis, this.qtn);
-        this.mat.identity(this.qMatrix);
-        this.q.toMatIV(this.qtn, this.qMatrix);
+        quat.setAxisAngle(this.qtn , qAngle, rotationAxis);
+        mat4.identity(this.qMatrix);
+        mat4.fromQuat(this.qMatrix,this.qtn);
     },
     render:function(){
         var percent = (this.currentLife / this.life > this.startAlpha)? this.startAlpha: this.currentLife / this.life;
@@ -99,12 +96,12 @@ Beam.prototype = {
         this.y+=this.lookVector[1]*this.speed;
         this.z+=this.lookVector[2]*this.speed;
         var translatePosition = [this.x, this.y, this.z];
-        this.mat.identity(this.mMatrix);
-        this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
-        this.mat.multiply(this.mMatrix, this.qMatrix, this.mMatrix);
+        mat4.identity(this.mMatrix);
+        mat4.translate(this.mMatrix, translatePosition, this.mMatrix);
+        mat4.multiply(this.mMatrix, this.qMatrix, this.mMatrix);
 
         var scale = [this.scaleX, this.scaleY , this.scaleZ]
-        this.mat.scale(this.mMatrix, scale, this.mMatrix);
+        mat4.scale(this.mMatrix, scale, this.mMatrix);
 
         this.currentLife--;
         if(this.currentLife < 0){
@@ -121,13 +118,11 @@ Funnel = function (gl,scene3D, lookTarget,img) {
     this.scene3D = scene3D;
     this.target = lookTarget
     this.modelData = window.funnel();
-    this.mat = new matIV();
-    this.mMatrix = this.mat.identity(this.mat.create());
-    this.invMatrix = this.mat.identity(this.mat.create());
+    this.mMatrix = mat4.identity(mat4.create());
+    this.invMatrix = mat4.identity(mat4.create());
 
-    this.q = new qtnIV();
-    this.qtn = this.q.identity(this.q.create());
-    this.qMatrix = this.mat.identity(this.mat.create());
+    this.qtn = quat.identity(quat.create());
+    this.qMatrix = mat4.identity(mat4.create());
 
     this.x = (Math.random() - 0.5) * 30
     this.y = (Math.random() - 0.5) * 30
@@ -194,8 +189,8 @@ Funnel.prototype = {
         this.count += this.speed
 
         var translatePosition = [this.x, this.y, this.z];
-        this.mat.identity(this.mMatrix);
-        this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
+        mat4.identity(this.mMatrix);
+        mat4.translate(this.mMatrix, translatePosition, this.mMatrix);
         var targetPosition = {x: 0, y: 0, z: 0};
         if (this.target) {
             targetPosition.x = this.target.x;
@@ -216,9 +211,9 @@ Funnel.prototype = {
         //var axisX = [1.0, 0.0, 0.0];
         //var axisY = [0.0, 1.0, 0.0];
         //var axisZ = [0.0, 0.0, 1.0];
-        //this.mat.rotate(this.mMatrix, radY, axisY, this.mMatrix);
-        //this.mat.rotate(this.mMatrix, radX, axisX, this.mMatrix);
-        //this.mat.rotate(this.mMatrix, radZ, axisZ, this.mMatrix);
+        //mat4.rotate(this.mMatrix, radY, axisY, this.mMatrix);
+        //mat4.rotate(this.mMatrix, radX, axisX, this.mMatrix);
+        //mat4.rotate(this.mMatrix, radZ, axisZ, this.mMatrix);
 
 
         //クォータニオンによる姿勢制御
@@ -229,22 +224,21 @@ Funnel.prototype = {
 
         //なす角(radian)
         var qAngle = Math.acos(vec3.dot(lookVector,this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
-        this.q.rotate(qAngle, rotationAxis, this.qtn);
-        this.mat.identity(this.qMatrix);
-        this.q.toMatIV(this.qtn, this.qMatrix)
-        this.mat.multiply(this.mMatrix, this.qMatrix, this.mMatrix)
+        quat.setAxisAngle(this.qtn ,qAngle, rotationAxis);
+        mat4.identity(this.qMatrix);
+        mat4.fromQuat(this.qMatrix , this.qtn);
+        mat4.multiply(this.mMatrix, this.qMatrix, this.mMatrix)
 
 
-        this.mat.inverse(this.mMatrix, this.invMatrix);
+        mat4.invert(this.invMatrix , this.mMatrix);
     }
 
 }
 Cokpit = function (gl, img) {
     this.gl = gl;
     this.modelData = window.sphere(10, 10, .3);
-    this.mat = new matIV();
-    this.mMatrix = this.mat.identity(this.mat.create());
-    this.invMatrix = this.mat.identity(this.mat.create());
+    this.mMatrix = mat4.identity(mat4.create());
+    this.invMatrix = mat4.identity(mat4.create());
     this.x = 0;
     this.y = 0;
     this.z = 0;
@@ -278,21 +272,20 @@ Cokpit.prototype = {
     },
     render: function () {
         var translatePosition = [this.x, this.y, this.z];
-        this.mat.identity(this.mMatrix);
-        this.mat.translate(this.mMatrix, translatePosition, this.mMatrix);
+        mat4.identity(this.mMatrix);
+        mat4.translate(this.mMatrix, translatePosition, this.mMatrix);
         //var radians = (0 % 360) * Math.PI / 180;
         //var axis = [1.0, 0.0, 0.0];
-        //this.mat.rotate(this.mMatrix, radians, axis, this.mMatrix);
-        this.mat.inverse(this.mMatrix, this.invMatrix);
+        //mat4.rotate(this.mMatrix, radians, axis, this.mMatrix);
+        mat4.invert(this.invMatrix , this.mMatrix);
     }
 }
 
 Stars = function (gl) {
     this.gl = gl;
     this.modelData = window.star(2, .1);
-    this.mat = new matIV();
-    this.mMatrix = this.mat.identity(this.mat.create());
-    this.invMatrix = this.mat.identity(this.mat.create());
+    this.mMatrix = mat4.identity(mat4.create());
+    this.invMatrix = mat4.identity(mat4.create());
     this.x = 0;
     this.y = 0;
     this.z = 0;
@@ -317,8 +310,7 @@ Scene3D = function (gl, camera, light) {
     this.camera = camera;
     this.light = light;
     this.meshList = [];
-    this.mat = new matIV();
-    this.mvpMatrix = this.mat.identity(this.mat.create());
+    this.mvpMatrix = mat4.identity(mat4.create());
     this.count = 0
     this.initWebgl();
     this.generateTexture(ImageLoader.images)
@@ -370,7 +362,7 @@ Scene3D.prototype = {
 
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
                 this.meshList[i].mesh.render();
-                this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
+                mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
                 this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
@@ -382,7 +374,7 @@ Scene3D.prototype = {
             } else {
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
                 this.meshList[i].mesh.render();
-                this.mat.multiply(this.camera.vpMatrix, this.meshList[i].mesh.mMatrix, this.mvpMatrix);
+                mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
                 this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
