@@ -171,7 +171,7 @@ Funnel.prototype = {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        //this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
     setTarget: function (cameraTarget) {
         this.target = cameraTarget
@@ -347,7 +347,7 @@ Scene3D.prototype = {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
         //カメラに座標変換行列の更新
-        this.camera.render()
+        this.camera.render();
 
         //各3Dオブジェクトの描画処理
         for (var i = 0, l = this.meshList.length; i < l; i++) {
@@ -359,6 +359,8 @@ Scene3D.prototype = {
                 this.gl.enable(this.gl.CULL_FACE);
                 this.gl.cullFace(this.gl.BACK);
 
+                //明示的に0番目を指定
+                this.gl.uniform1i(this.uniLocation.texture, 0);
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
                 this.meshList[i].mesh.render();
                 mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
@@ -406,6 +408,7 @@ Scene3D.prototype = {
 
         //固定となるuniformの生成
         this.uniLocation = {};
+        this.uniLocation.texture = this.gl.getUniformLocation(this.programs, "texture");
         this.uniLocation.mvpMatrix = this.gl.getUniformLocation(this.programs, "mvpMatrix");
         this.uniLocation.invMatrix = this.gl.getUniformLocation(this.programs, "invMatrix");
         this.uniLocation.lightDirection = this.gl.getUniformLocation(this.programs, "lightDirection");
@@ -612,29 +615,6 @@ window.onload = function () {
     var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
-}
-
-TextureList = {
-    gl: null,
-    initialize: false,
-    textures: [],
-    initWebgl: function (gl) {
-        this.gl = gl
-        this.initialize = true
-    },
-    setTexture: function () {
-        if (!this.initialize) return
-
-    },
-    initTexture: function (imageElement) {
-        if (!this.initialize) return
-
-        // テクスチャオブジェクトの生成
-        this.texture = this.gl.createTexture();
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, imageElement);
-        this.gl.generateMipmap(this.gl.TEXTURE_2D);
-    },
 }
 
 ImageLoader = {

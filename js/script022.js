@@ -126,6 +126,12 @@ onload = function(){
 
     // 恒常ループ
     (function(){
+
+        if(!texture0 || !texture1){
+            setTimeout(arguments.callee, 1000 / 30);
+            return
+        }
+
         // canvasを初期化
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clearDepth(1.0);
@@ -156,9 +162,9 @@ onload = function(){
         m.multiply(pMatrix, vMatrix, tmpMatrix);
 
         // フロア用テクスチャをバインド
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, texture1);
-        gl.uniform1i(uniLocation[1], 1);
+        //gl.activeTexture(gl.TEXTURE1);
+        gl.uniform1i(uniLocation[1], 0);
+        gl.bindTexture(gl.TEXTURE_2D, texture0);
 
         // フロアのレンダリング
         m.identity(mMatrix);
@@ -170,7 +176,7 @@ onload = function(){
 
         // ビルボード用テクスチャをバインド
         //gl.activeTexture(gl.TEXTURE1);
-        //gl.bindTexture(gl.TEXTURE_2D, texture1);
+        gl.bindTexture(gl.TEXTURE_2D, texture1);
         //gl.uniform1i(uniLocation[1], 1);
 
         // ビルボードのレンダリング
@@ -331,7 +337,6 @@ onload = function(){
             gl.generateMipmap(gl.TEXTURE_2D);
 
             // テクスチャのバインドを無効化
-            gl.bindTexture(gl.TEXTURE_2D, null);
 
             // 生成したテクスチャを変数に代入
             switch(index){
@@ -344,6 +349,8 @@ onload = function(){
                 default:
                     break;
             }
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
         };
 
         // イメージオブジェクトのソースを指定
