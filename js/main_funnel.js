@@ -176,15 +176,15 @@ Funnel.prototype = {
     setTarget: function (cameraTarget) {
         this.target = cameraTarget
     },
-    setBeam: function(){
+    shoot: function(){
         this.curentBeamIndex++;
         if(this.curentBeamIndex >= this.beamLength) {
             this.curentBeamIndex = 0;
         }
         this.currentBeam = this.beamArray[this.curentBeamIndex];
-        this.currentBeam.init()
+        this.currentBeam.init();
+        this.scene3D.addChild(this.beamArray[this.curentBeamIndex])
     },
-
     render: function () {
         this.count += this.speed
 
@@ -561,12 +561,10 @@ World.prototype = {
 
         this.camera.setTarget(this.cockpit);
 
-        var self = this
+        var self = this;
         setInterval( function(){
             for (var i = 0; i < self.funnelLength; i++) {
-                self.funnellArray[i].setBeam();
-                var beam = self.funnellArray[i].currentBeam;
-                self.scene3D.addChild(beam);
+                self.funnellArray[i].shoot();
             }
         },100);
 
