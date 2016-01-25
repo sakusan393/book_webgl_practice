@@ -327,7 +327,6 @@ Scene3D.prototype = {
         if (mesh.modelData.i) meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
         mesh.index = this.meshList.length;
-        console.log(obj)
         this.meshList.push(obj)
     },
     removeChild: function (mesh) {
@@ -367,7 +366,7 @@ Scene3D.prototype = {
                 this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
-                this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
+                if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
 
                 this.gl.disable(this.gl.CULL_FACE);
