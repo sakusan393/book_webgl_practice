@@ -84,7 +84,7 @@ Beam.prototype = {
         this.angleArray = [this.x, this.y, this.z];
         //なす角(radian)
         var qAngle = Math.acos(vec3.dot(this.lookVector,this.defaultPosture) / vec3.length(this.lookVector) * vec3.length(this.defaultPosture))
-        quat.setAxisAngle(this.qtn , qAngle, rotationAxis);
+        quat.setAxisAngle(this.qtn ,rotationAxis, -qAngle);
         mat4.identity(this.qMatrix);
         mat4.fromQuat(this.qMatrix,this.qtn);
     },
@@ -98,7 +98,7 @@ Beam.prototype = {
         var translatePosition = [this.x, this.y, this.z];
         mat4.identity(this.mMatrix);
         mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
-        mat4.multiply(this.mMatrix, this.qMatrix, this.mMatrix);
+        mat4.multiply(this.mMatrix, this.mMatrix, this.qMatrix);
 
         var scale = [this.scaleX, this.scaleY , this.scaleZ]
         mat4.scale(this.mMatrix, this.mMatrix, scale);
@@ -567,7 +567,7 @@ World.prototype = {
             for (var i = 0; i < self.funnelLength; i++) {
                 self.funnellArray[i].setBeam();
                 var beam = self.funnellArray[i].currentBeam;
-                //self.scene3D.addChild(beam);
+                self.scene3D.addChild(beam);
             }
         },100);
 
