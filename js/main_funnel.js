@@ -281,7 +281,7 @@ Cokpit.prototype = {
     }
 }
 
-Stars = function (gl) {
+Stars = function (gl,img) {
     this.gl = gl;
     this.modelData = window.star(2, .1);
     this.mMatrix = mat4.identity(mat4.create());
@@ -297,11 +297,23 @@ Stars = function (gl) {
     this.scaleZ = 1;
     this.count = 0;
     this.isPoint = 1;
+    if (img) {
+        this.initTexture(img);
+    }
+
 }
 
 Stars.prototype = {
     render: function () {
 
+    },
+    initTexture: function (img) {
+        // テクスチャオブジェクトの生成
+        this.texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
 }
 
@@ -313,7 +325,6 @@ Scene3D = function (gl, camera, light) {
     this.mvpMatrix = mat4.identity(mat4.create());
     this.count = 0;
     this.initWebgl();
-    this.generateTexture(ImageLoader.images);
     this.render()
 }
 Scene3D.prototype = {
@@ -361,8 +372,6 @@ Scene3D.prototype = {
                 this.gl.enable(this.gl.CULL_FACE);
                 this.gl.cullFace(this.gl.BACK);
 
-                //明示的に0番目を指定
-                this.gl.uniform1i(this.uniLocation.texture, 0);
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
                 this.meshList[i].mesh.render();
                 mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
@@ -370,6 +379,8 @@ Scene3D.prototype = {
                 this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
+                //明示的に0番目を指定
+                this.gl.uniform1i(this.uniLocation.texture, 0);
                 if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
 
@@ -381,6 +392,8 @@ Scene3D.prototype = {
 
                 this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
+                this.gl.uniform1i(this.uniLocation.texture, 0);
+                if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawArrays(this.gl.POINTS, 0, this.meshList[i].mesh.modelData.p.length / 3)
             }
         }
@@ -459,17 +472,6 @@ Scene3D.prototype = {
         this.checkLinkPrograms(programs)
 
         return programs;
-    },
-    generateTexture: function (imageArray) {
-        var length = imageArray.length;
-        this.texureArray = []
-        for (var i = 0; i < length; i++) {
-            this.texureArray[i] = this.gl.createTexture();
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.texureArray[i]);
-            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, imageArray[i]);
-            this.gl.generateMipmap(this.gl.TEXTURE_2D);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, null);
-        }
     },
 
     generateVBO: function (data) {
@@ -550,6 +552,9 @@ World.prototype = {
         this.light = new DirectionLight();
         this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
+        var stars = new Stars(this.gl,ImageLoader.images["texturestar"]);
+        this.scene3D.addChild(stars);
+
         this.cockpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
         this.scene3D.addChild(this.cockpit);
 
@@ -561,8 +566,6 @@ World.prototype = {
             this.scene3D.addChild(funnel)
         }
 
-        var stars = new Stars(this.gl);
-        this.scene3D.addChild(stars);
 
         this.camera.setTarget(this.cockpit);
 
@@ -614,7 +617,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg"];
+    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg","images/texturestar.png"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }

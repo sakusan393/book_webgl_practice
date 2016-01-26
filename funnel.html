@@ -50,12 +50,14 @@
             vec3 halfVector = normalize(invLight + invEye);
             float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
             float spec = pow(clamp(dot(halfVector,vNormal),0.0,2.0),10.0);
-            vec3 dest = texture2D(texture, vTexCoord).rgb * diff + spec + ambientColor.rgb;
-            destColor = vec4(dest, 1.0);
             if(!bool(vTexCoord)){
                 destColor = vec4(vec3(vColor.xyz) , alpha);
+            }else{
+                vec3 dest = texture2D(texture, vTexCoord).rgb * diff + spec + ambientColor.rgb;
+                destColor = vec4(dest, 1.0);
             }
         }else{
+            //destColor = texture2D(texture, gl_PointCoord);
             destColor = vec4(.7,.7,.9,.9);
         }
         gl_FragColor = destColor;

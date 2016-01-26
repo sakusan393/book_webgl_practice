@@ -44,7 +44,11 @@ onload = function(){
     var f_shader = create_shader('fs');
 
     // プログラムオブジェクトの生成とリンク
+    var p = {}
     var prg = create_program(v_shader, f_shader);
+    var prg2 = create_program(v_shader, f_shader);
+    p.prg = prg
+    p.prg2 = prg2
 
     // attributeLocationを配列に取得
     var attLocation = new Array();
@@ -97,6 +101,7 @@ onload = function(){
     var uniLocation = new Array();
     uniLocation[0]  = gl.getUniformLocation(prg, 'mvpMatrix');
     uniLocation[1]  = gl.getUniformLocation(prg, 'texture');
+    uniLocation[2]  = gl.getUniformLocation(prg, 'isPoint');
 
     // 各種行列の生成と初期化
     var m = new matIV();
@@ -119,10 +124,12 @@ onload = function(){
     // テクスチャ用変数の宣言
     var texture0 = null;
     var texture1 = null;
+    var texture2 = null;
 
     // テクスチャを生成
     create_texture('images/texture0.png', 0);
     create_texture('images/texture1.png', 1);
+    create_texture('images/test.jpg', 2);
 
     // 恒常ループ
     (function(){
@@ -161,10 +168,12 @@ onload = function(){
         m.perspective(45, c.width / c.height, 0.1, 100, pMatrix);
         m.multiply(pMatrix, vMatrix, tmpMatrix);
 
+        //isPoint
+        gl.uniform1i(uniLocation[2], 0);
         // フロア用テクスチャをバインド
-        //gl.activeTexture(gl.TEXTURE1);
-        gl.uniform1i(uniLocation[1], 0);
-        gl.bindTexture(gl.TEXTURE_2D, texture0);
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, texture2);
+        gl.uniform1i(uniLocation[1], 2);
 
         // フロアのレンダリング
         m.identity(mMatrix);
@@ -175,9 +184,9 @@ onload = function(){
         gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
 
         // ビルボード用テクスチャをバインド
-        //gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, texture1);
-        //gl.uniform1i(uniLocation[1], 1);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture0);
+        gl.uniform1i(uniLocation[1], 0);
 
         // ビルボードのレンダリング
         m.identity(mMatrix);
@@ -186,6 +195,15 @@ onload = function(){
         m.multiply(tmpMatrix, mMatrix, mvpMatrix);
         gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
         gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
+
+
+        //ポイントのレンダリング
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, texture1);
+        gl.uniform1i(uniLocation[1], 1);
+        gl.uniform1i(uniLocation[2], 1);
+        gl.drawArrays(gl.POINTS, 0,position.length/3);
+
 
         // コンテキストの再描画
         gl.flush();
@@ -345,6 +363,9 @@ onload = function(){
                     break;
                 case 1:
                     texture1 = tex;
+                    break;
+                case 2:
+                    texture2 = tex;
                     break;
                 default:
                     break;

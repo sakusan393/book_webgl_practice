@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>シェーダの切り替え（グローシェーディングとフォンシェーディングの比較）</title>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="webgl-utils.js"></script>
+
+<!-----------------------------------------------
+グローシェーディング
+------------------------------------------------>
+<script id="shader-vs_gouraud" type="x-shader/x-vertex">
+	//頂点シェーダ
+	//WebGL中で定義されたattribute変数
+	attribute vec3 aVertexPosition;	 //WebGL中で定義されたattribute変数(頂点座標)
+	attribute vec3 aVertexNormal;	 //WebGL中で定義されたattribute変数（法線ベクトル）
+
+	uniform vec4 uMaterialEmissive;  //放射色
+	uniform vec4 uMaterialAmbient;
+	uniform vec4 uMaterialDiffuse;
+	uniform vec4 uMaterialSpecular;
+	uniform float uMaterialShininess;	
+	
+	uniform mat4 uMVMatrix;   //WebGL中で定義されたuniform変数(モデルビュー行列)
+	uniform mat4 uPMatrix;    //WebGL中で定義されたuniform変数(プロジェクション行列)
+	uniform mat4 uVMatrix;		//WebGL中で定義されたuniform変数
+	uniform mat3 uNMatrix;		//WebGL中で定義されたuniform変数(法線行列)
+	
+	uniform vec4 uLightPosition;   //光源位置
+	uniform vec4 uLightAmbient;		 //環境光色
+	uniform vec4 uLightDiffuse;		 //拡散光色
+	uniform vec4 uLightSpecular;	 //鏡面光色
+	uniform bool uUseLight;		     //ライトのオンオフ
+
+	varying vec4 vColor; 			 //フラグメントシェーダに送るvarying変数（vColor）
+
+	void main(void) {
+		gl_Position = uPMatrix *  uMVMatrix * vec4(aVertexPosition, 1.0);
+		if (!uUseLight) {
+			vColor =  uMaterialEmissive;
+		} else {
+
+			vec3 P = ( uMVMatrix * vec4(aVertexPosition,  1.0)).xyz;
+			vec3 N = normalize(	      uNMatrix  * aVertexNormal);
+
+			vec3 L ;
+			if(uLightPosition.w > 0.0 ) L = normalize( ( uVMatrix * uLightPosition).xyz - P );
+			else                        L = normalize( ( uVMatrix * uLightPosition).xyz);
+			float dotNL = dot(N, L);
+			vec4 ambient = uMaterialAmbient * uLightAmbient;
+			vec4 diffuse = uMaterialDiffuse * uLightDiffuse * max(dotNL, 0.0);
+			vec3 V = normalize( -normalize(P));
+			vec3 H = normalize( L + V );
+			float dotNH = pow(max(dot(N, H), 0.0), uMaterialShininess);
+			if(dotNL <= 0.0) dotNH = 0.0;
+			vec4 specular = uMaterialSpecular * uLightSpecular * dotNH;
+			vColor =  uMaterialEmissive + ambient + diffuse + specular;
+
+		}
+	}
+</script>
+<script id="shader-fs_gouraud" type="x-shader/x-fragment">
+	//フラグメントシェーダ
+	precision mediump float;
+	varying vec4 vColor; //バーテックスシェーダから受け渡される変数
+	void main(void) {
+		gl_FragColor = vColor;
+	}
+</script>
+
+<!-----------------------------------------------
+フォンシェーディング
+------------------------------------------------>
+<script id="shader-vs_phong" type="x-shader/x-vertex">
+	//頂点シェーダ
+	//WebGL中で定義されたattribute変数
+	attribute vec3 aVertexPosition;	 //WebGL中で定義されたattribute変数(頂点座標)
+	attribute vec3 aVertexNormal;	 //WebGL中で定義されたattribute変数（法線ベクトル）
+
+	uniform mat4 uMVMatrix;          //WebGL中で定義されたuniform変数(モデルビュー行列)
+	uniform mat4 uPMatrix;           //WebGL中で定義されたuniform変数(プロジェクション行列)
+	uniform mat3 uNMatrix;           //WebGL中で定義されたuniform変数(法線行列)
+
+	varying vec3 P;
+	varying vec3 N;
+	void main(void) {
+		gl_Position = uPMatrix *  uMVMatrix * vec4(aVertexPosition, 1.0);
+
+		P = ( uMVMatrix * vec4(aVertexPosition, 1.0) ).xyz;
+		N = normalize( uNMatrix  * aVertexNormal              );
+	}
+</script>
+<script id="shader-fs_phong" type="x-shader/x-fragment">
+	//フラグメントシェーダ
+	precision mediump float;
+	varying vec4 vColor; //バーテックスシェーダから受け渡される変数
+
+	varying vec3 P;
+	varying vec3 N;
+
+	uniform vec4 uMaterialEmissive;  //放射色
+	uniform vec4 uMaterialAmbient;
+	uniform vec4 uMaterialDiffuse;
+	uniform vec4 uMaterialSpecular;
+	uniform float uMaterialShininess;	
+
+	uniform mat4 uVMatrix;           //WebGL中で定義されたuniform変数
+
+	uniform bool uUseLight;          //ライトのオンオフ
+	uniform vec4 uLightAmbient;		 //環境光色
+	uniform vec4 uLightDiffuse;		 //拡散光色
+	uniform vec4 uLightSpecular;	 //鏡面光色
+	uniform vec4 uLightPosition;     //平行光ベクトル
+
+	void main(void) {
+		vec4 fcolor;
+
+		if (!uUseLight) {
+			fcolor = uMaterialEmissive;
+		}else{
+
+			vec3 L ;
+			if(uLightPosition.w > 0.0 ) L = normalize( ( uVMatrix * uLightPosition).xyz - P );
+			else                        L = normalize( ( uVMatrix * uLightPosition).xyz);
+			//vec3 N = normalize(N);
+			float dotNL  = dot(N, L);
+
+			vec4 ambient = uMaterialAmbient * uLightAmbient;
+			vec4 diffuse = uMaterialDiffuse * uLightDiffuse * max(dotNL, 0.0);
+
+			vec3 V = normalize( -P );
+			vec3 H = normalize( L + V );
+			float dotNH = pow(max(dot(N, H), 0.0), uMaterialShininess);
+			if(dotNL <= 0.0) dotNH = 0.0;
+			vec4  specular = uMaterialSpecular * uLightSpecular * dotNH;
+			fcolor =  uMaterialEmissive + ambient + diffuse + specular;
+		}
+		gl_FragColor = fcolor;
+	}
+</script>
+<!-----------------------------------------------
+Javascript 
+------------------------------------------------>
+<script>
+	var gl;
+	function initGL(canvas) { //WebGLの初期化
+		try {
+			gl = canvas.getContext("experimental-webgl");
+			gl.viewportWidth  = canvas.width;
+			gl.viewportHeight = canvas.height;
+		} catch (e) {}
+		if (!gl) {
+			alert("Could not initialise WebGL, sorry :-(");
+		}
+	}
+	function getShader(gl, id) { //シェーダの読み込み
+		var shaderScript = document.getElementById(id); //
+		if (!shaderScript) {
+			return null;
+		}
+		var str = "";
+		var k = shaderScript.firstChild; 
+		while (k) {//シェーダ言語の読み込み
+			if (k.nodeType == 3) {
+				str += k.textContent;
+			}
+			k = k.nextSibling;
+		}
+
+		var shader;
+		if (shaderScript.type == "x-shader/x-fragment") {
+			shader = gl.createShader(gl.FRAGMENT_SHADER);
+		} else if (shaderScript.type == "x-shader/x-vertex") {
+			shader = gl.createShader(gl.VERTEX_SHADER);
+		} else {
+			return null;
+		}
+
+		gl.shaderSource(shader, str); //
+		gl.compileShader(shader);	 // シェーダのコンパイル
+
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			alert(gl.getShaderInfoLog(shader));
+			return null;
+		}
+		return shader;
+	}
+
+	var shaderPrograms = {};
+	function initShaders() { //シェーダの初期化
+
+		var fragmentShader = getShader(gl, "shader-fs_phong");
+		var vertexShader = getShader(gl, "shader-vs_phong");
+		shaderPrograms["phong"] = setShader(fragmentShader, vertexShader);
+
+		var fragmentShader = getShader(gl, "shader-fs_gouraud");
+		var vertexShader = getShader(gl, "shader-vs_gouraud");
+		shaderPrograms["gouraud"] = setShader(fragmentShader, vertexShader);
+
+		function setShader(fragmentShader, vertexShader) {
+			var shaderProgram = gl.createProgram();
+			gl.attachShader(shaderProgram, vertexShader);
+			gl.attachShader(shaderProgram, fragmentShader);
+			gl.linkProgram(shaderProgram);
+
+			if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+				alert("Could not initialise shaders");
+			}
+
+			//バーテックスシェーダで利用するattribut変数（頂点位置）を宣言する
+			shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+			gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+			//バーテックスシェーダで利用するattribut変数（法線）を宣言する
+			shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+			gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+
+			//バーテックスシェーダで利用するuniform変数（材質）を宣言する
+			shaderProgram.materialEmissiveUniform = gl.getUniformLocation(shaderProgram, "uMaterialEmissive");
+			shaderProgram.materialAmbientUniform = gl.getUniformLocation(shaderProgram, "uMaterialAmbient");
+			shaderProgram.materialDiffuseUniform = gl.getUniformLocation(shaderProgram, "uMaterialDiffuse");
+			shaderProgram.materialSpecularUniform = gl.getUniformLocation(shaderProgram, "uMaterialSpecular");
+			shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
+
+			//バーテックスシェーダで利用するuniform変数（ライティング）を宣言する		
+			shaderProgram.useLightUniform = gl.getUniformLocation(shaderProgram, "uUseLight");       //ライティング
+			shaderProgram.lightAmbientUniform = gl.getUniformLocation(shaderProgram, "uLightAmbient");      //環境光
+			shaderProgram.lightDiffuseUniform = gl.getUniformLocation(shaderProgram, "uLightDiffuse");      //拡散光
+			shaderProgram.lightSpecularUniform = gl.getUniformLocation(shaderProgram, "uLightSpecular");     //鏡面光
+			shaderProgram.lightPositionUniform = gl.getUniformLocation(shaderProgram, "uLightPosition");     //平行光ベクトル
+
+			//バーテックスシェーダで利用するuniform変数（変換行列）を宣言する
+			shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+			shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+			shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
+			shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
+			return shaderProgram;
+		}
+	}
+
+	var mvMatrix = mat4.create(); //モデルビュー行列
+	var pMatrix = mat4.create(); //プロジェクション行列
+	var vMatrix = mat4.create(); //視点行列
+	function setMatrixUniforms(useShaderProgram) {
+		gl.uniformMatrix4fv(shaderPrograms[useShaderProgram].pMatrixUniform, false, pMatrix);   //uniform型変数の値を設定する
+		gl.uniformMatrix4fv(shaderPrograms[useShaderProgram].mvMatrixUniform, false, mvMatrix); //uniform型変数の値を設定する
+		gl.uniformMatrix4fv(shaderPrograms[useShaderProgram].vMatrixUniform, false, vMatrix); //uniform型変数の値を設定する
+
+		var normalMatrix = mat3.create();
+		mat4.toInverseMat3(mvMatrix, normalMatrix);
+		mat3.transpose(normalMatrix);
+		gl.uniformMatrix3fv(shaderPrograms[useShaderProgram].nMatrixUniform, false, normalMatrix);
+	}
+
+
+	//モデルビューマトリックスのスタック配列
+	var mvMatrixStack = [];
+	function mvPushMatrix() {
+		var copy = mat4.create();
+		mat4.set(mvMatrix, copy);
+		mvMatrixStack.push(copy);
+	}
+	function mvPopMatrix() {
+		if (mvMatrixStack.length == 0) {
+			throw "Invalid popMatrix!";
+		}
+		mvMatrix = mvMatrixStack.pop();
+	}
+
+	//バッファー
+	var vertexPositionBuffer;
+	var vertexNormalBuffer;
+	var vertexIndexBuffer;
+	function initBuffers() {
+		///////////////////////////////////////////////
+		//四角形のバッファ
+		///////////////////////////////////////////////
+		vertexPositionBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		var vertices = [
+			-2.5, -2.5, 0.0,
+			 2.5, -2.5, 0.0,
+		   2.5,  2.5, 0.0,
+			-2.5,  2.5, 0.0
+		];
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+		vertexPositionBuffer.itemSize = 3;
+		vertexPositionBuffer.numItems = 4;
+
+		vertexNormalBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexNormalBuffer);
+		var normals = [
+			0.0, 0.0, 1.0,
+			0.0, 0.0, 1.0,
+			0.0, 0.0, 1.0,
+			0.0, 0.0, 1.0
+		];
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+		vertexNormalBuffer.itemSize = 3;
+		vertexNormalBuffer.numItems = normals.length / 3;
+		
+		vertexIndexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+		var indices = [
+			0, 1, 2,
+			0, 2, 3
+		];
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+		vertexIndexBuffer.itemSize = 1;
+		vertexIndexBuffer.numItems = 6;
+	}
+	function initialize(){
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.enable(gl.DEPTH_TEST);		
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+		mat4.identity(pMatrix);
+		mat4.perspective(30, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0, pMatrix);
+
+		mat4.identity(mvMatrix);
+		mat4.lookAt(
+			vec3.create([ 0, 0, 20 ]),
+			vec3.create([ 0, 0, 0 ]),
+			vec3.create([ 0, 1, 0 ]),
+			mvMatrix
+		);
+		mat4.set(mvMatrix, vMatrix); //視点行列部分だけをコピーしておく
+
+		var lightUse = true;
+		var lightAmbient = [1.0, 1.0, 1.0, 1.0];
+		var lightDiffuse = [1.0, 1.0, 1.0, 1.0];
+		var lightSpecular = [1.0, 1.0, 1.0, 1.0];
+		var lightPosition = [0.0, 0.0, 10.0, 1.0];
+
+		for (key in shaderPrograms) { //各シェーダープログラムに光源情報を送る
+			gl.useProgram(shaderPrograms[key]);
+			gl.uniform1i(shaderPrograms[key].useLightUniform, lightUse);
+			gl.uniform4fv(shaderPrograms[key].lightAmbientUniform, lightAmbient);
+			gl.uniform4fv(shaderPrograms[key].lightDiffuseUniform, lightDiffuse);
+			gl.uniform4fv(shaderPrograms[key].lightSpecularUniform, lightSpecular);
+			gl.uniform4fv(shaderPrograms[key].lightPositionUniform, lightPosition);
+		}
+	}
+	function display() {
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+		draw();
+
+		requestAnimFrame(display);
+	}
+	var step = 0;
+	function draw() {
+		step++;
+		var radian = Math.PI * step / 180;
+
+		///////////////////////////////////////////////
+		// 材質の指定
+		/////////////////////////////////////////////// 
+		var materialEmission = [0, 0, 0, 1];
+		var materialAmbient = [0.1745, 0.01175, 0.01175, 1.0];
+		var materialDiffuse = [0.61424, 0.04136, 0.04136, 1.0];
+		var materialSpecular = [0.727811, 0.626959, 0.626959, 1.0];
+		var materialShininess = [76.8];
+
+		var useShaderProgram = "gouraud"; //"phong";
+		///////////////////////////////////////////////
+		//グローシェーディングによる四角形の描画
+		/////////////////////////////////////////////// 
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		gl.vertexAttribPointer(shaderPrograms[useShaderProgram].vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexNormalBuffer);
+		gl.vertexAttribPointer(shaderPrograms[useShaderProgram].vertexNormalAttribute, vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+		
+		mvPushMatrix();
+		mat4.translate(mvMatrix, [-2.5, 0, 0]); //平行移動料
+		mat4.rotate(mvMatrix, radian, [1, 0, 0]); //回転移動量
+		gl.useProgram(shaderPrograms[useShaderProgram]); // シェーダプログラムの適用
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialEmissiveUniform, materialEmission);  //uniform型変数の値を設定する
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialAmbientUniform, materialAmbient);  //uniform型変数の値を設定する
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialDiffuseUniform, materialDiffuse);  //uniform型変数の値を設定する
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialSpecularUniform, materialSpecular);  //uniform型変数の値を設定する
+		gl.uniform1fv(shaderPrograms[useShaderProgram].materialShininessUniform, materialShininess);  //uniform型変数の値を設定する
+		setMatrixUniforms(useShaderProgram);
+		gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); //インデックスバッファーを使って描画する
+		mvPopMatrix();
+
+		var useShaderProgram = "phong"; //"gouraud";
+		///////////////////////////////////////////////
+		//フォンシェーディングによる四角形の描画
+		/////////////////////////////////////////////// 
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		gl.vertexAttribPointer(shaderPrograms[useShaderProgram].vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexNormalBuffer);
+		gl.vertexAttribPointer(shaderPrograms[useShaderProgram].vertexNormalAttribute, vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+
+		mvPushMatrix();
+		mat4.translate(mvMatrix, [ 2.5, 0, 0]); //平行移動料
+		mat4.rotate(mvMatrix, radian, [1, 0, 0]); //回転移動量
+		gl.useProgram(shaderPrograms[useShaderProgram]); // シェーダプログラムの適用
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialEmissiveUniform, materialEmission);  //uniform型変数の値を設定する
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialAmbientUniform, materialAmbient);  //uniform型変数の値を設定する
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialDiffuseUniform, materialDiffuse);  //uniform型変数の値を設定する
+		gl.uniform4fv(shaderPrograms[useShaderProgram].materialSpecularUniform, materialSpecular);  //uniform型変数の値を設定する
+		gl.uniform1fv(shaderPrograms[useShaderProgram].materialShininessUniform, materialShininess);  //uniform型変数の値を設定する
+		setMatrixUniforms(useShaderProgram);
+		gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); //インデックスバッファーを使って描画する
+		mvPopMatrix();
+
+	}
+	function webGLStart() {
+		var canvas = document.getElementById("frame");
+		initGL(canvas);
+		initShaders();
+		initBuffers();
+		initialize();
+		display();
+	}
+
+	window.onload = function(){
+		webGLStart();
+	}
+</script>
+</head>
+
+<body>
+	 <canvas id="frame" style="border: none;" width="500" height="500"></canvas>
+</body>
+
+</html>
