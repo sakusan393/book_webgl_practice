@@ -46,9 +46,9 @@ onload = function(){
     // プログラムオブジェクトの生成とリンク
     var p = {}
     var prg = create_program(v_shader, f_shader);
-    var prg2 = create_program(v_shader, f_shader);
-    p.prg = prg
-    p.prg2 = prg2
+    //var prg2 = create_program(v_shader, f_shader);
+    //p.prg = prg
+    //p.prg2 = prg2
 
     // attributeLocationを配列に取得
     var attLocation = new Array();
