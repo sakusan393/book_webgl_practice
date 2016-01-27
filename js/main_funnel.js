@@ -283,9 +283,8 @@ Cokpit.prototype = {
 
 Stars = function (gl,img) {
     this.gl = gl;
-    this.modelData = window.star(2, .1);
+    this.modelData = window.star();
     this.mMatrix = mat4.identity(mat4.create());
-    this.invMatrix = mat4.identity(mat4.create());
     this.x = 0;
     this.y = 0;
     this.z = 0;
@@ -305,7 +304,6 @@ Stars = function (gl,img) {
 
 Stars.prototype = {
     render: function () {
-
     },
     initTexture: function (img) {
         // テクスチャオブジェクトの生成
@@ -331,11 +329,23 @@ Scene3D.prototype = {
 
     addChild: function (mesh) {
         var vPositionBuffer, vNormalBuffer, vTexCoordBuffer,vColorBuffer,meshIndexBuffer;
-        if (mesh.modelData.p) vPositionBuffer = this.generateVBO(mesh.modelData.p);
-        if (mesh.modelData.n) vNormalBuffer = this.generateVBO(mesh.modelData.n);
-        if (mesh.modelData.t) vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
-        if (mesh.modelData.c) vColorBuffer = this.generateVBO(mesh.modelData.c);
-        var meshVboList = [vPositionBuffer, vNormalBuffer, vTexCoordBuffer,vColorBuffer];
+        var meshVboList = [];
+        if (mesh.modelData.p){
+            vPositionBuffer = this.generateVBO(mesh.modelData.p);
+            meshVboList[0] = (vPositionBuffer)
+        }
+        if (mesh.modelData.n){
+            vNormalBuffer = this.generateVBO(mesh.modelData.n);
+            meshVboList[1] = (vNormalBuffer)
+        }
+        if (mesh.modelData.t){
+            vTexCoordBuffer = this.generateVBO(mesh.modelData.t);
+            meshVboList[2] = (vTexCoordBuffer)
+        }
+        if (mesh.modelData.c){
+            vColorBuffer = this.generateVBO(mesh.modelData.c);
+            meshVboList[3] = (vColorBuffer)
+        }
         if (mesh.modelData.i) meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh};
         mesh.index = this.meshList.length;
@@ -365,9 +375,9 @@ Scene3D.prototype = {
         //各3Dオブジェクトの描画処理
         for (var i = 0, l = this.meshList.length; i < l; i++) {
 
-            this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
-            this.gl.uniform1i(this.uniLocation.isPoint, this.meshList[i].mesh.isPoint);
             if (!this.meshList[i].mesh.isPoint) {
+                this.gl.useProgram(this.programs);
+                this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
                 //裏面をカリング(描画しない)
                 this.gl.enable(this.gl.CULL_FACE);
                 this.gl.cullFace(this.gl.BACK);
@@ -376,25 +386,25 @@ Scene3D.prototype = {
                 this.meshList[i].mesh.render();
                 mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
-                this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
                 //明示的に0番目を指定
-                this.gl.uniform1i(this.uniLocation.texture, 0);
+                //this.gl.uniform1i(this.uniLocation.texture, 0);
                 if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
 
                 this.gl.disable(this.gl.CULL_FACE);
             } else {
-                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
+                this.gl.useProgram(this.programs_points);
+                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation_points, this.attStride, null , "point");
                 this.meshList[i].mesh.render();
                 mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
-                this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
-                this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
-                this.gl.uniform1i(this.uniLocation.texture, 0);
+                this.gl.uniformMatrix4fv(this.uniLocation_points.mvpMatrix, false, this.mvpMatrix);
+                //明示的に0番目を指定
+                //this.gl.uniform1i(this.uniLocation_points.texture, 0);
                 if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
-                this.gl.drawArrays(this.gl.POINTS, 0, this.meshList[i].mesh.modelData.p.length / 3)
+                this.gl.drawArrays(this.gl.POINTS, 0, this.meshList[i].mesh.modelData.p.length / 3);
             }
         }
         this.gl.flush();
@@ -418,7 +428,10 @@ Scene3D.prototype = {
         //シェーダーの生成
         var vertexShaderSource = document.getElementById("vs").textContent;
         var fragmentShaderSource = document.getElementById("fs").textContent;
+        var vertexShaderPointsSource = document.getElementById("vs_points").textContent;
+        var fragmentShaderPointsSource = document.getElementById("fs_points").textContent;
         //プログラムの生成
+        this.programs_points = this.createShaderProgram(vertexShaderPointsSource, fragmentShaderPointsSource);
         this.programs = this.createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
         //固定となるuniformの生成
@@ -430,8 +443,11 @@ Scene3D.prototype = {
         this.uniLocation.eyePosition = this.gl.getUniformLocation(this.programs, "eyePosition");
         this.uniLocation.centerPosition = this.gl.getUniformLocation(this.programs, "centerPosition");
         this.uniLocation.ambientColor = this.gl.getUniformLocation(this.programs, "ambientColor");
-        this.uniLocation.isPoint = this.gl.getUniformLocation(this.programs, "isPoint");
         this.uniLocation.alpha = this.gl.getUniformLocation(this.programs, "alpha");
+
+        this.uniLocation_points = {};
+        this.uniLocation_points.texture = this.gl.getUniformLocation(this.programs_points, "texture");
+        this.uniLocation_points.mvpMatrix = this.gl.getUniformLocation(this.programs_points, "mvpMatrix");
 
         // attributeLocationを取得して配列に格納する
         this.attLocation = [];
@@ -439,6 +455,9 @@ Scene3D.prototype = {
         this.attLocation[1] = this.gl.getAttribLocation(this.programs, 'normal');
         this.attLocation[2] = this.gl.getAttribLocation(this.programs, 'texCoord');
         this.attLocation[3] = this.gl.getAttribLocation(this.programs, 'color');
+
+        this.attLocation_points = [];
+        this.attLocation_points[0] = this.gl.getAttribLocation(this.programs_points, 'position');
 
         // attributeのストライドを配列に格納しておく
         this.attStride = [];
@@ -448,6 +467,7 @@ Scene3D.prototype = {
         this.attStride[3] = 4;
 
         //モデルに左右しない固定情報を先に転送する
+        this.gl.useProgram(this.programs);
         this.gl.uniform3fv(this.uniLocation.lightDirection, this.light.lightDirection);
         this.gl.uniform3fv(this.uniLocation.ambientColor, this.light.ambientColor);
     },
@@ -490,7 +510,7 @@ Scene3D.prototype = {
         return indexBuffer;
     },
 
-    setAttribute: function (vbo, attL, attS, ibo) {
+    setAttribute: function (vbo, attL, attS, ibo, hoge) {
         for (var i in vbo) {
             this.gl.disableVertexAttribArray(attL[i]);
             if (vbo[i]) {
@@ -514,7 +534,7 @@ Scene3D.prototype = {
         if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
             console.log(this.gl.getProgramInfoLog(program))
         } else {
-            this.gl.useProgram(program);
+            //this.gl.useProgram(program);
         }
     }
 };

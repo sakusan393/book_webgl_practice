@@ -167,12 +167,9 @@ function beam(side, color) {
     return {p: pos, n: nor, c: col, t: st, i: idx};
 }
 
-function star(side, color) {
-    var tc, hs = side * 0.5;
-    var pos = [
-        //-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs,-hs, -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs
-    ];
-    ratio = 80
+function star() {
+    var pos = [];
+    ratio = 80;
     for(var i = 0; i < 300; i++){
         pos.push(ratio*(Math.random()-0.5),ratio*(Math.random()-0.5),ratio*(Math.random()-0.5))
     }
