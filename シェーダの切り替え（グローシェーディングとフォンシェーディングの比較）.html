@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>シェーダの切り替え（グローシェーディングとフォンシェーディングの比較）</title>
-<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="js/glMatrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
 
 <!-----------------------------------------------
@@ -19,13 +19,13 @@
 	uniform vec4 uMaterialAmbient;
 	uniform vec4 uMaterialDiffuse;
 	uniform vec4 uMaterialSpecular;
-	uniform float uMaterialShininess;	
-	
+	uniform float uMaterialShininess;
+
 	uniform mat4 uMVMatrix;   //WebGL中で定義されたuniform変数(モデルビュー行列)
 	uniform mat4 uPMatrix;    //WebGL中で定義されたuniform変数(プロジェクション行列)
 	uniform mat4 uVMatrix;		//WebGL中で定義されたuniform変数
 	uniform mat3 uNMatrix;		//WebGL中で定義されたuniform変数(法線行列)
-	
+
 	uniform vec4 uLightPosition;   //光源位置
 	uniform vec4 uLightAmbient;		 //環境光色
 	uniform vec4 uLightDiffuse;		 //拡散光色
@@ -102,7 +102,7 @@
 	uniform vec4 uMaterialAmbient;
 	uniform vec4 uMaterialDiffuse;
 	uniform vec4 uMaterialSpecular;
-	uniform float uMaterialShininess;	
+	uniform float uMaterialShininess;
 
 	uniform mat4 uVMatrix;           //WebGL中で定義されたuniform変数
 
@@ -139,7 +139,7 @@
 	}
 </script>
 <!-----------------------------------------------
-Javascript 
+Javascript
 ------------------------------------------------>
 <script>
 	var gl;
@@ -159,7 +159,7 @@ Javascript
 			return null;
 		}
 		var str = "";
-		var k = shaderScript.firstChild; 
+		var k = shaderScript.firstChild;
 		while (k) {//シェーダ言語の読み込み
 			if (k.nodeType == 3) {
 				str += k.textContent;
@@ -222,7 +222,7 @@ Javascript
 			shaderProgram.materialSpecularUniform = gl.getUniformLocation(shaderProgram, "uMaterialSpecular");
 			shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
 
-			//バーテックスシェーダで利用するuniform変数（ライティング）を宣言する		
+			//バーテックスシェーダで利用するuniform変数（ライティング）を宣言する
 			shaderProgram.useLightUniform = gl.getUniformLocation(shaderProgram, "uUseLight");       //ライティング
 			shaderProgram.lightAmbientUniform = gl.getUniformLocation(shaderProgram, "uLightAmbient");      //環境光
 			shaderProgram.lightDiffuseUniform = gl.getUniformLocation(shaderProgram, "uLightDiffuse");      //拡散光
@@ -298,7 +298,7 @@ Javascript
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
 		vertexNormalBuffer.itemSize = 3;
 		vertexNormalBuffer.numItems = normals.length / 3;
-		
+
 		vertexIndexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 		var indices = [
@@ -311,7 +311,7 @@ Javascript
 	}
 	function initialize(){
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		gl.enable(gl.DEPTH_TEST);		
+		gl.enable(gl.DEPTH_TEST);
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
 		mat4.identity(pMatrix);
@@ -355,7 +355,7 @@ Javascript
 
 		///////////////////////////////////////////////
 		// 材質の指定
-		/////////////////////////////////////////////// 
+		///////////////////////////////////////////////
 		var materialEmission = [0, 0, 0, 1];
 		var materialAmbient = [0.1745, 0.01175, 0.01175, 1.0];
 		var materialDiffuse = [0.61424, 0.04136, 0.04136, 1.0];
@@ -365,7 +365,7 @@ Javascript
 		var useShaderProgram = "gouraud"; //"phong";
 		///////////////////////////////////////////////
 		//グローシェーディングによる四角形の描画
-		/////////////////////////////////////////////// 
+		///////////////////////////////////////////////
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
 		gl.vertexAttribPointer(shaderPrograms[useShaderProgram].vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -373,7 +373,7 @@ Javascript
 		gl.vertexAttribPointer(shaderPrograms[useShaderProgram].vertexNormalAttribute, vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
-		
+
 		mvPushMatrix();
 		mat4.translate(mvMatrix, [-2.5, 0, 0]); //平行移動料
 		mat4.rotate(mvMatrix, radian, [1, 0, 0]); //回転移動量
@@ -390,7 +390,7 @@ Javascript
 		var useShaderProgram = "phong"; //"gouraud";
 		///////////////////////////////////////////////
 		//フォンシェーディングによる四角形の描画
-		/////////////////////////////////////////////// 
+		///////////////////////////////////////////////
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
 		gl.vertexAttribPointer(shaderPrograms[useShaderProgram].vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 

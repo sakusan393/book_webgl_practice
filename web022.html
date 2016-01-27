@@ -31,29 +31,13 @@ uniform int isPoint;
 
 void main(void){
     if(bool(isPoint)){
-        vec4 smpColor = texture2D(texture, gl_PointCoord);
-        gl_FragColor  = vColor * smpColor;
+        //vec4 smpColor = texture2D(texture, gl_PointCoord);
+        gl_FragColor  = vColor;
         //discard;
     }else{
         vec4 smpColor = texture2D(texture, vTextureCoord);
         gl_FragColor  = vColor * smpColor;
 	}
-}
-
-</script>
-<script id="vs2" type="x-shader/x-vertex">
-attribute vec3 position;
-attribute vec4 color;
-attribute vec2 textureCoord;
-uniform   mat4 mvpMatrix;
-varying   vec4 vColor;
-varying   vec2 vTextureCoord;
-
-void main(void){
-	vColor        = color;
-	vTextureCoord = textureCoord;
-	gl_Position   = mvpMatrix * vec4(position, 1.0);
-	gl_PointSize = 30.0;
 }
 
 </script>
@@ -67,17 +51,17 @@ varying vec2      vTextureCoord;
 uniform int isPoint;
 
 void main(void){
-    if(bool(isPoint)){
-        vec4 smpColor = texture2D(texture, gl_PointCoord);
-        gl_FragColor  = vColor * smpColor;
-        //discard;
-    }else{
-        vec4 smpColor = texture2D(texture, vTextureCoord);
-        gl_FragColor  = vColor * smpColor;
-	}
+    vec4 smpColor = texture2D(texture, gl_PointCoord);
+    gl_FragColor  = smpColor;
 }
 
 </script>
+<style type="text/css">
+    p{
+        font-family: "ヒラギノ角ゴ Pro W6","Hiragino Kaku Gothic Pro","HiraKakuPro-W6","メイリオ ボールド",Meiryo Bold,"ＭＳ Ｐゴシック","MS PGothic",Osaka,Verdana,sans-serif
+        /*font-family:"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","HiraKakuPro-W3","メイリオ",Meiryo,"ＭＳ Ｐゴシック","MS PGothic",Osaka,Verdana,sans-serif;*/
+    }
+</style>
 </head>
 <body>
 <canvas id="canvas"></canvas>

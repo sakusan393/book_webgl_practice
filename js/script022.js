@@ -43,18 +43,28 @@ onload = function(){
     var v_shader = create_shader('vs');
     var f_shader = create_shader('fs');
 
+    var v_shader2 = create_shader('vs2');
+    var f_shader2 = create_shader('fs2');
+
     // プログラムオブジェクトの生成とリンク
-    var p = {}
+    var programs = {};
+    var prg2 = create_program(v_shader, f_shader2);
     var prg = create_program(v_shader, f_shader);
-    //var prg2 = create_program(v_shader, f_shader);
-    //p.prg = prg
-    //p.prg2 = prg2
+    programs.prg = prg;
+    programs.prg2 = prg2;
 
     // attributeLocationを配列に取得
     var attLocation = new Array();
-    attLocation[0] = gl.getAttribLocation(prg, 'position');
-    attLocation[1] = gl.getAttribLocation(prg, 'color');
-    attLocation[2] = gl.getAttribLocation(prg, 'textureCoord');
+    attLocation[0] = gl.getAttribLocation(programs.prg, 'position');
+    attLocation[1] = gl.getAttribLocation(programs.prg, 'color');
+    attLocation[2] = gl.getAttribLocation(programs.prg, 'textureCoord');
+
+    var attLocation2 = new Array();
+    attLocation2[0] = gl.getAttribLocation(programs.prg2, 'position');
+    attLocation2[1] = gl.getAttribLocation(programs.prg2, 'color');
+    attLocation2[2] = gl.getAttribLocation(programs.prg2, 'textureCoord');
+
+
 
     // attributeの要素数を配列に格納
     var attStride = new Array();
@@ -99,9 +109,15 @@ onload = function(){
 
     // uniformLocationを配列に取得
     var uniLocation = new Array();
-    uniLocation[0]  = gl.getUniformLocation(prg, 'mvpMatrix');
-    uniLocation[1]  = gl.getUniformLocation(prg, 'texture');
-    uniLocation[2]  = gl.getUniformLocation(prg, 'isPoint');
+    uniLocation[0]  = gl.getUniformLocation(programs.prg, 'mvpMatrix');
+    uniLocation[1]  = gl.getUniformLocation(programs.prg, 'texture');
+    uniLocation[2]  = gl.getUniformLocation(programs.prg, 'isPoint');
+
+    // uniformLocationを配列に取得
+    var uniLocation2 = new Array();
+    uniLocation2[0]  = gl.getUniformLocation(programs.prg2, 'mvpMatrix');
+    uniLocation2[1]  = gl.getUniformLocation(programs.prg2, 'texture');
+    uniLocation2[2]  = gl.getUniformLocation(programs.prg2, 'isPoint');
 
     // 各種行列の生成と初期化
     var m = new matIV();
@@ -169,39 +185,47 @@ onload = function(){
         m.multiply(pMatrix, vMatrix, tmpMatrix);
 
         //isPoint
+        gl.useProgram(programs.prg);
+
         gl.uniform1i(uniLocation[2], 0);
         // フロア用テクスチャをバインド
-        gl.activeTexture(gl.TEXTURE2);
+        //gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, texture2);
-        gl.uniform1i(uniLocation[1], 2);
+        //gl.uniform1i(uniLocation[1], 2);
 
         // フロアのレンダリング
         m.identity(mMatrix);
         m.rotate(mMatrix, Math.PI / 2, [1, 0, 0], mMatrix);
         m.scale(mMatrix, [3.0, 3.0, 1.0], mMatrix);
         m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+        set_attribute(VBOList, attLocation, attStride);
         gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
         gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
 
         // ビルボード用テクスチャをバインド
-        gl.activeTexture(gl.TEXTURE0);
+        //gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture0);
-        gl.uniform1i(uniLocation[1], 0);
+        //gl.uniform1i(uniLocation[1], 0);
 
         // ビルボードのレンダリング
         m.identity(mMatrix);
         m.translate(mMatrix, [0.0, 1.0, 0.0], mMatrix);
         if(eCheck.checked){m.multiply(mMatrix, invMatrix, mMatrix);}
         m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+        set_attribute(VBOList, attLocation, attStride);
         gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
         gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
 
-
+        //isPoint
+        gl.useProgram(programs.prg2);
+        set_attribute(VBOList, attLocation2, attStride);
+        gl.uniformMatrix4fv(uniLocation2[0], false, mvpMatrix);
+        gl.uniform1i(uniLocation2[2], 0);
         //ポイントのレンダリング
-        gl.activeTexture(gl.TEXTURE1);
+        //gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, texture1);
-        gl.uniform1i(uniLocation[1], 1);
-        gl.uniform1i(uniLocation[2], 1);
+        //gl.uniform1i(uniLocation2[1], 1);
+        gl.uniform1i(uniLocation2[2], 1);
         gl.drawArrays(gl.POINTS, 0,position.length/3);
 
 
