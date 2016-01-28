@@ -40,15 +40,16 @@
     void main(){
 
         vec4 destColor = vec4(0,0,0,0);
-        vec3 eyeDirection = eyePosition - centerPosition;
-        vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
-        vec3 invLight = (invMatrix * vec4(lightDirection,1.0)).xyz;
-        vec3 halfVector = normalize(invLight + invEye);
-        float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
-        float spec = pow(clamp(dot(halfVector,vNormal),0.0,2.0),10.0);
         if(!bool(vTexCoord)){
+            //ビームの描画はライトの計算不要
             destColor = vec4(vec3(vColor.xyz) , alpha);
         }else{
+            vec3 eyeDirection = eyePosition - centerPosition;
+            vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
+            vec3 invLight = (invMatrix * vec4(lightDirection,1.0)).xyz;
+            vec3 halfVector = normalize(invLight + invEye);
+            float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
+            float spec = pow(clamp(dot(halfVector,vNormal),0.0,2.0),10.0);
             vec3 dest = texture2D(texture, vTexCoord).rgb * diff + spec + ambientColor.rgb;
             destColor = vec4(dest, 1.0);
         }
@@ -75,13 +76,12 @@
 
     void main(){
         vec4 destColor = texture2D(texture, gl_PointCoord);
-        vec4 color = vec4(.7,.7,.9,.9);
         if(destColor.a == 0.0){
             discard;
         }else{
+            vec4 color = vec4(.7,.7,.9,.9);
             gl_FragColor = destColor * color;
         }
-
     }
 
     </script>

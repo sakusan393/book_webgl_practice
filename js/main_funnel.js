@@ -1,9 +1,9 @@
 var Camera = function (canvas) {
     // ビュー座標変換行列
     this.centerPoint = [0.0, 0.0, 0.0];    // 注視点
-    this.x = 0
-    this.y = 0
-    this.z = 20
+    this.x = 0;
+    this.y = 0;
+    this.z = 20;
     this.cameraPosition = [this.x, this.y, this.z]; // カメラの位置
     this.cameraUp = [0.0, 1.0, 0.0];       // カメラの上方向
     this.vMatrix = mat4.identity(mat4.create());
@@ -12,7 +12,7 @@ var Camera = function (canvas) {
     mat4.lookAt(this.vMatrix,this.cameraPosition, this.centerPoint, this.cameraUp);
 
     // プロジェクションのための情報を揃える
-    this.fov = 45;                             // 視野角
+    this.fov = 45 * Math.PI / 180                           // 視野角
     this.aspect = canvas.width / canvas.height; // アスペクト比
     this.near = 0.1;                            // 空間の最前面
     this.far = 200.0;                            // 空間の奥行き終端
@@ -579,7 +579,7 @@ World.prototype = {
         this.scene3D.addChild(this.cockpit);
 
         this.funnellArray = [];
-        this.funnelLength = 20;
+        this.funnelLength = 30;
         for (var i = 0; i < this.funnelLength; i++) {
             var funnel = new Funnel(this.gl,this.scene3D, this.cockpit,ImageLoader.images["texturefunnel"]);
             this.funnellArray.push(funnel);
