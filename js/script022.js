@@ -64,8 +64,6 @@ onload = function(){
     attLocation2[1] = gl.getAttribLocation(programs.prg2, 'color');
     attLocation2[2] = gl.getAttribLocation(programs.prg2, 'textureCoord');
 
-
-
     // attributeの要素数を配列に格納
     var attStride = new Array();
     attStride[0] = 3;
@@ -104,20 +102,18 @@ onload = function(){
     var iIndex        = create_ibo(index);
 
     // VBOとIBOの登録
-    set_attribute(VBOList, attLocation, attStride);
+    //set_attribute(VBOList, attLocation, attStride);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iIndex);
 
     // uniformLocationを配列に取得
     var uniLocation = new Array();
     uniLocation[0]  = gl.getUniformLocation(programs.prg, 'mvpMatrix');
     uniLocation[1]  = gl.getUniformLocation(programs.prg, 'texture');
-    uniLocation[2]  = gl.getUniformLocation(programs.prg, 'isPoint');
 
     // uniformLocationを配列に取得
     var uniLocation2 = new Array();
     uniLocation2[0]  = gl.getUniformLocation(programs.prg2, 'mvpMatrix');
     uniLocation2[1]  = gl.getUniformLocation(programs.prg2, 'texture');
-    uniLocation2[2]  = gl.getUniformLocation(programs.prg2, 'isPoint');
 
     // 各種行列の生成と初期化
     var m = new matIV();
@@ -147,19 +143,97 @@ onload = function(){
     create_texture('images/texture1.png', 1);
     create_texture('images/test.jpg', 2);
 
+    offscreenDraw = function(){
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clearDepth(1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.colorMask(false, true, true, true);
+        // クォータニオンを行列に適用
+        var qMatrix = m.identity(m.create());
+        q.toMatIV(qt, qMatrix);
+
+        // カメラの座標位置
+        var camPosition = [0.0, 5.0, 10.0];
+
+        // ビュー座標変換行列
+        m.lookAt(camPosition, [0, 0, 0], [0, 1, 0], vMatrix);
+
+        // ビルボード用のビュー座標変換行列
+        m.lookAt([0, 0, 0], camPosition, [0, 1, 0], invMatrix);
+
+        // ビュー座標変換行列にクォータニオンの回転を適用
+        m.multiply(vMatrix, qMatrix, vMatrix);
+        m.multiply(invMatrix, qMatrix, invMatrix);
+
+        // ビルボード用ビュー行列の逆行列を取得
+        m.inverse(invMatrix, invMatrix);
+
+        // ビュー×プロジェクション座標変換行列
+        m.perspective(45, c.width / c.height, 0.1, 100, pMatrix);
+        m.multiply(pMatrix, vMatrix, tmpMatrix);
+
+        //isPoint
+        gl.useProgram(programs.prg);
+
+        // フロア用テクスチャをバインド
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, texture2);
+        gl.uniform1i(uniLocation[1], 2);
+
+        // フロアのレンダリング
+        m.identity(mMatrix);
+        m.rotate(mMatrix, Math.PI / 2, [1, 0, 0], mMatrix);
+        m.scale(mMatrix, [3.0, 3.0, 1.0], mMatrix);
+        m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+        set_attribute(VBOList, attLocation, attStride);
+        gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
+        gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
+
+        // ビルボード用テクスチャをバインド
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture0);
+        gl.uniform1i(uniLocation[1], 0);
+
+        // ビルボードのレンダリング
+        m.identity(mMatrix);
+        m.translate(mMatrix, [0.0, 1.0, 0.0], mMatrix);
+        if(eCheck.checked){m.multiply(mMatrix, invMatrix, mMatrix);}
+        m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+        set_attribute(VBOList, attLocation, attStride);
+        gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
+        gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
+
+        //isPoint
+        gl.useProgram(programs.prg2);
+        set_attribute(VBOList, attLocation2, attStride);
+        gl.uniformMatrix4fv(uniLocation2[0], false, mvpMatrix);
+        //ポイントのレンダリング
+        //gl.activeTexture(gl.TEXTURE1);
+        //gl.bindTexture(gl.TEXTURE_2D, texture1);
+        //gl.uniform1i(uniLocation2[1], 1);
+        gl.drawArrays(gl.POINTS, 0,position.length/3);
+    };
+    var isImageLoaded = false;
+    var frameBuffer = create_framebuffer();
+
     // 恒常ループ
     (function(){
-
-        if(!texture0 || !texture1){
+        if(!texture0 || !texture1 || !texture2){
             setTimeout(arguments.callee, 1000 / 30);
             return
         }
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER,frameBuffer.f);
+        offscreenDraw();
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+
 
         // canvasを初期化
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clearDepth(1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        //gl.colorMask(false, false, false, true);
+        gl.colorMask(true, true, true, true);
         //gl.depthMask(false);
 
         // クォータニオンを行列に適用
@@ -189,9 +263,9 @@ onload = function(){
         //isPoint
         gl.useProgram(programs.prg);
 
-        gl.uniform1i(uniLocation[2], 0);
         // フロア用テクスチャをバインド
         //gl.activeTexture(gl.TEXTURE2);
+        //gl.bindTexture(gl.TEXTURE_2D, frameBuffer.t);
         gl.bindTexture(gl.TEXTURE_2D, texture2);
         //gl.uniform1i(uniLocation[1], 2);
 
@@ -206,7 +280,8 @@ onload = function(){
 
         // ビルボード用テクスチャをバインド
         //gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture0);
+        gl.bindTexture(gl.TEXTURE_2D, frameBuffer.t);
+
         //gl.uniform1i(uniLocation[1], 0);
 
         // ビルボードのレンダリング
@@ -222,12 +297,10 @@ onload = function(){
         gl.useProgram(programs.prg2);
         set_attribute(VBOList, attLocation2, attStride);
         gl.uniformMatrix4fv(uniLocation2[0], false, mvpMatrix);
-        gl.uniform1i(uniLocation2[2], 0);
         //ポイントのレンダリング
         //gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, texture1);
+        //gl.bindTexture(gl.TEXTURE_2D, texture0);
         //gl.uniform1i(uniLocation2[1], 1);
-        gl.uniform1i(uniLocation2[2], 1);
         gl.drawArrays(gl.POINTS, 0,position.length/3);
 
 
@@ -341,6 +414,32 @@ onload = function(){
             // attributeLocationを通知し登録する
             gl.vertexAttribPointer(attL[i], attS[i], gl.FLOAT, false, 0, 0);
         }
+    }
+    function create_framebuffer(){
+        if(frameBuffer) return;
+        var fBuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fBuffer);
+        var width = 256;
+        var height = 256;
+
+        var fTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, fTexture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+        var dBuffer = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, dBuffer);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16,width,height);
+
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fTexture, 0);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, dBuffer);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+
+        return {r:dBuffer, t:fTexture, f:fBuffer}
     }
 
     // IBOを生成する関数
