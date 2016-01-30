@@ -170,7 +170,7 @@ function beam(side, color) {
 function star() {
     var pos = [];
     ratio = 80;
-    for(var i = 0; i < 100; i++){
+    for(var i = 0; i < 50; i++){
         pos.push(ratio*(Math.random()-0.5),ratio*(Math.random())+1,ratio*(Math.random()-0.5))
     }
     return {p: pos};
