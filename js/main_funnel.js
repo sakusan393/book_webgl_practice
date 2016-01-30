@@ -302,6 +302,8 @@ Stars = function (gl,img) {
 
 }
 
+
+
 Stars.prototype = {
     render: function () {
     },
@@ -315,6 +317,43 @@ Stars.prototype = {
     }
 }
 
+SkySphere = function (gl,img) {
+    this.gl = gl;
+    this.modelData = window.sphere(20, 20, 100);
+    this.mMatrix = mat4.identity(mat4.create());
+    this.invMatrix = mat4.identity(mat4.create());
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
+    this.rotationX = 0;
+    this.rotationY = 0;
+    this.rotationY = 0;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.scaleZ = 1;
+    this.count = 0;
+    this.isPoint = 0;
+
+    if (img) {
+        this.initTexture(img);
+    }
+}
+SkySphere.prototype = {
+    render: function () {
+        //mat4.identity(this.mMatrix);
+        //var radians = 180 * Math.PI / 180;
+        //var axis = [0.0, 1.0, 0.0];
+        //mat4.rotate(this.mMatrix, this.mMatrix, radians, axis);
+    },
+    initTexture: function (img) {
+        // テクスチャオブジェクトの生成
+        this.texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    }
+}
 Scene3D = function (gl, camera, light) {
     this.gl = gl
     this.camera = camera;
@@ -379,8 +418,8 @@ Scene3D.prototype = {
                 this.gl.useProgram(this.programs);
                 this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
                 //裏面をカリング(描画しない)
-                this.gl.enable(this.gl.CULL_FACE);
-                this.gl.cullFace(this.gl.BACK);
+                //this.gl.enable(this.gl.CULL_FACE);
+                //this.gl.cullFace(this.gl.BACK);
 
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
                 this.meshList[i].mesh.render();
@@ -586,6 +625,9 @@ World.prototype = {
             this.scene3D.addChild(funnel)
         }
 
+        var skySphere = new SkySphere(this.gl,ImageLoader.images["space"]);
+        this.scene3D.addChild(skySphere);
+
 
         this.camera.setTarget(this.cockpit);
 
@@ -637,7 +679,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg","images/texturestar.png"];
+    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }
