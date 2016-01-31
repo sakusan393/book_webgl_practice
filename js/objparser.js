@@ -233,7 +233,9 @@
 		return {
 			vertices: vertices,
 			normals: normals,
-			mtlInfos: mtlInfos
+			mtlInfos: mtlInfos,
+			p: vertices,
+			n: normals
 		};
 	};
 })();
