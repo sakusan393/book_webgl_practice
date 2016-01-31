@@ -30,7 +30,7 @@ window.onload = function () {
     var fragmentShaderSource = document.getElementById("fs").textContent;
     var programs = shaderProgram(vertexShaderSource, fragmentShaderSource);
 
-    var sphereData = sphere(16, 16, 1.0);
+    var sphereData = sphere(16, 16, .5);
     var vboList = []
     vboList.push(generateVBO(sphereData.p))
     vboList.push(generateVBO(sphereData.t))
@@ -63,8 +63,8 @@ window.onload = function () {
     //var move = [0.0,0.0,0.0];
     //mat.translate(mMatrix, move, mMatrix);
 
-    var lightDirection = [1.0, 1.0, 1.0];
-    var cameraPosition = [0.0, 0.0, 3.0];
+    var lightDirection = [0.0, 1.0, 0.0];
+    var cameraPosition = [0, 0.0, 10.0];
     var centerPosition = [0.0, 0.0, 0.0];
     var cameraUp = [0.0, 1.0, 0.0];
     var ambientColor = [0.0, 0.0, 0.0];
@@ -108,10 +108,11 @@ window.onload = function () {
         var radians = (count % 360) * Math.PI / 180;
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         mat.identity(mMatrix);
-        var axis = [1.0, 0.0, 1.0];
+        var axis = [1.0, 0.0, 0.0];
+        mat.translate(mMatrix,[0,2,0],mMatrix);
         mat.rotate(mMatrix, radians, axis, mMatrix);
         mat.multiply(vpMatrix, mMatrix, mvpMatrix);
-        mat.inverse(mMatrix, invMatrix)
+        mat.inverse(mMatrix, invMatrix);
 
         gl.uniformMatrix4fv(uniLocation.mvpMatrix, false, mvpMatrix);
         gl.uniform1i(uniLocation.texture, 0);
@@ -123,8 +124,8 @@ window.onload = function () {
         //gl.drawElements(gl.POINTS, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
         //gl.drawElements(gl.LINE_LOOP, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
 
-        gl.cullFace(gl.FRONT);
-        gl.drawElements(gl.TRIANGLES, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
+        //gl.cullFace(gl.FRONT);
+        //gl.drawElements(gl.TRIANGLES, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
         gl.cullFace(gl.BACK);
         gl.drawElements(gl.TRIANGLES, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
 

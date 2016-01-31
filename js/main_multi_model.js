@@ -86,7 +86,7 @@ function initialize(json){
 	uniLocation.invMatrix = gl.getUniformLocation(programs, 'invMatrix');
 	uniLocation.lightPosition = gl.getUniformLocation(programs, 'lightPosition');
 	uniLocation.eyePosition = gl.getUniformLocation(programs, 'eyePosition');
-	uniLocation.centerPoint = gl.getUniformLocation(programs, 'centerPoint');
+	uniLocation.lookPoint = gl.getUniformLocation(programs, 'centerPoint');
 	uniLocation.texture = gl.getUniformLocation(programs, 'texture');
 	uniLocation.emission = gl.getUniformLocation(programs, 'emission');
 
@@ -171,7 +171,7 @@ function initialize(json){
 			// 更新しないuniform変数を先にシェーダに送る
 			gl.uniform3fv(uniLocation.lightPosition, lightPosition);
 			gl.uniform3fv(uniLocation.eyePosition, cameraPosition);
-			gl.uniform3fv(uniLocation.centerPoint, centerPoint);
+			gl.uniform3fv(uniLocation.lookPoint, centerPoint);
 			gl.uniform1i(uniLocation.texture, 0);
 
 			// レンダリング関数を呼び出す
