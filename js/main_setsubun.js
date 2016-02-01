@@ -143,9 +143,6 @@ Face393 = function (gl,scene3D, lookTarget) {
     this.x = (Math.random() - 0.5) * 30
     this.y = (Math.random() - 0.5) * 30
     this.z = (Math.random() - 0.5) * 30
-    this.x = 0;
-    this.y = -1;
-    this.z = 10;
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationY = 0;
@@ -672,7 +669,6 @@ World.prototype = {
         var skySphere = new SkySphere(this.gl,ImageLoader.images["hell"]);
         this.scene3D.addChild(skySphere);
 
-
         this.camera.setTarget(this.cockpit);
 
         var self = this;
@@ -738,7 +734,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/texturefunnel.png", "images/oni.png","images/texturestar.png","images/hell.jpg","images/beans.png"];
+    var texturePashArray = ["images/texturefunnel.png", "images/oni.png","images/texturestar.png","images/hell.jpg","images/beans.jpg"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }
