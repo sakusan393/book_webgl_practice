@@ -45,11 +45,16 @@
     void main(){
 
         vec4 destColor = vec4(0,0,0,0);
-        if(!bool(vTexCoord)){
+        if(isObjData)
+        {
+            vec3 invLight = (invMatrix * vec4(lightDirection,1.0)).xyz;
+            float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
+            destColor = vec4(kdColor, 1.0);
+        }
+        else if(!bool(vTexCoord))
+        {
             //ビームの描画はライトの計算不要
             destColor = vec4(vec3(vColor.xyz) , alpha);
-        }else if(isObjData){
-            destColor = vec4(kdColor, 1.0);
         } else {
             if(isLightEnable){
                 vec3 eyeDirection = normalize(eyePosition - lookPoint);
