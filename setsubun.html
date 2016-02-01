@@ -48,8 +48,8 @@
         if(isObjData)
         {
             vec3 invLight = (invMatrix * vec4(lightDirection,1.0)).xyz;
-            float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
-            destColor = vec4(kdColor, 1.0);
+            float diff = clamp(dot(normalize(invLight), vNormal) , 0.5, 1.0);
+            destColor = vec4(kdColor*diff, 1.0);
         }
         else if(!bool(vTexCoord))
         {
@@ -61,7 +61,7 @@
                 vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
                 vec3 invLight = (invMatrix * vec4(lightDirection,1.0)).xyz;
                 vec3 halfVector = normalize(invLight + invEye);
-                float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
+                float diff = clamp(dot(normalize(invLight), vNormal) , 0.8 , 1.0);
                 float spec = pow(clamp(dot(halfVector,vNormal),0.0,2.0),10.0);
                 vec3 dest = texture2D(texture, vTexCoord).rgb * diff + spec + ambientColor.rgb;
                 destColor = vec4(dest, 1.0);
