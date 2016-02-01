@@ -19,7 +19,9 @@ var Camera = function (canvas) {
     mat4.perspective(this.pMatrix,this.fov, this.aspect, this.near, this.far);
     mat4.multiply(this.vpMatrix,this.pMatrix, this.vMatrix);
     this.count = 0;
-    this.parent = null
+    this.parent = null;
+
+
 }
 Camera.prototype = {
     setTarget: function (cameraTarget) {
@@ -267,9 +269,9 @@ Cokpit.prototype = {
         mat4.translate(this.mMatrix, this.mMatrix,translatePosition);
         mat4.scale(this.mMatrix, this.mMatrix, [this.scaleX,this.scaleY,this.scaleZ]);
 
-        //var radians = (0 % 360) * Math.PI / 180;
-        //var axis = [1.0, 0.0, 0.0];
-        //mat4.rotate(this.mMatrix, radians, axis, this.mMatrix);
+        var radians = (this.count*20 % 360) * Math.PI / 180;
+        var axis = [1.0, 1.0, 1.0];
+        mat4.rotate(this.mMatrix, this.mMatrix, radians, axis);
         mat4.invert(this.invMatrix , this.mMatrix);
     }
 }
@@ -728,8 +730,8 @@ window.onload = function () {
         };
 
         var srcFiles = {
-            obj: "models/face_fix.obj",
-            mtl: "models/face_fix.mtl"
+            obj: "models/face_body_fix.obj",
+            mtl: "models/face_body_fix.mtl"
         };
         objLoader.load(srcFiles,initialize);
     }
