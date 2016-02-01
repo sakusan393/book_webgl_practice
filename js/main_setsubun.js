@@ -62,12 +62,14 @@ Beam = function(gl,scene3D,funnel,cockpit,img){
     this.scaleY = 1;
     this.scaleZ = 1;
     this.life = 50;
-    this.startAlpha = 0.4;
+    this.startAlpha = 1.0;
+    this.alpha = this.startAlpha;
     this.currentLife = this.life;
     this.speed = 1;
     this.index = 0;
     this.isLightEnable = true;
     this.isObjData = false;
+
 
     this.defaultPosture = [0,0,1];
     if(img){
@@ -105,7 +107,7 @@ Beam.prototype = {
         mat4.fromQuat(this.qMatrix,this.qtn);
     },
     render:function(){
-        var percent = (this.currentLife / this.life > this.startAlpha)? this.startAlpha: this.currentLife / this.life;
+        var percent = (this.currentLife / this.life > this.startAlpha/4)? this.startAlpha: this.currentLife / this.life;
         this.alpha = percent;
         vec3.normalize(this.lookVector,this.lookVector)
         this.x+=this.lookVector[0]*this.speed;
@@ -120,7 +122,7 @@ Beam.prototype = {
         mat4.scale(this.mMatrix, this.mMatrix, scale);
 
         this.currentLife--;
-        if(this.currentLife < 0){
+        if(this.currentLife <= 0){
             requestAnimationFrame(this.dispose.bind(this))
         }
     },
@@ -171,6 +173,7 @@ Face393 = function (gl,scene3D, lookTarget) {
     this.currentBeam = null;
     this.isLightEnable = true;
     this.isObjData = true;
+    this.alpha = 1.0;
 
     for(var i = 0; i < this.beamLength; i++){
         this.beamArray[i] = new Beam(this.gl,this.scene3D,this,this.parent,ImageLoader.images["beans"]);
@@ -242,6 +245,7 @@ Cokpit = function (gl, img) {
     this.isLightEnable = true;
     this.isObjData = false;
     this.count = 0;
+    this.alpha = 1.0;
 
     if (img) {
         this.initTexture(img);
@@ -286,6 +290,7 @@ Stars = function (gl,img) {
     this.count = 0;
     this.isPoint = true;
     this.isLightEnable = false;
+    this.alpha = 1.0;
     if (img) {
         this.initTexture(img);
     }
@@ -325,6 +330,7 @@ SkySphere = function (gl,img) {
     this.count = 0;
     this.isLightEnable = false;
     this.isObjData = false;
+    this.alpha = 1.0;
 
     if (img) {
         this.initTexture(img);
@@ -424,12 +430,12 @@ Scene3D.prototype = {
                 this.gl.useProgram(this.programs);
                 this.gl.uniform3fv(this.uniLocation.eyePosition, this.camera.cameraPosition);
                 this.gl.uniform1i(this.uniLocation.isObjData, this.meshList[i].mesh.isObjData);
-                this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
                 this.gl.uniform1i(this.uniLocation.isLightEnable, this.meshList[i].mesh.isLightEnable);
 
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
 
                 this.meshList[i].mesh.render();
+                this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
                 mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
@@ -442,12 +448,7 @@ Scene3D.prototype = {
                 var pos = 0;
                 for(var j = 0; j < this.meshList[i].mesh.modelData.mtlInfos.length; j++) {
                     var mtlInfo = this.meshList[i].mesh.modelData.mtlInfos[j];
-                    //
-                    //// Kd, Ks, Nsをそれぞれuniformで送信
                     this.gl.uniform3fv(this.uniLocation.kdColor, mtlInfo.kd);
-                    //
-                    //// 前の最後の頂点(pos / 3)から、今回のmtlで描画する頂点数だけ送る
-
                     this.gl.drawArrays(this.gl.TRIANGLES, pos / 3, (mtlInfo.endPos - pos) / 3);
                     pos = mtlInfo.endPos;
                 }
