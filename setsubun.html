@@ -87,7 +87,7 @@
 
     void main(){
         gl_Position = mvpMatrix * vec4(position, 1.0);
-        gl_PointSize = 4.0;
+        gl_PointSize = 5.0;
     }
 
     </script>
@@ -100,7 +100,7 @@
         if(destColor.a == 0.0){
             discard;
         }else{
-            vec4 color = vec4(.9,.4,.4,.9);
+            vec4 color = vec4(1.0,.4,.4,.9);
             gl_FragColor = destColor * color;
         }
     }
