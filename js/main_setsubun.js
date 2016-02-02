@@ -19,9 +19,7 @@ var Camera = function (canvas) {
     mat4.perspective(this.pMatrix,this.fov, this.aspect, this.near, this.far);
     mat4.multiply(this.vpMatrix,this.pMatrix, this.vMatrix);
     this.count = 0;
-    this.parent = null;
-
-
+    this.parent = null
 }
 Camera.prototype = {
     setTarget: function (cameraTarget) {

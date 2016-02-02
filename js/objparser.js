@@ -228,7 +228,7 @@
 				++triangleCount;
 			}
 		}
-		
+
 		// 用意したTypedArrayをリターン
 		return {
 			vertices: vertices,
