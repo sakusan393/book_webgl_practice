@@ -33,7 +33,6 @@ Camera.prototype = {
         this.cameraPosition = [this.x, this.y, this.z]
 
         mat4.lookAt(this.vMatrix, this.cameraPosition, this.lookPoint, this.cameraUp);
-        mat4.perspective(this.pMatrix, this.fov, this.aspect, this.near, this.far);
         mat4.multiply(this.vpMatrix, this.pMatrix, this.vMatrix);
     }
 }

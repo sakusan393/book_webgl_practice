@@ -446,7 +446,7 @@ Scene3D.prototype = {
                 this.gl.disable(this.gl.CULL_FACE);
             } else {
                 this.gl.useProgram(this.programs_points);
-                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation_points, this.attStride, null , "point");
+                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation_points, this.attStride, null);
                 this.meshList[i].mesh.render();
                 mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
@@ -561,9 +561,12 @@ Scene3D.prototype = {
         return indexBuffer;
     },
 
-    setAttribute: function (vbo, attL, attS, ibo, hoge) {
+    setAttribute: function (vbo, attL, attS, ibo) {
+        var l = attL.length
+        for (var j = 0; j < l; j++) {
+            this.gl.disableVertexAttribArray(attL[j]);
+        }
         for (var i in vbo) {
-            this.gl.disableVertexAttribArray(attL[i]);
             if (vbo[i]) {
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vbo[i]);
                 this.gl.enableVertexAttribArray(attL[i]);
