@@ -10,8 +10,10 @@
 				cb();
 			}
 		};
-		loadFile(srcFiles.obj, "obj", callback);
-		loadFile(srcFiles.mtl, "mtl", callback);
+		var objName = srcFiles.obj.split("/")[1].split(".")[0] + "_obj";
+		var mtlName = srcFiles.mtl.split("/")[1].split(".")[0] + "_mtl";
+		loadFile(srcFiles.obj, objName, callback);
+		loadFile(srcFiles.mtl, mtlName, callback);
 	};
 	objLoader.files = {};
 	var loadFile = function(url, name, callback) {
