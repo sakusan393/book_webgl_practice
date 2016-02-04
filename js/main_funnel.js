@@ -256,8 +256,9 @@ Cokpit = function (gl, img) {
     this.rnd1 = Math.random() * 10 + 30;
     this.rnd2 = Math.random() * 10 + 30;
     this.rnd3 = Math.random() * 10 + 30;
-    this.speed = .06
+    this.speed = .06;
     this.isLightEnable = true;
+    this.isCockpit = true;
 
     if (img) {
         this.initTexture(img);
@@ -445,6 +446,7 @@ Scene3D.prototype = {
 
                 this.gl.disable(this.gl.CULL_FACE);
             } else {
+                //POINT
                 this.gl.useProgram(this.programs_points);
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation_points, this.attStride, null);
                 this.meshList[i].mesh.render();
@@ -644,7 +646,7 @@ World.prototype = {
         this.scene3D.addChild(skySphere);
 
 
-        //this.camera.setTarget(this.cockpit);
+        this.camera.setTarget(this.cockpit);
 
         var self = this;
         setInterval( function(){
@@ -659,9 +661,9 @@ World.prototype = {
     enterFrameHandler: function () {
 
         this.camera.count += 1;
-        //this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
-        //this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        //this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
+        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
         this.camera.z = 70;
         this.cockpit.count += this.cockpit.speed / 3;
         this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
@@ -694,7 +696,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg"];
+    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }
