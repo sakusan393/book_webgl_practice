@@ -60,11 +60,9 @@ window.onload = function () {
     var vpMatrix = mat.identity(mat.create());
     var mvpMatrix = mat.identity(mat.create());
     var invMatrix = mat.identity(mat.create());
-    //var move = [0.0,0.0,0.0];
-    //mat.translate(mMatrix, move, mMatrix);
 
     var lightDirection = [0.0, 1.0, 0.0];
-    var cameraPosition = [0, 0.0, 10.0];
+    var cameraPosition = [0, 0.0, 20.0];
     var centerPosition = [0.0, 0.0, 0.0];
     var cameraUp = [0.0, 1.0, 0.0];
     var ambientColor = [0.0, 0.0, 0.0];
@@ -73,7 +71,7 @@ window.onload = function () {
     var fov = 45;
     var aspect = c.width / c.height;
     var near = 0.1;
-    var far = 10.0;
+    var far = 20.0;
     mat.perspective(fov, aspect, near, far, pMatrix);
     mat.multiply(pMatrix, vMatrix, vpMatrix);
     //mat.multiply(vpMatrix, mMatrix, mvpMatrix);
@@ -95,12 +93,14 @@ window.onload = function () {
     gl.flush();
 
 
-    requestAnimationFrame(render);
 
-    generateTexure("images/test.jpg");
+
+
     function textureLoadComplete(texture) {
         gl.bindTexture(gl.TEXTURE_2D, texture);
+        requestAnimationFrame(render);
     }
+    generateTexure("images/test.jpg");
 
 
     function render() {

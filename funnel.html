@@ -49,7 +49,7 @@
             if(isLightEnable){
                 vec3 eyeDirection = normalize(eyePosition - lookPoint);
                 vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
-                vec3 invLight = (invMatrix * vec4(lightDirection,1.0)).xyz;
+                vec3 invLight = normalize(invMatrix * vec4(lightDirection,0.0)).xyz;
                 vec3 halfVector = normalize(invLight + invEye);
                 float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
                 float spec = pow(clamp(dot(halfVector,vNormal),0.0,2.0),10.0);

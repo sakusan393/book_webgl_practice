@@ -39,7 +39,7 @@ Camera.prototype = {
 }
 var DirectionLight = function () {
     // ビュー座標変換行列
-    this.lightDirection = [0.0, 50.0, -100.0];
+    this.lightDirection = [0.0, 0.2, -1.0];
     this.ambientColor = [0.0, 0.0, 0.1];
 }
 DirectionLight.prototype = {}
@@ -644,12 +644,12 @@ World.prototype = {
         this.scene3D.addChild(skySphere);
 
 
-        this.camera.setTarget(this.cockpit);
+        //this.camera.setTarget(this.cockpit);
 
         var self = this;
         setInterval( function(){
             for (var i = 0; i < self.funnelLength; i++) {
-                self.funnellArray[i].shoot();
+                //self.funnellArray[i].shoot();
             }
         },100);
 
@@ -659,10 +659,10 @@ World.prototype = {
     enterFrameHandler: function () {
 
         this.camera.count += 1;
-        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
-        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
-
+        //this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        //this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        //this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
+        this.camera.z = 70;
         this.cockpit.count += this.cockpit.speed / 3;
         this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
         this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)

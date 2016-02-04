@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>index</title>
-<script src="js/minMatrix.js"></script>
-<script src="js/main.js"></script>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <script src="js/minMatrix.js"></script>
+    <script src="js/main.js"></script>
 
-<script id="vs" type="x-shader/x-vertex">
+    <script id="vs" type="x-shader/x-vertex">
     attribute vec3 position;
     attribute vec3 normal;
     //attribute vec4 color;
@@ -23,9 +23,10 @@
         gl_PointSize = 40.0;
     }
 
-</script>
 
-<script id="fs" type="x-shader/x-fragment">
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
     precision mediump float;
     varying vec2 vTexCoord;
     uniform sampler2D texture;
@@ -38,16 +39,17 @@
     uniform vec3 eyePosition;
     uniform vec3 centerPosition;
     void main(){
-        vec3 eyeDirection = eyePosition - centerPosition;
+        vec3 eyeDirection = eyePosition;
         vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
-        vec3 invLight = (invMatrix * vec4(lightDirection,1.0)).xyz;
+        vec3 invLight = (invMatrix * vec4(lightDirection,0.0)).xyz;
         vec3 halfVector = normalize(invLight + invEye);
         float diff = clamp(dot(normalize(invLight), vNormal) , 0.3 , 1.0);
         float spec = pow(clamp(dot(halfVector,vNormal),0.0,1.0),10.0);
         vec3 dest = texture2D(texture, vTexCoord).rgb * diff + spec + ambientColor.rgb;
         gl_FragColor = vec4(dest, 1.0);
     }
-</script>
+
+    </script>
 
 </head>
 <body>
