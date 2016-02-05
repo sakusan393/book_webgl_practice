@@ -120,13 +120,15 @@ Funnel = function (gl,scene3D, lookTarget,option) {
     this.scene3D = scene3D;
     this.parent = lookTarget
     this.modelData = window.funnel();
-    this.modelData = window.sphere(10,10,0.3);
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
 
     this.qtn = quat.identity(quat.create());
     this.qMatrix = mat4.identity(mat4.create());
 
+    this.x = (Math.random() - 0.5) * 0
+    this.y = (Math.random() - 0.5) * 0
+    this.z = (Math.random() - 0.5) * 0
     this.x = (Math.random() - 0.5) * 30
     this.y = (Math.random() - 0.5) * 30
     this.z = (Math.random() - 0.5) * 30
@@ -157,7 +159,7 @@ Funnel = function (gl,scene3D, lookTarget,option) {
     this.curentBeamIndex = 0;
     this.currentBeam = null;
     this.isLightEnable = true;
-    this.isBump = false;
+    this.isBump = true;
     this.textureObject = {};
 
     for(var i = 0; i < this.beamLength; i++){
@@ -201,11 +203,11 @@ Funnel.prototype = {
         mat4.identity(this.mMatrix);
         mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
         var targetPosition = {x: 0, y: 0, z: 0};
-        //if (this.parent) {
-        //    targetPosition.x = this.parent.x;
-        //    targetPosition.y = this.parent.y;
-        //    targetPosition.z = this.parent.z;
-        //}
+        if (this.parent) {
+            targetPosition.x = this.parent.x;
+            targetPosition.y = this.parent.y;
+            targetPosition.z = this.parent.z;
+        }
 
         //オイラー角による向き制御
         //var subtractPosition = {
@@ -225,18 +227,18 @@ Funnel.prototype = {
         //mat4.rotate(this.mMatrix, this.mMatrix, radZ, axisZ);
 
 
-        ////クォータニオンによる姿勢制御
-        //var lookVector = vec3.subtract([],[targetPosition.x,targetPosition.y,targetPosition.z],[this.x, this.y, this.z])
-        ////回転軸(外積)
-        //var rotationAxis = vec3.cross([],lookVector, this.defaultPosture);
-        //vec3.normalize(rotationAxis,rotationAxis);
-        //
-        ////なす角(radian)
-        //var qAngle = Math.acos(vec3.dot(lookVector,this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
-        //quat.setAxisAngle(this.qtn  ,rotationAxis,-qAngle);
-        //mat4.identity(this.qMatrix);
-        //mat4.fromQuat(this.qMatrix , this.qtn);
-        //mat4.multiply(this.mMatrix, this.mMatrix, this.qMatrix);
+        //クォータニオンによる姿勢制御
+        var lookVector = vec3.subtract([],[targetPosition.x,targetPosition.y,targetPosition.z],[this.x, this.y, this.z])
+        //回転軸(外積)
+        var rotationAxis = vec3.cross([],lookVector, this.defaultPosture);
+        vec3.normalize(rotationAxis,rotationAxis);
+
+        //なす角(radian)
+        var qAngle = Math.acos(vec3.dot(lookVector,this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
+        quat.setAxisAngle(this.qtn  ,rotationAxis,-qAngle);
+        mat4.identity(this.qMatrix);
+        mat4.fromQuat(this.qMatrix , this.qtn);
+        mat4.multiply(this.mMatrix, this.mMatrix, this.qMatrix);
 
         mat4.invert(this.invMatrix , this.mMatrix);
     }
@@ -705,7 +707,7 @@ World.prototype = {
         var self = this;
         setInterval( function(){
             for (var i = 0; i < self.funnelLength; i++) {
-                //self.funnellArray[i].shoot();
+                if(Math.random() > 0.8) self.funnellArray[i].shoot();
             }
         },100);
 
@@ -715,18 +717,19 @@ World.prototype = {
     enterFrameHandler: function () {
 
         this.camera.count += 1;
-        //this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
-        //this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        //this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13+10;
+        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13+10;
 
-        this.camera.x = Math.sin((this.camera.count * .01 % 360 )) * 5;
-        this.camera.z = Math.cos((this.camera.count * .01 % 360)) * 5;
+        //this.camera.x = Math.sin((this.camera.count * .01 % 360 )) * 5;
+        //this.camera.z = Math.cos((this.camera.count * .01 % 360)) * 5;
         //this.camera.y = Math.cos((this.camera.count * .03 % 360)) * 10;
         //this.camera.z = 20;
+
         this.cockpit.count += this.cockpit.speed / 3;
-        //this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
-        //this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
-        //this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
+        this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
+        this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
+        this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
 
         for (var i = 0; i < this.funnelLength; i++) {
             this.funnellArray[i].count += this.funnellArray[i].speed;
@@ -754,7 +757,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
+    var texturePashArray = ["images/texturefunnel.png","images/texturefunnel_n.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }
