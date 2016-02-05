@@ -797,7 +797,7 @@ World.prototype = {
         this.camera.count += 1;
         this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
         this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
+        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13+80;
 
         this.cockpit.count += this.cockpit.speed / 3;
         this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
