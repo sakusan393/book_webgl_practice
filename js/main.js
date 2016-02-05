@@ -62,7 +62,7 @@ window.onload = function () {
     var invMatrix = mat.identity(mat.create());
 
     var lightDirection = [0.0, 1.0, 0.0];
-    var cameraPosition = [0, 0.0, 20.0];
+    var cameraPosition = [0.0, 50.0, 20.0];
     var centerPosition = [0.0, 0.0, 0.0];
     var cameraUp = [0.0, 1.0, 0.0];
     var ambientColor = [0.0, 0.0, 0.0];
@@ -71,7 +71,7 @@ window.onload = function () {
     var fov = 45;
     var aspect = c.width / c.height;
     var near = 0.1;
-    var far = 20.0;
+    var far = 200.0;
     mat.perspective(fov, aspect, near, far, pMatrix);
     mat.multiply(pMatrix, vMatrix, vpMatrix);
     //mat.multiply(vpMatrix, mMatrix, mvpMatrix);
@@ -104,12 +104,24 @@ window.onload = function () {
 
 
     function render() {
-        count += 1
+        lightDirection = [0.0, 0.2, -1.0];
+        cameraPosition = [Math.sin(count *.01)*10.0,0.0,Math.cos(count *.01)*10.0];
+        centerPosition = [0.0, 0.0, 0.0];
+
+        mat.lookAt(cameraPosition, centerPosition, cameraUp, vMatrix);
+        var fov = 45;
+        var aspect = c.width / c.height;
+        var near = 0.1;
+        var far = 200.0;
+        mat.perspective(fov, aspect, near, far, pMatrix);
+        mat.multiply(pMatrix, vMatrix, vpMatrix);
+
+        count += 1;
         var radians = (count % 360) * Math.PI / 180;
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         mat.identity(mMatrix);
         var axis = [1.0, 0.0, 0.0];
-        mat.translate(mMatrix,[0,2,0],mMatrix);
+        //mat.translate(mMatrix,[Math.sin(count *.01)*3,Math.sin(count *.01)*3,0],mMatrix);
         mat.rotate(mMatrix, radians, axis, mMatrix);
         mat.multiply(vpMatrix, mMatrix, mvpMatrix);
         mat.inverse(mMatrix, invMatrix);
