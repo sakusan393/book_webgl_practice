@@ -12,10 +12,10 @@ var Camera = function (canvas) {
     mat4.lookAt(this.vMatrix,this.cameraPosition, this.lookPoint, this.cameraUp);
 
     // プロジェクションのための情報を揃える
-    this.fov = 45 * Math.PI / 180                           // 視野角
+    this.fov = 30 * Math.PI / 180                           // 視野角
     this.aspect = canvas.width / canvas.height; // アスペクト比
     this.near = 0.1;                            // 空間の最前面
-    this.far = 200.0;                            // 空間の奥行き終端
+    this.far = 300.0;                            // 空間の奥行き終端
     mat4.perspective(this.pMatrix,this.fov, this.aspect, this.near, this.far);
     mat4.multiply(this.vpMatrix,this.pMatrix, this.vMatrix);
     this.count = 0;
@@ -337,7 +337,7 @@ Stars.prototype = {
 
 SkySphere = function (gl,img) {
     this.gl = gl;
-    this.modelData = window.sphere(20, 20, 100);
+    this.modelData = window.sphere(20, 20, 80);
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
     this.x = 0;
@@ -688,7 +688,7 @@ World.prototype = {
         this.scene3D.addChild(this.cockpit);
 
         this.funnellArray = [];
-        this.funnelLength = 30;
+        this.funnelLength = 100;
         var funnelOption = {};
         funnelOption.diffuseMapSource = ImageLoader.images["texturefunnel"];
         funnelOption.bumpMapSource = ImageLoader.images["texturefunnel_n"];
@@ -707,9 +707,9 @@ World.prototype = {
         var self = this;
         setInterval( function(){
             for (var i = 0; i < self.funnelLength; i++) {
-                if(Math.random() > 0.8) self.funnellArray[i].shoot();
+                if(Math.random() > 0.98) self.funnellArray[i].shoot();
             }
-        },100);
+        },300);
 
         this.enterFrameHandler()
     },
@@ -757,7 +757,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/texturefunnel.png","images/texturefunnel_n.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
+    var texturePashArray = ["images/ngundam.png","images/texturefunnel.png","images/texturefunnel_n.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }
