@@ -102,6 +102,31 @@ function cube(side, color) {
     ];
     return {p: pos, n: nor, c: col, t: st, i: idx};
 }
+function plane(side, color) {
+    var tc, hs = side * 0.5;
+    var pos = [
+        -hs, -hs, 0, hs, -hs, 0, hs, hs, 0, -hs, hs, 0
+    ];
+    var nor = [
+        -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0
+    ];
+    var col = new Array();
+    for (var i = 0; i < pos.length / 3; i++) {
+        if (color) {
+            tc = color;
+        } else {
+            tc = hsva(360 / pos.length / 3 * i, 1, 1, 1);
+        }
+        col.push(tc[0], tc[1], tc[2], tc[3]);
+    }
+    var st = [
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
+    ];
+    var idx = [
+        0, 1, 2, 0, 2, 3
+    ];
+    return {p: pos, n: nor, c: col, t: st, i: idx};
+}
 
 function beam(side, color) {
     var tc, hs = 1 * 0.5;

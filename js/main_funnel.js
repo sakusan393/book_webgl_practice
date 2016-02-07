@@ -159,7 +159,7 @@ Funnel = function (gl,scene3D, lookTarget,option) {
     this.curentBeamIndex = 0;
     this.currentBeam = null;
     this.isLightEnable = true;
-    this.isBump = true;
+    this.isBump = false;
     this.textureObject = {};
 
     for(var i = 0; i < this.beamLength; i++){
@@ -266,7 +266,7 @@ Cockpit = function (gl, option) {
     this.rnd3 = Math.random() * 10 + 30;
     this.speed = .06;
     this.isLightEnable = true;
-    this.isBump = true;
+    this.isBump = false;
     this.textureObject = {};
 
     if (option.diffuseMapSource) {
@@ -324,6 +324,51 @@ Stars = function (gl,img) {
 Stars.prototype = {
     render: function () {
 
+    },
+    initTexture: function (img) {
+        // テクスチャオブジェクトの生成
+        this.texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    }
+}
+NGundam = function (gl,img) {
+    this.gl = gl;
+    this.modelData = window.plane(2);
+    this.mMatrix = mat4.identity(mat4.create());
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
+    this.rotationX = 0;
+    this.rotationY = 0;
+    this.rotationY = 0;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.scaleZ = 1;
+    this.count = 0;
+    this.isPoint = false;
+    this.isLightEnable = false;
+    if (img) {
+        this.initTexture(img);
+    }
+
+}
+
+
+
+NGundam.prototype = {
+    render: function () {
+        this.z = -60;
+        this.y = 20;
+        var translatePosition = [this.x, this.y, this.z];
+        mat4.identity(this.mMatrix);
+        mat4.translate(this.mMatrix, this.mMatrix,translatePosition);
+        var radians = (180 % 360) * Math.PI / 180;
+        var axis = [0.0,0.0, 1.0];
+        mat4.rotate(this.mMatrix, this.mMatrix, radians, axis);
+        //mat4.invert(this.invMatrix , this.mMatrix);
     },
     initTexture: function (img) {
         // テクスチャオブジェクトの生成
@@ -681,25 +726,30 @@ World.prototype = {
         var stars = new Stars(this.gl,ImageLoader.images["texturestar"]);
         this.scene3D.addChild(stars);
 
-        var cockpitOption = {};
-        cockpitOption.diffuseMapSource = ImageLoader.images["texturesazabycokpit"];
-        cockpitOption.bumpMapSource = ImageLoader.images["texturesazabycokpit_n"];
+        var cockpitOption = {
+            diffuseMapSource: ImageLoader.images["texturesazabycokpit"],
+            bumpMapSource: ImageLoader.images["texturesazabycokpit_n"]
+        }
         this.cockpit = new Cockpit(this.gl, cockpitOption);
         this.scene3D.addChild(this.cockpit);
 
         this.funnellArray = [];
-        this.funnelLength = 100;
-        var funnelOption = {};
-        funnelOption.diffuseMapSource = ImageLoader.images["texturefunnel"];
-        funnelOption.bumpMapSource = ImageLoader.images["texturefunnel_n"];
+        this.funnelLength = 20;
+
+        var funnelOption = {
+            diffuseMapSource: ImageLoader.images["texturefunnel"],
+            bumpMapSource: ImageLoader.images["texturefunnel_n"]
+        }
         for (var i = 0; i < this.funnelLength; i++) {
             var funnel = new Funnel(this.gl,this.scene3D, this.cockpit,funnelOption);
             this.funnellArray.push(funnel);
             this.scene3D.addChild(funnel)
         }
-
         var skySphere = new SkySphere(this.gl,ImageLoader.images["space"]);
         this.scene3D.addChild(skySphere);
+
+        var nGumdam = new NGundam(this.gl, ImageLoader.images["texturengundam"]);
+        this.scene3D.addChild(nGumdam);
 
 
         this.camera.setTarget(this.cockpit);
@@ -721,6 +771,7 @@ World.prototype = {
         this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
         this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13+10;
 
+        //FOR TEST
         //this.camera.x = Math.sin((this.camera.count * .01 % 360 )) * 5;
         //this.camera.z = Math.cos((this.camera.count * .01 % 360)) * 5;
         //this.camera.y = Math.cos((this.camera.count * .03 % 360)) * 10;
@@ -757,7 +808,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/ngundam.png","images/texturefunnel.png","images/texturefunnel_n.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
+    var texturePashArray = ["images/texturengundam.png","images/texturefunnel.png","images/texturefunnel_n.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }
