@@ -1,6 +1,6 @@
 var Camera = function (canvas) {
     // ビュー座標変換行列
-    this.centerPoint = [0.0, 0.0, 0.0];    // 注視点
+    this.lookPoint = [0.0, 0.0, 0.0];    // 注視点
     this.x = 0;
     this.y = 0;
     this.z = 20;
@@ -9,7 +9,7 @@ var Camera = function (canvas) {
     this.vMatrix = mat4.identity(mat4.create());
     this.pMatrix = mat4.identity(mat4.create());
     this.vpMatrix = mat4.identity(mat4.create());
-    mat4.lookAt(this.vMatrix,this.cameraPosition, this.centerPoint, this.cameraUp);
+    mat4.lookAt(this.vMatrix,this.cameraPosition, this.lookPoint, this.cameraUp);
 
     // プロジェクションのための情報を揃える
     this.fov = 45 * Math.PI / 180                           // 視野角
@@ -28,18 +28,18 @@ Camera.prototype = {
     render: function () {
 
         if (this.parent) {
-            this.centerPoint = [this.parent.x, this.parent.y, this.parent.z]
+            this.lookPoint = [this.parent.x, this.parent.y, this.parent.z]
         }
         this.cameraPosition = [this.x, this.y, this.z]
 
-        mat4.lookAt(this.vMatrix, this.cameraPosition, this.centerPoint, this.cameraUp);
+        mat4.lookAt(this.vMatrix, this.cameraPosition, this.lookPoint, this.cameraUp);
         mat4.perspective(this.pMatrix , this.fov, this.aspect, this.near, this.far);
         mat4.multiply(this.vpMatrix , this.pMatrix, this.vMatrix);
     }
 }
 var DirectionLight = function () {
     // ビュー座標変換行列
-    this.lightDirection = [1.0, 1.0, 1.0];
+    this.lightDirection = [0.0, 20, -100.0];
     this.ambientColor = [0.0, 0.0, 0.1];
 }
 DirectionLight.prototype = {}
@@ -65,6 +65,7 @@ Beam = function(gl,scene3D,funnel,cockpit){
     this.currentLife = this.life;
     this.speed = 1;
     this.index = 0;
+    this.isLightEnable = false;
 
     this.defaultPosture = [0,0,1];
 }
@@ -114,7 +115,7 @@ Beam.prototype = {
     }
 }
 
-Funnel = function (gl,scene3D, lookTarget,img) {
+Funnel = function (gl,scene3D, lookTarget) {
     this.gl = gl;
     this.scene3D = scene3D;
     this.parent = lookTarget
@@ -155,21 +156,25 @@ Funnel = function (gl,scene3D, lookTarget,img) {
     this.beamArray = [];
     this.curentBeamIndex = 0;
     this.currentBeam = null;
+    this.isLightEnable = true;
+    this.isBump = true;
+    this.textureObject = {};
 
     for(var i = 0; i < this.beamLength; i++){
         this.beamArray[i] = new Beam(this.gl,this.scene3D,this,this.parent);
     }
-
-    if (img) {
-        this.initTexture(img);
-    }
+    var diffuseMapSource = ImageLoader.images["texturefunnel"];
+    var bumpMapSource = ImageLoader.images["texturefunnel_n"];
+    this.initTexture(diffuseMapSource,"diffuse");
+    this.initTexture(bumpMapSource,"bump");
+    this.texture = this.textureObject.diffuse;
 }
 
 Funnel.prototype = {
-    initTexture: function (img) {
+    initTexture: function (img,type) {
         // テクスチャオブジェクトの生成
-        this.texture = this.gl.createTexture();
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.textureObject[type] = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.textureObject[type]);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
@@ -234,9 +239,9 @@ Funnel.prototype = {
     }
 
 }
-Cokpit = function (gl, img) {
+Cokpit = function (gl) {
     this.gl = gl;
-    this.modelData = window.sphere(10, 10, .3);
+    this.modelData = window.sphere(20, 20, .3);
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
     this.x = 0;
@@ -255,17 +260,23 @@ Cokpit = function (gl, img) {
     this.rnd1 = Math.random() * 10 + 30;
     this.rnd2 = Math.random() * 10 + 30;
     this.rnd3 = Math.random() * 10 + 30;
-    this.speed = .06
+    this.speed = .06;
+    this.isLightEnable = true;
+    this.isBump = true;
+    this.textureObject = {};
 
-    if (img) {
-        this.initTexture(img);
-    }
+    var diffuseMapSource = ImageLoader.images["texturesazabycokpit"];
+    var bumpMapSource = ImageLoader.images["texturesazabycokpit_n"];
+    this.initTexture(diffuseMapSource,"diffuse");
+    this.initTexture(bumpMapSource,"bump");
+    this.texture = this.textureObject.diffuse;
+
 }
 Cokpit.prototype = {
-    initTexture: function (img) {
+    initTexture: function (img,type) {
         // テクスチャオブジェクトの生成
-        this.texture = this.gl.createTexture();
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.textureObject[type] = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.textureObject[type]);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
@@ -274,9 +285,9 @@ Cokpit.prototype = {
         var translatePosition = [this.x, this.y, this.z];
         mat4.identity(this.mMatrix);
         mat4.translate(this.mMatrix, this.mMatrix,translatePosition);
-        //var radians = (0 % 360) * Math.PI / 180;
-        //var axis = [1.0, 0.0, 0.0];
-        //mat4.rotate(this.mMatrix, radians, axis, this.mMatrix);
+        var radians = (this.count*50 % 360) * Math.PI / 180;
+        var axis = [1.0,0.5, 0.1];
+        mat4.rotate(this.mMatrix, this.mMatrix, radians, axis);
         mat4.invert(this.invMatrix , this.mMatrix);
     }
 }
@@ -295,7 +306,7 @@ Stars = function (gl,img) {
     this.scaleY = 1;
     this.scaleZ = 1;
     this.count = 0;
-    this.isPoint = 1;
+    this.isPoint = true;
     if (img) {
         this.initTexture(img);
     }
@@ -314,6 +325,90 @@ Stars.prototype = {
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
 }
+SkySphere = function (gl,img) {
+    this.gl = gl;
+    this.modelData = window.sphere(20, 20, 80);
+    this.mMatrix = mat4.identity(mat4.create());
+    this.invMatrix = mat4.identity(mat4.create());
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
+    this.rotationX = 0;
+    this.rotationY = 0;
+    this.rotationY = 0;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.scaleZ = 1;
+    this.count = 0;
+    this.isLightEnable = false;
+    this.isCullingFront = true;
+
+
+    if (img) {
+        this.initTexture(img);
+    }
+}
+SkySphere.prototype = {
+    render: function () {
+        mat4.identity(this.mMatrix);
+        var radians = -90 * Math.PI / 180;
+        var axis = [0.0, 1.0, 0.0];
+        mat4.rotate(this.mMatrix, this.mMatrix, radians, axis);
+    },
+    initTexture: function (img) {
+        // テクスチャオブジェクトの生成
+        this.texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    }
+}
+
+NGundam = function (gl,img) {
+    this.gl = gl;
+    this.modelData = window.plane(2);
+    this.mMatrix = mat4.identity(mat4.create());
+    this.invMatrix = mat4.identity(mat4.create());
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
+    this.rotationX = 0;
+    this.rotationY = 0;
+    this.rotationY = 0;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.scaleZ = 1;
+    this.count = 0;
+    this.isPoint = false;
+    this.isLightEnable = false;
+    if (img) {
+        this.initTexture(img);
+    }
+
+}
+NGundam.prototype = {
+    render: function () {
+        this.z = -60;
+        this.y = 20;
+        var translatePosition = [this.x, this.y, this.z];
+        mat4.identity(this.mMatrix);
+        mat4.translate(this.mMatrix, this.mMatrix,translatePosition);
+        var radians = (180 % 360) * Math.PI / 180;
+        var axis = [0.0,0.0, 1.0];
+        mat4.rotate(this.mMatrix, this.mMatrix, radians, axis);
+        //mat4.invert(this.invMatrix , this.mMatrix);
+    },
+    initTexture: function (img) {
+        // テクスチャオブジェクトの生成
+        this.texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    }
+}
+
 
 Scene3D = function (gl, camera, light) {
     this.gl = gl
@@ -371,30 +466,12 @@ Scene3D.prototype = {
 
         //カメラに座標変換行列の更新
         this.camera.render();
+        this.gl.uniform3fv(this.uniLocation.lightDirection, this.light.lightDirection);
 
         //各3Dオブジェクトの描画処理
         for (var i = 0, l = this.meshList.length; i < l; i++) {
 
-            if (!this.meshList[i].mesh.isPoint) {
-                this.gl.useProgram(this.programs);
-                this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
-                //裏面をカリング(描画しない)
-                this.gl.enable(this.gl.CULL_FACE);
-                this.gl.cullFace(this.gl.BACK);
-
-                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
-                this.meshList[i].mesh.render();
-                mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
-
-                this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
-                this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
-                //明示的に0番目を指定
-                //this.gl.uniform1i(this.uniLocation.texture, 0);
-                if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
-                this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
-
-                this.gl.disable(this.gl.CULL_FACE);
-            } else {
+            if (this.meshList[i].mesh.isPoint) {
                 this.gl.useProgram(this.programs_points);
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation_points, this.attStride, null , "point");
                 this.meshList[i].mesh.render();
@@ -402,9 +479,64 @@ Scene3D.prototype = {
 
                 this.gl.uniformMatrix4fv(this.uniLocation_points.mvpMatrix, false, this.mvpMatrix);
                 //明示的に0番目を指定
-                //this.gl.uniform1i(this.uniLocation_points.texture, 0);
+                this.gl.activeTexture(this.gl.TEXTURE0);
+                this.gl.uniform1i(this.uniLocation_points.texture, 0);
                 if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
                 this.gl.drawArrays(this.gl.POINTS, 0, this.meshList[i].mesh.modelData.p.length / 3);
+            }else if(this.meshList[i].mesh.isBump){
+                this.gl.useProgram(this.programs_bump);
+                this.gl.enable(this.gl.CULL_FACE);
+                if(this.meshList[i].mesh.isCullingFront){
+                    this.gl.cullFace(this.gl.FRONT);
+                }else{
+                    this.gl.cullFace(this.gl.BACK);
+                }
+                this.gl.uniform3fv(this.uniLocation_bump.eyePosition, this.camera.cameraPosition);
+                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
+                this.meshList[i].mesh.render();
+                mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
+
+                this.gl.uniformMatrix4fv(this.uniLocation_bump.mvpMatrix, false, this.mvpMatrix);
+                this.gl.uniform3fv(this.uniLocation_bump.lookPoint, this.camera.lookPoint);
+                this.gl.uniformMatrix4fv(this.uniLocation_bump.invMatrix, false, this.meshList[i].mesh.invMatrix);
+
+                //明示的に0番目を指定
+                this.gl.activeTexture(this.gl.TEXTURE0);
+                if(this.meshList[i].mesh.textureObject.diffuse) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.textureObject.diffuse);
+                this.gl.uniform1i(this.uniLocation_bump.texture0, 0);
+                this.gl.activeTexture(this.gl.TEXTURE1);
+                if(this.meshList[i].mesh.textureObject.bump) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.textureObject.bump);
+                this.gl.uniform1i(this.uniLocation_bump.texture1, 1);
+
+                this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
+                this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+
+            } else {
+                this.gl.useProgram(this.programs);
+                this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
+                //裏面をカリング(描画しない)
+                this.gl.enable(this.gl.CULL_FACE);
+                if(this.meshList[i].mesh.isCullingFront){
+                    this.gl.cullFace(this.gl.FRONT);
+                }else{
+                    this.gl.cullFace(this.gl.BACK);
+                }
+
+                this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride, this.meshList[i].indexBuffer);
+                this.meshList[i].mesh.render();
+                mat4.multiply(this.mvpMatrix , this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
+                this.gl.uniform1i(this.uniLocation.isLightEnable, this.meshList[i].mesh.isLightEnable);
+
+
+                this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
+                this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
+                //明示的に0番目を指定
+                this.gl.activeTexture(this.gl.TEXTURE0);
+                if(this.meshList[i].mesh.texture) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.texture);
+                this.gl.uniform1i(this.uniLocation.texture, 0);
+                this.gl.drawElements(this.gl.TRIANGLES, this.meshList[i].mesh.modelData.i.length, this.gl.UNSIGNED_SHORT, 0);
+                this.gl.disable(this.gl.CULL_FACE);
+                this.gl.bindTexture(this.gl.TEXTURE_2D, null);
             }
         }
         this.gl.flush();
@@ -430,24 +562,25 @@ Scene3D.prototype = {
         var fragmentShaderSource = document.getElementById("fs").textContent;
         var vertexShaderPointsSource = document.getElementById("vs_points").textContent;
         var fragmentShaderPointsSource = document.getElementById("fs_points").textContent;
+        var vertexShaderBumpSource = document.getElementById("vs_bump").textContent;
+        var fragmentShaderBumpSource = document.getElementById("fs_bump").textContent;
         //プログラムの生成
         this.programs_points = this.createShaderProgram(vertexShaderPointsSource, fragmentShaderPointsSource);
+        this.programs_bump = this.createShaderProgram(vertexShaderBumpSource, fragmentShaderBumpSource);
         this.programs = this.createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
         //固定となるuniformの生成
         this.uniLocation = {};
-        this.uniLocation.texture = this.gl.getUniformLocation(this.programs, "texture");
-        this.uniLocation.mvpMatrix = this.gl.getUniformLocation(this.programs, "mvpMatrix");
-        this.uniLocation.invMatrix = this.gl.getUniformLocation(this.programs, "invMatrix");
-        this.uniLocation.lightDirection = this.gl.getUniformLocation(this.programs, "lightDirection");
-        this.uniLocation.eyePosition = this.gl.getUniformLocation(this.programs, "eyePosition");
-        this.uniLocation.centerPosition = this.gl.getUniformLocation(this.programs, "centerPosition");
-        this.uniLocation.ambientColor = this.gl.getUniformLocation(this.programs, "ambientColor");
-        this.uniLocation.alpha = this.gl.getUniformLocation(this.programs, "alpha");
+        var uniformParameters = ["texture","mvpMatrix","invMatrix","lightDirection","eyePosition","lookPoint","ambientColor","alpha","isLightEnable"];
+        this.initUniformParameter(this.uniLocation,uniformParameters,this.programs);
 
         this.uniLocation_points = {};
-        this.uniLocation_points.texture = this.gl.getUniformLocation(this.programs_points, "texture");
-        this.uniLocation_points.mvpMatrix = this.gl.getUniformLocation(this.programs_points, "mvpMatrix");
+        uniformParameters = ["texture","mvpMatrix"];
+        this.initUniformParameter(this.uniLocation_points,uniformParameters,this.programs_points);
+
+        this.uniLocation_bump = {};
+        uniformParameters = ["texture","texture0","texture1","mvpMatrix","invMatrix","lightDirection","eyePosition","lookPoint","ambientColor","alpha","isLightEnable"];
+        this.initUniformParameter(this.uniLocation_bump,uniformParameters,this.programs_bump);
 
         // attributeLocationを取得して配列に格納する
         this.attLocation = [];
@@ -471,6 +604,14 @@ Scene3D.prototype = {
         this.gl.uniform3fv(this.uniLocation.lightDirection, this.light.lightDirection);
         this.gl.uniform3fv(this.uniLocation.ambientColor, this.light.ambientColor);
     },
+
+    initUniformParameter:function(uniformObj,uniformParameters,program){
+        var l = uniformParameters.length;
+        for(var i = 0; i < l; i++){
+            uniformObj[uniformParameters[i]] = this.gl.getUniformLocation(program, uniformParameters[i]);
+        }
+    },
+
     createShaderProgram: function (vertexShaderSource, fragmentShaderSource) {
         //shaderオブジェクトを生成
         var vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
@@ -575,24 +716,30 @@ World.prototype = {
         var stars = new Stars(this.gl,ImageLoader.images["texturestar"]);
         this.scene3D.addChild(stars);
 
-        this.cockpit = new Cokpit(this.gl, ImageLoader.images["texturesazabycokpit"]);
+        this.cockpit = new Cokpit(this.gl);
         this.scene3D.addChild(this.cockpit);
 
         this.funnellArray = [];
         this.funnelLength = 30;
         for (var i = 0; i < this.funnelLength; i++) {
-            var funnel = new Funnel(this.gl,this.scene3D, this.cockpit,ImageLoader.images["texturefunnel"]);
+            var funnel = new Funnel(this.gl,this.scene3D, this.cockpit);
             this.funnellArray.push(funnel);
             this.scene3D.addChild(funnel)
         }
 
+        var skySphere = new SkySphere(this.gl,ImageLoader.images["space"]);
+        this.scene3D.addChild(skySphere);
+        console.log(skySphere)
+
+        var nGumdam = new NGundam(this.gl, ImageLoader.images["texturengundam"]);
+        this.scene3D.addChild(nGumdam);
 
         this.camera.setTarget(this.cockpit);
 
         var self = this;
         setInterval( function(){
             for (var i = 0; i < self.funnelLength; i++) {
-                self.funnellArray[i].shoot();
+                //self.funnellArray[i].shoot();
             }
         },100);
 
@@ -637,7 +784,7 @@ window.onload = function () {
     }
 
     //テクスチャ画像リスト
-    var texturePashArray = ["images/texturefunnel.png", "images/texturesazabycokpit.jpg","images/texturestar.png"];
+    var texturePashArray = ["images/texturengundam.png","images/texturefunnel.png","images/texturefunnel_n.png", "images/texturesazabycokpit.jpg","images/texturestar.png","images/space.jpg","images/texturesazabycokpit_n.png"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
 }

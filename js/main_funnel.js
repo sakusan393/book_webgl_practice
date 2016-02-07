@@ -355,9 +355,6 @@ NGundam = function (gl,img) {
     }
 
 }
-
-
-
 NGundam.prototype = {
     render: function () {
         this.z = -60;
