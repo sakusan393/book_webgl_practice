@@ -111,7 +111,6 @@
 
     varying vec2 vTexCoord;
     varying vec4 vColor;
-    varying vec3 vNormal;
     varying vec3 vEyeDirection;
     varying vec3 vLightDirection;
 
@@ -130,12 +129,12 @@
         vEyeDirection.x = dot(t, eye);
         vEyeDirection.y = dot(b, eye);
         vEyeDirection = normalize(vEyeDirection);
+
         vLightDirection.z  =dot(n,light);
         vLightDirection.x  =dot(t,light);
         vLightDirection.y  =dot(b,light);
         vLightDirection = normalize(vLightDirection);
 
-        vNormal = normal;
         vTexCoord = texCoord;
         vColor = color;
         gl_Position = mvpMatrix * vec4(position, 1.0);
@@ -147,7 +146,6 @@
     precision mediump float;
     varying vec2 vTexCoord;
     varying vec4 vColor;
-    varying vec3 vNormal;
     varying vec3 vEyeDirection;
     varying vec3 vLightDirection;
 
@@ -166,18 +164,8 @@
         vec3 halfLE = normalize(vLightDirection + vEyeDirection);
         float diffuse = clamp(dot(vLightDirection,mNormal) , 0.4 , 1.0);
         float specular = pow(clamp(dot(halfLE,mNormal),0.0,2.0),20.0);
-        vec3 d = texture2D(texture0, vTexCoord).rgb * diffuse + specular * 0.1 + ambientColor.rgb;
+        vec3 d = texture2D(texture0, vTexCoord).rgb * diffuse + specular * 0.0  + ambientColor.rgb;
         vec4 dc = vec4(d, 1.0);
-
-        //vec3 eyeDirection = normalize(eyePosition - lookPoint);
-        //vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 0.0)).xyz;
-        //vec3 invLight = normalize(invMatrix * vec4(lightDirection,0.0)).xyz;
-        //vec3 halfVector = normalize(invLight + invEye);
-        //float diff = clamp(dot(normalize(invLight), vNormal) , 0.5 , 1.0);
-        //float spec = pow(clamp(dot(halfVector,vNormal),0.0,2.0),10.0);
-        //vec3 dest = texture2D(texture0, vTexCoord).rgb * diff + spec + ambientColor.rgb;
-        //vec4 destColor = vec4(dest, 1.0);
-        //gl_FragColor = destColor;
 
         gl_FragColor = dc;
     }
