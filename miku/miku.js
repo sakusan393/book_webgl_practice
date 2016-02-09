@@ -29,7 +29,7 @@
 		xhr.open("GET", url, true);
 		xhr.send("");
 	};
-	
+
 	var gl; // WebGLのcontext
 	var prog; // コンパイル・リンクされたプログラム
 	var glObj; // WebGL用に変換されたモデルデータ
@@ -39,7 +39,7 @@
 		var mtl = objParser.mtlParse(files.mtl);
 		// パースしたデータを元にWebGL用のObjectを作成する
 		glObj = objParser.createGLObject(obj, mtl);
-		
+
 		// WebGLのcontextを取得
 		var canvas = document.getElementById("canvas");
 		gl = canvas.getContext("experimental-webgl") || canvas.getContext("webgl");
@@ -47,7 +47,7 @@
 			document.write("This browser does not support webgl");
 			return;
 		}
-		
+
 		// Vertex Shaderをコンパイル
 		var vs = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(vs, document.getElementById("vs").text);
@@ -135,8 +135,8 @@
 
 			// Kd, Ks, Nsをそれぞれuniformで送信
 			gl.uniform3fv(gl.getUniformLocation(prog, "kdcolor"), mtlInfo.kd);
-			//gl.uniform3fv(gl.getUniformLocation(prog, "kscolor"), mtlInfo.ks);
-			//gl.uniform1f(gl.getUniformLocation(prog, "nscolor"), mtlInfo.ns); // 1fの意味はfloat1個
+			gl.uniform3fv(gl.getUniformLocation(prog, "kscolor"), mtlInfo.ks);
+			gl.uniform1f(gl.getUniformLocation(prog, "nscolor"), mtlInfo.ns); // 1fの意味はfloat1個
 
 			// 前の最後の頂点(pos / 3)から、今回のmtlで描画する頂点数だけ送る
 

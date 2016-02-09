@@ -40,8 +40,8 @@ void main() {
 	float specular = pow(max(dot(-normalize(eye_v), reflect(-light_v, n)), 0.0), nscolor); // 鏡面光は視線ベクトルと反射光ベクトルの内積
 	float l = 0.5; // 環境光の強さ
 	//gl_FragColor = vec4(kdcolor * diffuse + kscolor * specular, 1.0) + vec4(kdcolor, 1.0) * vec4(l, l, l, 1.0);
-	//gl_FragColor = vec4(kdcolor * diffuse , 1.0) + vec4(kdcolor, 1.0) * vec4(l, l, l, 1.0);
-	gl_FragColor = vec4(kdcolor, 1.0);
+	gl_FragColor = vec4(kdcolor * diffuse , 1.0) + vec4(kdcolor, 1.0) * vec4(l, l, l, 1.0);
+	//gl_FragColor = vec4(kdcolor, 1.0);
 }
 </script>
 </title><body>
