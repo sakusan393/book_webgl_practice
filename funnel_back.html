@@ -136,6 +136,7 @@
     }
 
 
+
     </script>
 
     <script id="fs_bump" type="x-shader/x-fragment">
@@ -152,23 +153,23 @@
 
 
     void main(void){
-        //vec3 mNormal = (texture2D(texture1, vTexCoord) * 2.0 - 1.0).rgb;
-        //vec3 halfLE = normalize(vLightDirection + vEyeDirection);
-        //float diffuse = clamp(dot(vLightDirection,mNormal) , 0.3 , 1.0);
-        //float specular = pow(clamp(dot(halfLE,mNormal),0.0,2.0),10.0);
-        //vec3 d = texture2D(texture0, vTexCoord).rgb * diffuse + specular * .5  + ambientColor.rgb;
-        //vec4 dc = vec4(d, 1.0);
-        //gl_FragColor = dc;
+        vec3 mNormal = (texture2D(texture1, vTexCoord) * 2.0 - 1.0).rgb;
+        vec3 halfLE = normalize(vLightDirection + vEyeDirection);
+        float diffuse = clamp(dot(vLightDirection,mNormal) , 0.3 , 1.0);
+        float specular = pow(clamp(dot(halfLE,mNormal),0.0,2.0),10.0);
+        vec3 d = texture2D(texture0, vTexCoord).rgb * diffuse + specular * .5  + ambientColor.rgb;
+        vec4 dc = vec4(d, 1.0);
+        gl_FragColor = dc;
 
 
-        vec3 mNormal    = (texture2D(texture1, vTexCoord) * 2.0 - 1.0).rgb;
-        vec3 light      = normalize(vLightDirection);
-        vec3 eye        = normalize(vEyeDirection);
-        vec3 halfLE     = normalize(light + eye);
-        float diffuse   = clamp(dot(mNormal, light), 0.1, 1.0);
-        float specular  = pow(clamp(dot(mNormal, halfLE), 0.0, 1.0), 100.0);
-        vec4  destColor = texture2D(texture0, vTexCoord) * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0);
-        gl_FragColor    = destColor;
+        //vec3 mNormal    = (texture2D(texture1, vTexCoord) * 2.0 - 1.0).rgb;
+        //vec3 light      = normalize(vLightDirection);
+        //vec3 eye        = normalize(vEyeDirection);
+        //vec3 halfLE     = normalize(light + eye);
+        //float diffuse   = clamp(dot(mNormal, light), 0.1, 1.0);
+        //float specular  = pow(clamp(dot(mNormal, halfLE), 0.0, 1.0), 100.0);
+        //vec4  destColor = texture2D(texture0, vTexCoord) * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0);
+        //gl_FragColor    = destColor;
     }
 
     </script>

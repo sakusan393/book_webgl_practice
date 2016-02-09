@@ -60,6 +60,7 @@ window.onload = function () {
     var vpMatrix = mat.identity(mat.create());
     var mvpMatrix = mat.identity(mat.create());
     var invMatrix = mat.identity(mat.create());
+    var transMatrix = mat.identity(mat.create());
 
     var lightDirection = [0.0, 1.0, 0.0];
     var cameraPosition = [0.0, 50.0, 20.0];
@@ -79,6 +80,7 @@ window.onload = function () {
     var uniLocation = {};
     uniLocation.mvpMatrix = gl.getUniformLocation(programs, "mvpMatrix");
     uniLocation.invMatrix = gl.getUniformLocation(programs, "invMatrix");
+    uniLocation.transMatrix = gl.getUniformLocation(programs, "transMatrix");
     uniLocation.lightDirection = gl.getUniformLocation(programs, "lightDirection");
     uniLocation.eyePosition = gl.getUniformLocation(programs, "eyePosition");
     uniLocation.centerPosition = gl.getUniformLocation(programs, "centerPosition");
@@ -89,12 +91,6 @@ window.onload = function () {
 
     var count = 0;
 
-    gl.drawElements(gl.LINE_LOOP, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
-    gl.flush();
-
-
-
-
 
     function textureLoadComplete(texture) {
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -104,8 +100,9 @@ window.onload = function () {
 
 
     function render() {
-        lightDirection = [0.0, 0.2, -1.0];
+        lightDirection = [0.0, 1.0, 0.0];
         cameraPosition = [Math.sin(count *.01)*10.0,0.0,Math.cos(count *.01)*10.0];
+        cameraPosition = [0.0,0.0,10.0];
         centerPosition = [0.0, 0.0, 0.0];
 
         mat.lookAt(cameraPosition, centerPosition, cameraUp, vMatrix);
@@ -121,14 +118,16 @@ window.onload = function () {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         mat.identity(mMatrix);
         var axis = [1.0, 0.0, 0.0];
-        //mat.translate(mMatrix,[Math.sin(count *.01)*3,Math.sin(count *.01)*3,0],mMatrix);
+        mat.translate(mMatrix,[Math.sin(count *.01)*3,Math.sin(count *.01)*3,0],mMatrix);
         mat.rotate(mMatrix, radians, axis, mMatrix);
         mat.multiply(vpMatrix, mMatrix, mvpMatrix);
         mat.inverse(mMatrix, invMatrix);
+        mat.transpose(invMatrix, transMatrix);
 
         gl.uniformMatrix4fv(uniLocation.mvpMatrix, false, mvpMatrix);
         gl.uniform1i(uniLocation.texture, 0);
         gl.uniformMatrix4fv(uniLocation.invMatrix, false, invMatrix);
+        gl.uniformMatrix4fv(uniLocation.transMatrix, false, transMatrix);
         gl.uniform3fv(uniLocation.lightDirection, lightDirection);
         gl.uniform3fv(uniLocation.eyePosition, cameraPosition);
         gl.uniform3fv(uniLocation.centerPosition, centerPosition);
