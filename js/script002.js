@@ -26,23 +26,28 @@ onload = function(){
 		-0.9, -0.9, 0.0//
 	];
 
+	// 頂点情報のBOの生成
+	var vbo = create_vbo(vertex_position);
 	// attributeLocationの取得
 	var attLocation = gl.getAttribLocation(prg, 'position');
 	var attStride = 3;
-	// 頂点情報のBOの生成
-	var vbo = create_vbo(vertex_position);
+    // uniformLocationの取得
+    var uniLocation = gl.getUniformLocation(prg, "color");
 
     render();
 
     function render(){
         // VBO(頂点情報)をバインド
+
         gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
         gl.enableVertexAttribArray(attLocation);
         gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
 
-        // 描画
+        gl.uniform1f(uniLocation, 1.0);
         gl.drawArrays(gl.POINTS, 0, 3);
-        //gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.uniform1f(uniLocation, 0.0);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.uniform1f(uniLocation, 0.5);
         gl.drawArrays(gl.LINE_LOOP, 0, 3);
 
         // コンテキストの再描画
