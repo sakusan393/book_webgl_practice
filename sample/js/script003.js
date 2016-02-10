@@ -20,9 +20,17 @@ onload = function(){
 		0.5, -0.5, 0.0,
 		-0.5, -0.5, 0.0
 	];
+	var vertex_position2 = [
+		0.0, -0.5, 0.0,
+		0.5, 0.5, 0.0,
+		-0.5, 0.5, 0.0
+	];
 
 	// 頂点情報のBufferObjectの生成
 	var vbo = create_vbo(vertex_position);
+	// 頂点情報のBufferObjectの生成2
+	var vbo2 = create_vbo(vertex_position2);
+
 	var attLocation = gl.getAttribLocation(prg, 'position');
 	var attStride = 3;
 	var uniLocation = gl.getUniformLocation(prg, "color");
@@ -34,10 +42,10 @@ onload = function(){
 	render();
 
 	function updatePosition(array,offset){
-        if(offset == undefined) offset = 0;
+		if(offset == undefined) offset = 0;
 		var newArray = [];
 		for(var i= 0, l=array.length; i < l; i++){
-			newArray[i] = array[i] + Math.sin(new Date().getTime()/1000) * 0.3 + offset;
+			newArray[i] = array[i] + Math.sin(new Date().getTime()/1000 + offset) * 0.3;
 		}
 		return newArray;
 	}
@@ -46,22 +54,38 @@ onload = function(){
 		gl.clear(gl.COLOR_BUFFER_BIT);
 
 		update_vbo(updatePosition(vertex_position,0),vbo);
+		update_vbo(updatePosition(vertex_position2,3.14/2),vbo2);
 
+
+		//一個目のメッシュ的なもの
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
 
-		gl.uniform1f(uniLocation, Math.random());
+		gl.uniform1f(uniLocation, 0.5);
 		gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-		gl.uniform1f(uniLocation, Math.random());
+		gl.uniform1f(uniLocation, 0.1);
 		gl.drawArrays(gl.LINE_LOOP, 0, 3);
 
-		gl.uniform1f(uniLocation, Math.random());
+		gl.uniform1f(uniLocation, 0.3);
+		gl.drawArrays(gl.POINTS, 0, 3);
+
+		//二個目のメッシュ的なもの
+		gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
+		gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
+
+		gl.uniform1f(uniLocation, 1.0);
+		gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+		gl.uniform1f(uniLocation, 0.8);
+		gl.drawArrays(gl.LINE_LOOP, 0, 3);
+
+		gl.uniform1f(uniLocation, 0.6);
 		gl.drawArrays(gl.POINTS, 0, 3);
 
 		gl.flush();
 
-        requestAnimationFrame(render)
+		requestAnimationFrame(render)
 	}
 
 

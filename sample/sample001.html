@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>sample001</title>
+<title>シンプルにモデル（1つ）を描画する</title>
 
 <script id="vs" type="x-shader/x-vertex">
 attribute vec3 position;
@@ -23,7 +23,7 @@ void main(void){
 <script>
 // canvasエレメントを取得
 var c = document.getElementById('canvas');
-c.width = c.height = 100;
+c.width = c.height = 300;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //■1.webglコンテキストを取得
@@ -74,7 +74,9 @@ gl.drawArrays(gl.POINTS, 0, 3);
 gl.drawArrays(gl.LINES, 0, 3);
 gl.drawArrays(gl.LINE_STRIP, 0, 3);
 gl.drawArrays(gl.LINE_LOOP, 0, 3);
-// コンテキストの再描画
+
+//確実に描画する
+//（flushしないとで描画drawメソッドはいつ実行されるかわからない）
 gl.flush();
 
 

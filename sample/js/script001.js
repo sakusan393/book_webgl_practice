@@ -4,7 +4,7 @@
 window.onload = function () {
     // canvasエレメントを取得
     var c = document.getElementById('canvas');
-    c.width = c.height = 100;
+    c.width = c.height = 300;
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     //■1.webglコンテキストを取得
