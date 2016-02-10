@@ -1,7 +1,3 @@
-// sample_002
-//
-// WebGLでポリゴンを描画する
-
 onload = function () {
     // canvasエレメントを取得
     var c = document.getElementById('canvas');

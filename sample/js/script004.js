@@ -12,71 +12,71 @@ onload = function(){
 	var prg = create_program(v_shader, f_shader);
 
 	var vertex_position = [
-		0.0, 0.5, 0.0,
+        0.0, 0.5, 0.0,
 		0.5, -0.5, 0.0,
 		-0.5, -0.5, 0.0
-	];
-	var vertex_position2 = [
-		0.0, -0.5, 0.0,
-		0.5, 0.5, 0.0,
-		-0.5, 0.5, 0.0
 	];
 
 	// 頂点情報のBufferObjectの生成
 	var vbo = create_vbo(vertex_position);
-	// 頂点情報のBufferObjectの生成2
-	var vbo2 = create_vbo(vertex_position2);
 
 	var attLocation = gl.getAttribLocation(prg, 'position');
 	var attStride = 3;
-	var uniLocation = gl.getUniformLocation(prg, "color");
+	var uniLocation = gl.getUniformLocation(prg, "mvpMatrix");
 
-    gl.useProgram(prg);
+    //ビュー座標空間用
+    //(カメラの位置・姿勢を示す行列)
+    var vMatrix = mat4.identity(mat4.create());
+    var cameraPosition = [0,0,2];
+    var cameraUp = [0,1,0];
+    var lookPosition = [0,0,0];
+    mat4.lookAt(vMatrix,cameraPosition,lookPosition, cameraUp);
+
+    //プロジェクション座標空間用
+    //(視野角、遠近の有効、表示エリアのアスペクト比の設定して3D空間を2Dに投影)
+    var pMatrix = mat4.identity(mat4.create());
+    var fov = 45 * Math.PI / 180;
+    var aspect = c.width / c.height;
+    var near = 0.1;
+    var far = 100;
+    mat4.perspective(pMatrix,fov, aspect, near, far);
+
+    //ビュープロジェクション行列
+    //(基本的に固定値)
+    var vpMatrix = mat4.identity(mat4.create());
+    mat4.multiply(vpMatrix,pMatrix, vMatrix);
+
+    //ワールド座標空間用
+    //(各モデルの位置・姿勢を示す行列)
+    var mMatrix = mat4.identity(mat4.create());
+
+    //最終的な変換行列
+    var mvpMatrix = mat4.identity(mat4.create());
+
+	gl.useProgram(prg);
     //↓高負荷らしい
     gl.enableVertexAttribArray(attLocation);
 
-	render();
+    //一個目のメッシュ的なもの
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
 
-	function updatePosition(array,offset){
-		if(offset == undefined) offset = 0;
-		var newArray = [];
-		for(var i= 0, l=array.length; i < l; i++){
-			newArray[i] = array[i] + Math.sin(new Date().getTime()/1000 + offset) * 0.3;
-		}
-		return newArray;
-	}
+	render();
 
 	function render(){
 		gl.clear(gl.COLOR_BUFFER_BIT);
 
-		update_vbo(updatePosition(vertex_position,0),vbo);
-		update_vbo(updatePosition(vertex_position2,3.14/2),vbo2);
+        mat4.identity(mMatrix);
+        var radians = (new Date().getTime() / 5 % 360) * Math.PI / 180;
+        var axis = [1.0,1.0, 1.0];
+        mat4.rotate(mMatrix, mMatrix, radians, axis);
+        mat4.multiply(mvpMatrix , vpMatrix, mMatrix);
+        gl.uniformMatrix4fv(uniLocation, false, mvpMatrix);
 
-
-		//一個目のメッシュ的なもの
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
-
-		gl.uniform1f(uniLocation, 0.5);
 		gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-		gl.uniform1f(uniLocation, 0.1);
 		gl.drawArrays(gl.LINE_LOOP, 0, 3);
 
-		gl.uniform1f(uniLocation, 0.3);
-		gl.drawArrays(gl.POINTS, 0, 3);
-
-		//二個目のメッシュ的なもの
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
-		gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
-
-		gl.uniform1f(uniLocation, 1.0);
-		gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-		gl.uniform1f(uniLocation, 0.8);
-		gl.drawArrays(gl.LINE_LOOP, 0, 3);
-
-		gl.uniform1f(uniLocation, 0.6);
 		gl.drawArrays(gl.POINTS, 0, 3);
 
 		gl.flush();
@@ -129,11 +129,5 @@ onload = function(){
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 		return vbo;
-	}
-
-	function update_vbo(data,vbo){
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 	}
 };
