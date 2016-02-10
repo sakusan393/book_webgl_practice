@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>sample001</title>
+    <script src="js/script001.js" type="text/javascript"></script>
+    <script id="vs" type="x-shader/x-vertex">
+attribute vec3 position;
+
+void main(void){
+	gl_Position = vec4(position, 1.0);
+	gl_PointSize = 50.0 / (gl_Position.z + 1.0);
+}
+
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+precision mediump float;
+uniform float color;
+void main(void){
+	gl_FragColor = vec4(1.0, color, 1.0, 1.0);
+}
+
+    </script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+</body>
+</html>
