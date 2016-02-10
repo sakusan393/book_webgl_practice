@@ -39,7 +39,7 @@ Camera.prototype = {
 }
 var DirectionLight = function () {
     // ビュー座標変換行列
-    this.lightDirection = [0.0, 20, -100.0];
+    this.lightDirection = [0.0,.2, -1.0];
     this.ambientColor = [0.0, 0.0, 0.1];
 }
 DirectionLight.prototype = {}
@@ -765,18 +765,18 @@ World.prototype = {
     enterFrameHandler: function () {
 
         this.camera.count++;
-        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
-        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
+        //this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        //this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        //this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
 
         //TEST
-        //this.camera.x = Math.cos((this.camera.count * .01 % 360 )) * 5;
-        //this.camera.z = Math.sin((this.camera.count * .01 % 360)) * 5;
+        this.camera.x = Math.cos((this.camera.count * .01 % 360 )) * 5;
+        this.camera.z = Math.sin((this.camera.count * .01 % 360)) * 5;
 
         this.cockpit.count += this.cockpit.speed;
-        this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
-        this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
-        this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
+        //this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
+        //this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
+        //this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
 
         for (var i = 0; i < this.funnelLength; i++) {
             this.funnellArray[i].count += this.funnellArray[i].speed;
