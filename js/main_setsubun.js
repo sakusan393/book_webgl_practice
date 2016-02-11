@@ -178,7 +178,7 @@ BeamEhoumaki.prototype = {
         vec3.normalize(rotationAxis, rotationAxis);
 
         //なす角(radian)
-        var qAngle = Math.acos(vec3.dot(this.lookVector, this.defaultPosture) / vec3.length(this.lookVector) * vec3.length(this.defaultPosture))
+        var qAngle = Math.acos(vec3.dot(this.lookVector, this.defaultPosture) / (vec3.length(this.lookVector) * vec3.length(this.defaultPosture)))
         quat.setAxisAngle(this.qtn, rotationAxis, -qAngle);
         mat4.identity(this.qMatrix);
         mat4.fromQuat(this.qMatrix, this.qtn);
@@ -299,7 +299,7 @@ Face393.prototype = {
         vec3.normalize(rotationAxis, rotationAxis);
 
         //なす角(radian)
-        var qAngle = Math.acos(vec3.dot(lookVector, this.defaultPosture) / vec3.length(lookVector) * vec3.length(this.defaultPosture))
+        var qAngle = Math.acos(vec3.dot(lookVector, this.defaultPosture) / (vec3.length(lookVector) * vec3.length(this.defaultPosture)))
         quat.setAxisAngle(this.qtn, rotationAxis, -qAngle);
         mat4.identity(this.qMatrix);
         mat4.fromQuat(this.qMatrix, this.qtn);
@@ -794,18 +794,21 @@ World.prototype = {
 
     enterFrameHandler: function () {
 
-        this.camera.count += 1;
+        var ratio = 0.4;
+
+
+        this.camera.count += ratio
         this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
         this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13+80;
+        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13+10;
 
-        this.cockpit.count += this.cockpit.speed / 3;
+        this.cockpit.count += this.cockpit.speed / 3 * ratio;
         this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
         this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
         this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
 
         for (var i = 0; i < this.funnelLength; i++) {
-            this.funnellArray[i].count += this.funnellArray[i].speed;
+            this.funnellArray[i].count += this.funnellArray[i].speed * ratio;
             this.funnellArray[i].rotationZ = Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y) * this.funnellArray[i].speedRatio.z
             this.funnellArray[i].x += (this.cockpit.x - this.funnellArray[i].x) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.x) + 1) * this.funnellArray[i].ratio.x;
             this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
