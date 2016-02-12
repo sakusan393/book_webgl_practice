@@ -737,7 +737,7 @@ World.prototype = {
         this.scene3D.addChild(stars);
 
         this.funnellArray = [];
-        this.funnelLength = 200;
+        this.funnelLength = 400;
         for (var i = 0; i < this.funnelLength; i++) {
             var funnel = new Funnel(this.gl, this.scene3D, this.cockpit);
             this.funnellArray.push(funnel);
