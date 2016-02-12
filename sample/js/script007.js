@@ -16,6 +16,7 @@ onload = function(){
     var attLocationColor1 = gl.getAttribLocation(prg1, 'color');
 	var attStridePosition1 = 3;
 	var attStrideColor1 = 4;
+	var stride1 = 4 * (attStridePosition1 + attStrideColor1);
 	var uniLocation1 = gl.getUniformLocation(prg1, "mvpMatrix");
 
 	//programオブジェクト(2)
@@ -24,39 +25,25 @@ onload = function(){
 	var prg2 = create_program(v_shader2, f_shader2);
 
     var attLocationPosition2 = gl.getAttribLocation(prg2, 'position');
-    var attLocationColor2 = gl.getAttribLocation(prg2, 'color');
+    var attLocationPointSize2 = gl.getAttribLocation(prg2, 'point_size');
 	var attStridePosition2 = 3;
-	var attStrideColor2 = 4;
+	var attStridePointSize2 = 1;
 	var uniLocation2 = gl.getUniformLocation(prg2, "mvpMatrix");
 
-	var vertex_position = [
-        0.0, 0.5, 0.0,
-		0.5, -0.5, 0.0,
-		-0.5, -0.5, 0.0
-	];
-	var vertex_color = [
-        1.0, 0.0, 0.0,1.0,
-		0.0, 1.0, 0.0,1.0,
-		0.0, 0.0, 1.0,1.0
-	];
-
-	// 頂点情報のBufferObjectの生成
-	var vbo = create_vbo(vertex_position);
-	var color_vbo = create_vbo(vertex_color);
+	var vertex1  = [
+		0.0, 0.5, 0.0,1.0, 0.0, 0.0,1.0,
+		0.5, -0.5, 0.0,0.0, 1.0, 0.0,1.0,
+		-0.5, -0.5, 0.0,0.0, 0.0, 1.0,1.0
+	]
+	var vbo = create_vbo(vertex1);
 
     // 頂点情報のBufferObjectの生成2
-	var vertex_position2 = [
-		0.0, -0.5, 0.0,
-		0.5, 0.5, 0.0,
-		-0.5, 0.5, 0.0
+	var vertex2 = [
+		0.0, -0.5, 0.0,20.0,
+		0.5, 0.5, 0.0,50.0,
+		-0.5, 0.5, 0.0,10.0
 	];
-	var vertex_color2 = [
-        0.5, 0.3, 0.1,1.0,
-		0.3, 0.1, 0.5,1.0,
-		0.1, 0.5, 0.3,1.0
-	];
-    var vbo2 = create_vbo(vertex_position2);
-    var color_vbo2 = create_vbo(vertex_color2);
+    var vbo2 = create_vbo(vertex2);
 
     //ビュー座標空間用
     //(カメラの位置・姿勢を示す行列)
@@ -91,26 +78,24 @@ onload = function(){
 	gl.enableVertexAttribArray(attLocationPosition1);
 	gl.enableVertexAttribArray(attLocationColor1);
 
-	//二個目のメッシュ的なもの
 	//↓高負荷らしい
 	gl.enableVertexAttribArray(attLocationPosition2);
-	gl.enableVertexAttribArray(attLocationColor2);
+	gl.enableVertexAttribArray(attLocationPointSize2);
 
 	console.log(attLocationPosition1 + " " +  attLocationColor1);
-	console.log(attLocationPosition2 + " " +   attLocationColor2);
+	console.log(attLocationPosition2 + " " + attLocationPointSize2);
 
 	render();
 
 	function render(){
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-
         //一個目のメッシュ的なもの
 		gl.useProgram(prg1);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-        gl.vertexAttribPointer(attLocationPosition1, attStridePosition1, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo);
-        gl.vertexAttribPointer(attLocationColor1, attStrideColor1, gl.FLOAT, false, 0, 0);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+		var stride = 4 * (attStridePosition1+attStrideColor1);
+		gl.vertexAttribPointer(attLocationPosition1, attStridePosition1, gl.FLOAT, false, stride, 0);
+		gl.vertexAttribPointer(attLocationColor1, attStrideColor1, gl.FLOAT, false, stride, 4*attStridePosition1);
 
         mat4.identity(mMatrix);
         var radians = (new Date().getTime() / 8 % 360) * Math.PI / 180;
@@ -125,12 +110,13 @@ onload = function(){
 
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
+
         //二個目のメッシュ的なもの
-        gl.useProgram(prg2);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
-        gl.vertexAttribPointer(attLocationPosition2, attStridePosition2, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo2);
-        gl.vertexAttribPointer(attLocationColor2, attStrideColor2, gl.FLOAT, false, 0, 0);
+		gl.useProgram(prg2);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
+		var stride2 = 4 * (attStridePosition2 + attStridePointSize2); //4: gl.FLOATなので4バイト
+		gl.vertexAttribPointer(attLocationPosition2, attStridePosition2, gl.FLOAT, false, stride2, 0);
+		gl.vertexAttribPointer(attLocationPointSize2, attStridePointSize2, gl.FLOAT, false, stride2, 4*attStridePosition1);
 
         mat4.identity(mMatrix);
         var radians = (new Date().getTime() / 12 % 360) * Math.PI / 180;
@@ -149,8 +135,6 @@ onload = function(){
 
 		requestAnimationFrame(render)
 	}
-
-
 
 	// シェーダを生成する関数
 	function create_shader(id){
