@@ -53,46 +53,26 @@ function sphere(row, column, rad, color){
             idx.push(r, r + column + 2, r + column + 1);
         }
     }
-    return {p : pos, n : nor, c : col, t : st, i : idx};
+
+    var all = [];
+    var pStride = 3;
+    var nStride = 3;
+    var tStride = 2;
+    var dataLength = pos.length / 3;
+    for(i = 0; i < dataLength; i++){
+        all.push(pos[(i*pStride)+0])
+        all.push(pos[(i*pStride)+1])
+        all.push(pos[(i*pStride)+2])
+        all.push(nor[(i*nStride)+0])
+        all.push(nor[(i*nStride)+1])
+        all.push(nor[(i*nStride)+2])
+        all.push(st[(i*tStride)+0])
+        all.push(st[(i*tStride)+1])
+    }
+    console.log(dataLength, all);
+
+    return {p : pos, n : nor, c : col, t : st, i : idx, a:all};
 }
-
-
-//function sphere(row, column, rad, color) {
-//    var i, j, tc;
-//    var pos = new Array(), nor = new Array(),
-//        col = new Array(), st = new Array(), idx = new Array();
-//    for (i = 0; i <= row; i++) {
-//        var r = Math.PI / row * i;
-//        var ry = Math.cos(r);
-//        var rr = Math.sin(r);
-//        for (j = 0; j <= column; j++) {
-//            var tr = Math.PI * 2 / column * j;
-//            var tx = rr * rad * Math.cos(tr);
-//            var ty = ry * rad;
-//            var tz = rr * rad * Math.sin(tr);
-//            var rx = rr * Math.cos(tr);
-//            var rz = rr * Math.sin(tr);
-//            if (color) {
-//                tc = color;
-//            } else {
-//                tc = hsva(360 / row * i, 1, 1, 1);
-//            }
-//            pos.push(tx, ty, tz);
-//            nor.push(rx, ry, rz);
-//            col.push(tc[0], tc[1], tc[2], tc[3]);
-//            st.push(1 - 1 / column * j, 1 / row * i);
-//        }
-//    }
-//    r = 0;
-//    for (i = 0; i < row; i++) {
-//        for (j = 0; j < column; j++) {
-//            r = (column + 1) * i + j;
-//            idx.push(r, r + 1, r + column + 2);
-//            idx.push(r, r + column + 2, r + column + 1);
-//        }
-//    }
-//    return {p: pos, n: nor, c: col, t: st, i: idx};
-//}
 
 function cube(side, color) {
     var tc, hs = side * 0.5;
@@ -442,6 +422,22 @@ function funnel(color) {
     //    nor.push(vec3Normalize(a));
     //}
 
-    return {p: pos, n: nor, c: col, t: st, i: idx};
+    var all = [];
+    var pStride = 3;
+    var nStride = 3;
+    var tStride = 2;
+    var dataLength = pos.length / 3;
+    for(i = 0; i < dataLength; i++){
+        all.push(pos[(i*pStride)+0])
+        all.push(pos[(i*pStride)+1])
+        all.push(pos[(i*pStride)+2])
+        all.push(nor[(i*nStride)+0])
+        all.push(nor[(i*nStride)+1])
+        all.push(nor[(i*nStride)+2])
+        all.push(st[(i*tStride)+0])
+        all.push(st[(i*tStride)+1])
+    }
+
+    return {a:all, p: pos, n: nor, c: col, t: st, i: idx};
 }
 

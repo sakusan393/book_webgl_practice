@@ -263,7 +263,7 @@ Cokpit = function (gl) {
     this.rnd2 = Math.random() * 10 + 30;
     this.speed = .02;
     this.isLightEnable = true;
-    this.isBump = true;
+    this.isBump = false;
     this.textureObject = {};
 
     var diffuseMapSource = ImageLoader.images["texturesazabycokpit"];
@@ -737,7 +737,7 @@ World.prototype = {
         this.scene3D.addChild(stars);
 
         this.funnellArray = [];
-        this.funnelLength = 20;
+        this.funnelLength = 200;
         for (var i = 0; i < this.funnelLength; i++) {
             var funnel = new Funnel(this.gl, this.scene3D, this.cockpit);
             this.funnellArray.push(funnel);
@@ -755,7 +755,7 @@ World.prototype = {
         var self = this;
         setInterval(function () {
             for (var i = 0; i < self.funnelLength; i++) {
-                if (Math.random() > 0) self.funnellArray[i].shoot();
+                //if (Math.random() > 0) self.funnellArray[i].shoot();
             }
         }, 100);
 
@@ -764,7 +764,7 @@ World.prototype = {
 
     enterFrameHandler: function () {
 
-        var ratio = 0.4;
+        var ratio = 0.5;
 
         this.camera.count+= ratio;
         this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
