@@ -54,7 +54,7 @@ onload = function(){
     var mvpMatrix = mat4.identity(mat4.create());
 
 	gl.useProgram(prg);
-    //↓高負荷らしい
+    //↓高負荷らしいので毎フレームはやりたくない。
     gl.enableVertexAttribArray(attLocation);
 
     //一個目のメッシュ的なもの

@@ -7,19 +7,42 @@ onload = function(){
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
+	//programオブジェクト(1)
+	var v_shader1 = create_shader('vs1');
+	var f_shader1 = create_shader('fs1');
+	var prg1 = create_program(v_shader1, f_shader1);
 
-	var v_shader = create_shader('vs');
-	var f_shader = create_shader('fs');
-	var prg = create_program(v_shader, f_shader);
+    var attLocationPosition1 = gl.getAttribLocation(prg1, 'position');
+    var attLocationColor1 = gl.getAttribLocation(prg1, 'color');
+	var attStridePosition1 = 3;
+	var attStrideColor1 = 4;
+	var uniLocation1 = gl.getUniformLocation(prg1, "mvpMatrix");
+
+	//programオブジェクト(2)
+	var v_shader2 = create_shader('vs2');
+	var f_shader2 = create_shader('fs2');
+	var prg2 = create_program(v_shader2, f_shader2);
+
+    var attLocationPosition2 = gl.getAttribLocation(prg2, 'position');
+    var attLocationColor2 = gl.getAttribLocation(prg2, 'color');
+	var attStridePosition2 = 3;
+	var attStrideColor2 = 4;
+	var uniLocation2 = gl.getUniformLocation(prg2, "mvpMatrix");
 
 	var vertex_position = [
         0.0, 0.5, 0.0,
 		0.5, -0.5, 0.0,
 		-0.5, -0.5, 0.0
 	];
+	var vertex_color = [
+        1.0, 0.0, 0.0,1.0,
+		0.0, 1.0, 0.0,1.0,
+		0.0, 0.0, 1.0,1.0
+	];
 
 	// 頂点情報のBufferObjectの生成
 	var vbo = create_vbo(vertex_position);
+	var color_vbo = create_vbo(vertex_color);
 
     // 頂点情報のBufferObjectの生成2
 	var vertex_position2 = [
@@ -27,13 +50,13 @@ onload = function(){
 		0.5, 0.5, 0.0,
 		-0.5, 0.5, 0.0
 	];
+	var vertex_color2 = [
+        0.5, 0.3, 0.1,1.0,
+		0.3, 0.1, 0.5,1.0,
+		0.1, 0.5, 0.3,1.0
+	];
     var vbo2 = create_vbo(vertex_position2);
-
-    var attLocation = gl.getAttribLocation(prg, 'position');
-	var attStride = 3;
-	var uniLocation = gl.getUniformLocation(prg, "mvpMatrix");
-	var uniLocationColor = gl.getUniformLocation(prg, "color");
-
+    var color_vbo2 = create_vbo(vertex_color2);
 
     //ビュー座標空間用
     //(カメラの位置・姿勢を示す行列)
@@ -64,26 +87,37 @@ onload = function(){
     //最終的な変換行列
     var mvpMatrix = mat4.identity(mat4.create());
 
-	gl.useProgram(prg);
-    //↓高負荷らしいので
-    gl.enableVertexAttribArray(attLocation);
+	//↓高負荷らしい
+	gl.enableVertexAttribArray(attLocationPosition1);
+	gl.enableVertexAttribArray(attLocationColor1);
+
+	//二個目のメッシュ的なもの
+	//↓高負荷らしい
+	gl.enableVertexAttribArray(attLocationPosition2);
+	gl.enableVertexAttribArray(attLocationColor2);
+
+	console.log(attLocationPosition1 + " " +  attLocationColor1);
+	console.log(attLocationPosition2 + " " +   attLocationColor2);
 
 	render();
 
 	function render(){
         gl.clear(gl.COLOR_BUFFER_BIT);
 
+
         //一個目のメッシュ的なもの
+		gl.useProgram(prg1);
         gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-        gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(attLocationPosition1, attStridePosition1, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo);
+        gl.vertexAttribPointer(attLocationColor1, attStrideColor1, gl.FLOAT, false, 0, 0);
 
         mat4.identity(mMatrix);
         var radians = (new Date().getTime() / 8 % 360) * Math.PI / 180;
         var axis = [1.0,1.0, 1.0];
         mat4.rotate(mMatrix, mMatrix, radians, axis);
         mat4.multiply(mvpMatrix , vpMatrix, mMatrix);
-        gl.uniformMatrix4fv(uniLocation, false, mvpMatrix);
-        gl.uniform3fv(uniLocationColor, [1.0,0.0,0.5]);
+        gl.uniformMatrix4fv(uniLocation1, false, mvpMatrix);
 
 		gl.drawArrays(gl.TRIANGLES, 0, 3);
 		gl.drawArrays(gl.LINE_LOOP, 0, 3);
@@ -91,21 +125,24 @@ onload = function(){
 
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
+
         //二個目のメッシュ的なもの
+        gl.useProgram(prg2);
         gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
-        gl.vertexAttribPointer(attLocation, attStride, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(attLocationPosition2, attStridePosition2, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo2);
+        gl.vertexAttribPointer(attLocationColor2, attStrideColor2, gl.FLOAT, false, 0, 0);
 
         mat4.identity(mMatrix);
         var radians = (new Date().getTime() / 12 % 360) * Math.PI / 180;
         var axis = [1.0,1.0, 1.0];
         mat4.rotate(mMatrix, mMatrix, radians, axis);
         mat4.multiply(mvpMatrix , vpMatrix, mMatrix);
-        gl.uniformMatrix4fv(uniLocation, false, mvpMatrix);
-        gl.uniform3fv(uniLocationColor, [0.0,1.0,0.5]);
+        gl.uniformMatrix4fv(uniLocation2, false, mvpMatrix);
 
-		gl.drawArrays(gl.TRIANGLES, 0, 3);
-		gl.drawArrays(gl.LINE_LOOP, 0, 3);
-		gl.drawArrays(gl.POINTS, 0, 3);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.drawArrays(gl.LINE_LOOP, 0, 3);
+        gl.drawArrays(gl.POINTS, 0, 3);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
