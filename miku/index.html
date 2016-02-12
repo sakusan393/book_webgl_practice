@@ -22,6 +22,7 @@ void main() {
 	// 法線ベクトルと視線ベクトルを世界座標系に変換する
 	e_normal = vec3(modelviewMatrix * vec4(normal, 0.0));
 	eye_v = (modelviewMatrix * vec4(vertex, 1.0)).xyz;
+	gl_PointSize=4.0;
 }
 </script>
 <script type="glsl" id="fs">

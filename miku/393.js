@@ -116,7 +116,7 @@
 			//gl.uniform1f(gl.getUniformLocation(prog, "nscolor"), mtlInfo.ns); // 1fの意味はfloat1個
 
 			// 前の最後の頂点(pos / 3)から、今回のmtlで描画する頂点数だけ送る
-			gl.drawArrays(gl.TRIANGLES, pos / 3, (mtlInfo.endPos - pos) / 3);
+			gl.drawArrays(gl.POINTS, pos / 3, (mtlInfo.endPos - pos) / 3);
 			pos = mtlInfo.endPos;
 		}
 		setTimeout(drawFrame, 16);
