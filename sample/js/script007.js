@@ -16,7 +16,7 @@ onload = function(){
     var attLocationColor1 = gl.getAttribLocation(prg1, 'color');
 	var attStridePosition1 = 3;
 	var attStrideColor1 = 4;
-	var stride1 = 4 * (attStridePosition1 + attStrideColor1);
+	var stride1 = 4 * (attStridePosition1 + attStrideColor1);//マジックナンバー4は、vertexAttribPointerで、gl.FLOATを指定するため(float = 4バイト)
 	var uniLocation1 = gl.getUniformLocation(prg1, "mvpMatrix");
 
 	//programオブジェクト(2)
@@ -28,8 +28,11 @@ onload = function(){
     var attLocationPointSize2 = gl.getAttribLocation(prg2, 'point_size');
 	var attStridePosition2 = 3;
 	var attStridePointSize2 = 1;
+	var stride2 = 4 * (attStridePosition2+attStridePointSize2);//マジックナンバー4は、vertexAttribPointerで、gl.FLOATを指定するため(float = 4バイト)
 	var uniLocation2 = gl.getUniformLocation(prg2, "mvpMatrix");
 
+	//頂点情報と、色情報をミックスしたモデルデータ構造
+	// 1要素：x,y,z,r,g,b,a
 	var vertex1  = [
 		0.0, 0.5, 0.0,1.0, 0.0, 0.0,1.0,
 		0.5, -0.5, 0.0,0.0, 1.0, 0.0,1.0,
@@ -37,7 +40,8 @@ onload = function(){
 	]
 	var vbo = create_vbo(vertex1);
 
-    // 頂点情報のBufferObjectの生成2
+	//頂点情報と、ポイントサイズ情報をミックスしたモデルデータ構造
+	//要素：x,y,z,pointSize
 	var vertex2 = [
 		0.0, -0.5, 0.0,20.0,
 		0.5, 0.5, 0.0,50.0,
@@ -93,9 +97,8 @@ onload = function(){
         //一個目のメッシュ的なもの
 		gl.useProgram(prg1);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		var stride = 4 * (attStridePosition1+attStrideColor1);
-		gl.vertexAttribPointer(attLocationPosition1, attStridePosition1, gl.FLOAT, false, stride, 0);
-		gl.vertexAttribPointer(attLocationColor1, attStrideColor1, gl.FLOAT, false, stride, 4*attStridePosition1);
+		gl.vertexAttribPointer(attLocationPosition1, attStridePosition1, gl.FLOAT, false, stride1, 0);
+		gl.vertexAttribPointer(attLocationColor1, attStrideColor1, gl.FLOAT, false, stride1, 4*attStridePosition1);
 
         mat4.identity(mMatrix);
         var radians = (new Date().getTime() / 8 % 360) * Math.PI / 180;
@@ -114,7 +117,6 @@ onload = function(){
         //二個目のメッシュ的なもの
 		gl.useProgram(prg2);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
-		var stride2 = 4 * (attStridePosition2 + attStridePointSize2); //4: gl.FLOATなので4バイト
 		gl.vertexAttribPointer(attLocationPosition2, attStridePosition2, gl.FLOAT, false, stride2, 0);
 		gl.vertexAttribPointer(attLocationPointSize2, attStridePointSize2, gl.FLOAT, false, stride2, 4*attStridePosition1);
 
