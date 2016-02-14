@@ -430,7 +430,6 @@ Scene3D.prototype = {
         if (mesh.modelData.a) {
             veterxBuffer = this.generateVBO(mesh.modelData.a);
             meshVbo = (veterxBuffer)
-            console.log("veterxBuffer  ;", veterxBuffer)
         }
         if (mesh.modelData.i) {
             meshIndexBuffer = this.generateIBO(mesh.modelData.i);
@@ -732,7 +731,7 @@ World.prototype = {
         this.scene3D.addChild(stars);
 
         this.funnellArray = [];
-        this.funnelLength = 400;
+        this.funnelLength = 40;
         for (var i = 0; i < this.funnelLength; i++) {
             var funnel = new Funnel(this.gl, this.scene3D, this.cockpit);
             this.funnellArray.push(funnel);

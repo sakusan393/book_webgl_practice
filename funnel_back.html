@@ -94,7 +94,8 @@
     </script>
 
     <script id="vs_bump" type="x-shader/x-vertex">
-    precision mediump float;
+    precision highp float;
+
     attribute vec3 position;
     attribute vec3 normal;
     attribute vec4 color;
@@ -139,7 +140,7 @@
     </script>
 
     <script id="fs_bump" type="x-shader/x-fragment">
-    precision mediump float;
+    precision highp float;
 
     uniform sampler2D texture0;
     uniform sampler2D texture1;

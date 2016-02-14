@@ -263,7 +263,7 @@ Cokpit = function (gl) {
     this.rnd2 = Math.random() * 10 + 30;
     this.speed = .02;
     this.isLightEnable = true;
-    this.isBump = false;
+    this.isBump = true;
     this.textureObject = {};
 
     var diffuseMapSource = ImageLoader.images["texturesazabycokpit"];
@@ -737,7 +737,7 @@ World.prototype = {
         this.scene3D.addChild(stars);
 
         this.funnellArray = [];
-        this.funnelLength = 400;
+        this.funnelLength = 20;
         for (var i = 0; i < this.funnelLength; i++) {
             var funnel = new Funnel(this.gl, this.scene3D, this.cockpit);
             this.funnellArray.push(funnel);
@@ -767,18 +767,18 @@ World.prototype = {
         var ratio = 0.5;
 
         this.camera.count+= ratio;
-        this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
-        this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
-        this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
+        //this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
+        //this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
+        //this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
 
         //TEST
         this.camera.x = Math.cos((this.camera.count * .01 % 360 )) * 5;
         this.camera.z = Math.sin((this.camera.count * .01 % 360)) * 5;
 
         this.cockpit.count += this.cockpit.speed * ratio
-        this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
-        this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
-        this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
+        //this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
+        //this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
+        //this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
 
         for (var i = 0; i < this.funnelLength; i++) {
             this.funnellArray[i].count += this.funnellArray[i].speed * ratio;

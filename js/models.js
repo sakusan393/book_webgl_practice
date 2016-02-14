@@ -20,23 +20,23 @@ function hsva(h, s, v, a) {
     return color;
 }
 
-function sphere(row, column, rad, color){
+function sphere(row, column, rad, color) {
     var pos = new Array(), nor = new Array(),
-        col = new Array(), st  = new Array(), idx = new Array();
-    for(var i = 0; i <= row; i++){
+        col = new Array(), st = new Array(), idx = new Array();
+    for (var i = 0; i <= row; i++) {
         var r = Math.PI / row * i;
         var ry = Math.cos(r);
         var rr = Math.sin(r);
-        for(var ii = 0; ii <= column; ii++){
+        for (var ii = 0; ii <= column; ii++) {
             var tr = Math.PI * 2 / column * ii;
             var tx = rr * rad * Math.cos(tr);
             var ty = ry * rad;
             var tz = rr * rad * Math.sin(tr);
             var rx = rr * Math.cos(tr);
             var rz = rr * Math.sin(tr);
-            if(color){
+            if (color) {
                 var tc = color;
-            }else{
+            } else {
                 tc = hsva(360 / row * i, 1, 1, 1);
             }
             pos.push(tx, ty, tz);
@@ -46,8 +46,8 @@ function sphere(row, column, rad, color){
         }
     }
     r = 0;
-    for(i = 0; i < row; i++){
-        for(ii = 0; ii < column; ii++){
+    for (i = 0; i < row; i++) {
+        for (ii = 0; ii < column; ii++) {
             r = (column + 1) * i + ii;
             idx.push(r, r + 1, r + column + 2);
             idx.push(r, r + column + 2, r + column + 1);
@@ -59,19 +59,20 @@ function sphere(row, column, rad, color){
     var nStride = 3;
     var tStride = 2;
     var dataLength = pos.length / 3;
-    for(i = 0; i < dataLength; i++){
-        all.push(pos[(i*pStride)+0])
-        all.push(pos[(i*pStride)+1])
-        all.push(pos[(i*pStride)+2])
-        all.push(nor[(i*nStride)+0])
-        all.push(nor[(i*nStride)+1])
-        all.push(nor[(i*nStride)+2])
-        all.push(st[(i*tStride)+0])
-        all.push(st[(i*tStride)+1])
+    for (i = 0; i < dataLength; i++) {
+        all.push(pos[(i * pStride) + 0])
+        all.push(pos[(i * pStride) + 1])
+        all.push(pos[(i * pStride) + 2])
+        all.push(nor[(i * nStride) + 0])
+        all.push(nor[(i * nStride) + 1])
+        all.push(nor[(i * nStride) + 2])
+        all.push(st[(i * tStride) + 0])
+        all.push(st[(i * tStride) + 1])
     }
-    console.log(dataLength, all);
+    console.log(dataLength, all.length);
+    console.log(pos.length, nor.length, st.length);
 
-    return {p : pos, n : nor, c : col, t : st, i : idx, a:all};
+    return {p: pos, n: nor, c: col, t: st, i: idx, a: all};
 }
 
 function cube(side, color) {
@@ -212,8 +213,8 @@ function beam(side, color) {
 function star() {
     var pos = [];
     ratio = 80;
-    for(var i = 0; i < 50; i++){
-        pos.push(ratio*(Math.random()-0.5),ratio*(Math.random())+1,ratio*(Math.random()-0.5))
+    for (var i = 0; i < 50; i++) {
+        pos.push(ratio * (Math.random() - 0.5), ratio * (Math.random()) + 1, ratio * (Math.random() - 0.5))
     }
     return {p: pos};
 }
@@ -427,17 +428,17 @@ function funnel(color) {
     var nStride = 3;
     var tStride = 2;
     var dataLength = pos.length / 3;
-    for(i = 0; i < dataLength; i++){
-        all.push(pos[(i*pStride)+0])
-        all.push(pos[(i*pStride)+1])
-        all.push(pos[(i*pStride)+2])
-        all.push(nor[(i*nStride)+0])
-        all.push(nor[(i*nStride)+1])
-        all.push(nor[(i*nStride)+2])
-        all.push(st[(i*tStride)+0])
-        all.push(st[(i*tStride)+1])
+    for (i = 0; i < dataLength; i++) {
+        all.push(pos[(i * pStride) + 0])
+        all.push(pos[(i * pStride) + 1])
+        all.push(pos[(i * pStride) + 2])
+        all.push(nor[(i * nStride) + 0])
+        all.push(nor[(i * nStride) + 1])
+        all.push(nor[(i * nStride) + 2])
+        all.push(st[(i * tStride) + 0])
+        all.push(st[(i * tStride) + 1])
     }
 
-    return {a:all, p: pos, n: nor, c: col, t: st, i: idx};
+    return {a: all, p: pos, n: nor, c: col, t: st, i: idx};
 }
 
