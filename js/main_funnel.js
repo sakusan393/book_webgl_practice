@@ -245,7 +245,7 @@ Cokpit = function (gl) {
     this.rnd2 = Math.random() * 10 + 30;
     this.speed = .02;
     this.isLightEnable = true;
-    this.isBump = false;
+    this.isBump = true;
     this.textureObject = {};
 
     var diffuseMapSource = ImageLoader.images["texturesazabycokpit"];
@@ -723,33 +723,34 @@ World.prototype = {
         this.light = new DirectionLight();
         this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
-
         this.cockpit = new Cokpit(this.gl);
-        this.scene3D.addChild(this.cockpit);
 
         var stars = new Stars(this.gl, ImageLoader.images["texturestar"]);
-        this.scene3D.addChild(stars);
 
+
+        var skySphere = new SkySphere(this.gl, ImageLoader.images["space"]);
+
+        var nGumdam = new NGundam(this.gl, ImageLoader.images["texturengundam"]);
+
+        this.camera.setTarget(this.cockpit);
+
+
+        this.scene3D.addChild(skySphere);
         this.funnellArray = [];
-        this.funnelLength = 40;
+        this.funnelLength = 30;
         for (var i = 0; i < this.funnelLength; i++) {
             var funnel = new Funnel(this.gl, this.scene3D, this.cockpit);
             this.funnellArray.push(funnel);
             this.scene3D.addChild(funnel)
         }
-
-        var skySphere = new SkySphere(this.gl, ImageLoader.images["space"]);
-        this.scene3D.addChild(skySphere);
-
-        var nGumdam = new NGundam(this.gl, ImageLoader.images["texturengundam"]);
+        this.scene3D.addChild(this.cockpit);
         this.scene3D.addChild(nGumdam);
-
-        this.camera.setTarget(this.cockpit);
+        this.scene3D.addChild(stars);
 
         var self = this;
         setInterval(function () {
             for (var i = 0; i < self.funnelLength; i++) {
-                //if (Math.random() > 0) self.funnellArray[i].shoot();
+                self.funnellArray[i].shoot();
             }
         }, 100);
 
