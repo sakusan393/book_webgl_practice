@@ -20,7 +20,7 @@ var Camera = function (canvas) {
     mat4.multiply(this.vpMatrix, this.pMatrix, this.vMatrix);
     this.count = 0;
     this.parent = null
-}
+};
 Camera.prototype = {
     setTarget: function (cameraTarget) {
         this.parent = cameraTarget
@@ -30,26 +30,26 @@ Camera.prototype = {
         if (this.parent) {
             this.lookPoint = [this.parent.x, this.parent.y, this.parent.z]
         }
-        this.cameraPosition = [this.x, this.y, this.z]
+        this.cameraPosition = [this.x, this.y, this.z];
 
         mat4.lookAt(this.vMatrix, this.cameraPosition, this.lookPoint, this.cameraUp);
         mat4.perspective(this.pMatrix, this.fov, this.aspect, this.near, this.far);
         mat4.multiply(this.vpMatrix, this.pMatrix, this.vMatrix);
     }
-}
+};
 var DirectionLight = function () {
     // ビュー座標変換行列
     this.lightDirection = [0.0, .2, -1.0];
     this.ambientColor = [0.0, 0.0, 0.1];
-}
-DirectionLight.prototype = {}
+};
+DirectionLight.prototype = {};
 
 Beam = function (gl, scene3D, funnel, cockpit) {
     this.gl = gl;
     this.scene3D = scene3D;
     this.parent = funnel;
     this.target = cockpit;
-    this.modelData = window.beam(2, [1, 1, 0, 0.5])
+    this.modelData = window.beam(2, [1, 1, 0, 0.5]);
     this.qtn = quat.identity(quat.create());
     this.mMatrix = mat4.identity(mat4.create());
     this.qMatrix = mat4.identity(mat4.create());
@@ -68,7 +68,7 @@ Beam = function (gl, scene3D, funnel, cockpit) {
     this.isLightEnable = false;
 
     this.defaultPosture = [0, 0, 1];
-}
+};
 
 Beam.prototype = {
     init: function () {
@@ -78,22 +78,20 @@ Beam.prototype = {
         this.alpha = this.startAlpha;
         this.currentLife = this.life;
         //クォータニオンによる姿勢制御
-        this.lookVector = vec3.subtract([], [this.target.x, this.target.y, this.target.z], [this.x, this.y, this.z])
+        this.lookVector = vec3.subtract([], [this.target.x, this.target.y, this.target.z], [this.x, this.y, this.z]);
         //回転軸(外積)
         var rotationAxis = vec3.cross([], this.lookVector, this.defaultPosture);
         vec3.normalize(rotationAxis, rotationAxis);
 
-        this.angleArray = [this.x, this.y, this.z];
         //なす角(radian)
-        var qAngle = Math.acos(vec3.dot(this.lookVector, this.defaultPosture) / (vec3.length(this.lookVector) * vec3.length(this.defaultPosture)))
+        var qAngle = Math.acos(vec3.dot(this.lookVector, this.defaultPosture) / (vec3.length(this.lookVector) * vec3.length(this.defaultPosture)));
         quat.setAxisAngle(this.qtn, rotationAxis, -qAngle);
         mat4.identity(this.qMatrix);
         mat4.fromQuat(this.qMatrix, this.qtn);
     },
     render: function () {
-        var percent = (this.currentLife / this.life > this.startAlpha) ? this.startAlpha : this.currentLife / this.life;
-        this.alpha = percent;
-        vec3.normalize(this.lookVector, this.lookVector)
+        this.alpha = (this.currentLife / this.life > this.startAlpha) ? this.startAlpha : this.currentLife / this.life;
+        vec3.normalize(this.lookVector, this.lookVector);
         this.x += this.lookVector[0] * this.speed;
         this.y += this.lookVector[1] * this.speed;
         this.z += this.lookVector[2] * this.speed;
@@ -102,7 +100,7 @@ Beam.prototype = {
         mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
         mat4.multiply(this.mMatrix, this.mMatrix, this.qMatrix);
 
-        var scale = [this.scaleX, this.scaleY, this.scaleZ]
+        var scale = [this.scaleX, this.scaleY, this.scaleZ];
         mat4.scale(this.mMatrix, this.mMatrix, scale);
 
         this.currentLife--;
@@ -113,12 +111,13 @@ Beam.prototype = {
     dispose: function () {
         this.scene3D.removeChild(this)
     }
-}
+};
+
 
 Funnel = function (gl, scene3D, lookTarget) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.parent = lookTarget
+    this.parent = lookTarget;
     this.modelData = window.funnel();
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
@@ -126,9 +125,9 @@ Funnel = function (gl, scene3D, lookTarget) {
     this.qtn = quat.identity(quat.create());
     this.qMatrix = mat4.identity(mat4.create());
 
-    this.x = (Math.random() - 0.5) * 30
-    this.y = (Math.random() - 0.5) * 30
-    this.z = (Math.random() - 0.5) * 30
+    this.x = (Math.random() - 0.5) * 30;
+    this.y = (Math.random() - 0.5) * 30;
+    this.z = (Math.random() - 0.5) * 30;
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationY = 0;
@@ -143,7 +142,7 @@ Funnel = function (gl, scene3D, lookTarget) {
 
     this.defaultPosture = [0, 0, 1];
 
-    this.speedRatio = {}, this.ratio = {};
+    this.speedRatio = {}; this.ratio = {};
     this.speedRatio.x = Math.random() * 30 + 50;
     this.speedRatio.y = Math.random() * 30 + 50;
     this.speedRatio.z = Math.random() * 30 + 50;
@@ -158,16 +157,20 @@ Funnel = function (gl, scene3D, lookTarget) {
     this.isLightEnable = true;
     this.isBump = true;
     this.textureObject = {};
+    this.textureObject.diffuse = null;
+    this.textureObject.bump = null;
 
     for (var i = 0; i < this.beamLength; i++) {
         this.beamArray[i] = new Beam(this.gl, this.scene3D, this, this.parent);
     }
+
     var diffuseMapSource = ImageLoader.images["texturefunnel"];
     var bumpMapSource = ImageLoader.images["texturefunnel_n"];
     this.initTexture(diffuseMapSource, "diffuse");
     this.initTexture(bumpMapSource, "bump");
     this.texture = this.textureObject.diffuse;
-}
+};
+
 
 Funnel.prototype = {
     initTexture: function (img, type) {
@@ -195,7 +198,7 @@ Funnel.prototype = {
         this.scene3D.addChild(this.beamArray[this.curentBeamIndex])
     },
     render: function () {
-        this.count += this.speed
+        this.count += this.speed;
 
         var translatePosition = [this.x, this.y, this.z];
         mat4.identity(this.mMatrix);
@@ -208,13 +211,13 @@ Funnel.prototype = {
         }
 
         //クォータニオンによる姿勢制御
-        var lookVector = vec3.subtract([], [targetPosition.x, targetPosition.y, targetPosition.z], [this.x, this.y, this.z])
+        var lookVector = vec3.subtract([], [targetPosition.x, targetPosition.y, targetPosition.z], [this.x, this.y, this.z]);
         //回転軸(外積)
         var rotationAxis = vec3.cross([], lookVector, this.defaultPosture);
         vec3.normalize(rotationAxis, rotationAxis);
 
         //なす角(radian)
-        var qAngle = Math.acos(vec3.dot(lookVector, this.defaultPosture) / (vec3.length(lookVector) * vec3.length(this.defaultPosture)))
+        var qAngle = Math.acos(vec3.dot(lookVector, this.defaultPosture) / (vec3.length(lookVector) * vec3.length(this.defaultPosture)));
         quat.setAxisAngle(this.qtn, rotationAxis, -qAngle);
         mat4.identity(this.qMatrix);
         mat4.fromQuat(this.qMatrix, this.qtn);
@@ -223,7 +226,7 @@ Funnel.prototype = {
         mat4.invert(this.invMatrix, this.mMatrix);
     }
 
-}
+};
 Cokpit = function (gl) {
     this.gl = gl;
     this.modelData = window.sphere(20, 20, .3);
@@ -247,13 +250,16 @@ Cokpit = function (gl) {
     this.isLightEnable = true;
     this.isBump = true;
     this.textureObject = {};
+    this.textureObject.diffuse = null;
+    this.textureObject.bump = null;
 
     var diffuseMapSource = ImageLoader.images["texturesazabycokpit"];
     var bumpMapSource = ImageLoader.images["texturesazabycokpit_n"];
     this.initTexture(diffuseMapSource, "diffuse");
     this.initTexture(bumpMapSource, "bump");
     this.texture = this.textureObject.diffuse;
-}
+
+};
 Cokpit.prototype = {
     initTexture: function (img, type) {
         // テクスチャオブジェクトの生成
@@ -276,7 +282,7 @@ Cokpit.prototype = {
         mat4.rotate(this.mMatrix, this.mMatrix, radians, axis);
         mat4.invert(this.invMatrix, this.mMatrix);
     }
-}
+};
 
 Stars = function (gl, img) {
     this.gl = gl;
@@ -296,7 +302,7 @@ Stars = function (gl, img) {
     if (img) {
         this.initTexture(img);
     }
-}
+};
 
 Stars.prototype = {
     render: function () {
@@ -309,7 +315,7 @@ Stars.prototype = {
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
-}
+};
 SkySphere = function (gl, img) {
     this.gl = gl;
     this.modelData = window.sphere(20, 20, 80);
@@ -332,7 +338,7 @@ SkySphere = function (gl, img) {
     if (img) {
         this.initTexture(img);
     }
-}
+};
 SkySphere.prototype = {
     render: function () {
         mat4.identity(this.mMatrix);
@@ -348,7 +354,8 @@ SkySphere.prototype = {
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
-}
+};
+
 
 NGundam = function (gl, img) {
     this.gl = gl;
@@ -371,7 +378,7 @@ NGundam = function (gl, img) {
         this.initTexture(img);
     }
 
-}
+};
 NGundam.prototype = {
     render: function () {
         this.z = -60;
@@ -392,11 +399,11 @@ NGundam.prototype = {
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
-}
+};
 
 
 Scene3D = function (gl, camera, light) {
-    this.gl = gl
+    this.gl = gl;
     this.camera = camera;
     this.light = light;
     this.meshList = [];
@@ -404,11 +411,11 @@ Scene3D = function (gl, camera, light) {
     this.count = 0;
     this.initWebgl();
     this.render()
-}
+};
 Scene3D.prototype = {
 
     addChild: function (mesh) {
-        var vPositionBuffer, vNormalBuffer, vTexCoordBuffer, vColorBuffer,veterxBuffer, meshIndexBuffer;
+        var vPositionBuffer, vNormalBuffer, vTexCoordBuffer, vColorBuffer, veterxBuffer, meshIndexBuffer;
         var meshVboList = [];
         var meshVbo;
         if (mesh.modelData.p) {
@@ -434,7 +441,12 @@ Scene3D.prototype = {
         if (mesh.modelData.i) {
             meshIndexBuffer = this.generateIBO(mesh.modelData.i);
         }
-        var obj = {"vertexBufferList": meshVboList, "indexBuffer": meshIndexBuffer, "mesh": mesh, "vertexBuffer":meshVbo};
+        var obj = {
+            "vertexBufferList": meshVboList,
+            "indexBuffer": meshIndexBuffer,
+            "mesh": mesh,
+            "vertexBuffer": meshVbo
+        };
         mesh.index = this.meshList.length;
         this.meshList.push(obj);
     },
@@ -485,9 +497,9 @@ Scene3D.prototype = {
                     this.gl.cullFace(this.gl.BACK);
                 }
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshList[i].vertexBuffer);
-                this.gl.vertexAttribPointer(this.attLocation_bump[0], this.attStride[0], this.gl.FLOAT, false,(3+3+2)*4, 0);
-                this.gl.vertexAttribPointer(this.attLocation_bump[1], this.attStride[1], this.gl.FLOAT, false, (3+3+2)*4,4*3);
-                this.gl.vertexAttribPointer(this.attLocation_bump[2], this.attStride[2], this.gl.FLOAT, false, (3+3+2)*4, 4*(3+3));
+                this.gl.vertexAttribPointer(this.attLocation_bump[0], this.attStride[0], this.gl.FLOAT, false, (3 + 3 + 2) * 4, 0);
+                this.gl.vertexAttribPointer(this.attLocation_bump[1], this.attStride[1], this.gl.FLOAT, false, (3 + 3 + 2) * 4, 4 * 3);
+                this.gl.vertexAttribPointer(this.attLocation_bump[2], this.attStride[2], this.gl.FLOAT, false, (3 + 3 + 2) * 4, 4 * (3 + 3));
                 this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.meshList[i].indexBuffer);
 
                 //this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation_bump, this.attStride, this.meshList[i].indexBuffer);
@@ -585,7 +597,7 @@ Scene3D.prototype = {
         this.attLocation[1] = this.gl.getAttribLocation(this.programs, 'normal');
         this.attLocation[2] = this.gl.getAttribLocation(this.programs, 'texCoord');
         this.attLocation[3] = this.gl.getAttribLocation(this.programs, 'color');
-        for(var i = 0,l=this.attLocation.length; i < l; i++){
+        for (var i = 0, l = this.attLocation.length; i < l; i++) {
             this.gl.enableVertexAttribArray(this.attLocation[i]);
         }
 
@@ -632,17 +644,17 @@ Scene3D.prototype = {
         //shaderオブジェクトにソースを割り当てて、コンパイル
         this.gl.shaderSource(vertexShader, vertexShaderSource);
         this.gl.compileShader(vertexShader);
-        this.checkShaderCompile(vertexShader)
+        this.checkShaderCompile(vertexShader);
         this.gl.shaderSource(fragmentShader, fragmentShaderSource);
         this.gl.compileShader(fragmentShader);
-        this.checkShaderCompile(fragmentShader)
+        this.checkShaderCompile(fragmentShader);
 
         //programを生成し、shaderとの紐づけ
         var programs = this.gl.createProgram();
         this.gl.attachShader(programs, vertexShader);
         this.gl.attachShader(programs, fragmentShader);
         this.gl.linkProgram(programs);
-        this.checkLinkPrograms(programs)
+        this.checkLinkPrograms(programs);
 
         return programs;
     },
@@ -694,7 +706,7 @@ Scene3D.prototype = {
 var World = function (canvasId) {
     this.gl = this.initWebglContext(canvasId);
     this.init();
-}
+};
 
 World.prototype = {
     initWebglContext: function (canvasId) {
@@ -761,7 +773,7 @@ World.prototype = {
 
         var ratio = 0.5;
 
-        this.camera.count+= ratio;
+        this.camera.count += ratio;
         this.camera.x = Math.sin((this.camera.count * .003 % 360 )) * 5;
         this.camera.y = Math.cos((this.camera.count * .002 % 360)) * 7;
         this.camera.z = Math.cos((this.camera.count * .003 % 360)) * 13;
@@ -770,14 +782,14 @@ World.prototype = {
         this.camera.x = Math.cos((this.camera.count * .01 % 360 )) * 5;
         this.camera.z = Math.sin((this.camera.count * .01 % 360)) * 5;
 
-        this.cockpit.count += this.cockpit.speed * ratio
-        this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1)
-        this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3)
-        this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1)
+        this.cockpit.count += this.cockpit.speed * ratio;
+        this.cockpit.x = Math.sin((this.cockpit.count + this.cockpit.rnd1) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count / 1.5) + 1);
+        this.cockpit.y = Math.cos((this.cockpit.count + this.cockpit.rnd) / 3) * this.cockpit.gainRatio * .2 * (Math.sin(this.cockpit.count) + 1.3);
+        this.cockpit.z = Math.cos((this.cockpit.count + this.cockpit.rnd2) / 7) * this.cockpit.gainRatio * .1 * (Math.sin(this.cockpit.count) + 1);
 
         for (var i = 0; i < this.funnelLength; i++) {
             this.funnellArray[i].count += this.funnellArray[i].speed * ratio;
-            this.funnellArray[i].rotationZ = Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y) * this.funnellArray[i].speedRatio.z
+            this.funnellArray[i].rotationZ = Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y) * this.funnellArray[i].speedRatio.z;
             this.funnellArray[i].x += (this.cockpit.x - this.funnellArray[i].x) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.x) + 1) * this.funnellArray[i].ratio.x;
             this.funnellArray[i].y += (this.cockpit.y - this.funnellArray[i].y) * (Math.cos(this.funnellArray[i].count / this.funnellArray[i].speedRatio.y + this.funnellArray[i].speedRatio.y) + 1) * this.funnellArray[i].ratio.y;
             this.funnellArray[i].z += (this.cockpit.z - this.funnellArray[i].z) * (Math.sin(this.funnellArray[i].count / this.funnellArray[i].speedRatio.z + this.funnellArray[i].speedRatio.z) + 1) * this.funnellArray[i].ratio.z;
@@ -785,7 +797,7 @@ World.prototype = {
         this.scene3D.render();
         requestAnimationFrame(this.enterFrameHandler.bind(this))
     }
-}
+};
 
 
 window.onload = function () {
@@ -798,13 +810,13 @@ window.onload = function () {
         }
         //ドキュメントクラス的なもの canvasのIDを渡す
         new World()
-    }
+    };
 
     //テクスチャ画像リスト
     var texturePashArray = ["images/texturengundam.png", "images/texturefunnel.png", "images/texturefunnel_n.png", "images/texturesazabycokpit.jpg", "images/texturestar.png", "images/space.jpg", "images/texturesazabycokpit_n.png"];
     //テクスチャ画像をImage要素としての読み込み
     ImageLoader.load(texturePashArray, loadCompleteHandler);
-}
+};
 
 ImageLoader = {
     length: 0,
@@ -816,16 +828,14 @@ ImageLoader = {
             var counter = 0;
             img.onload = function () {
                 counter++;
-                id = this.src.split("/")[this.src.split("/").length - 1].split(".")[0]
+                var id = this.src.split("/")[this.src.split("/").length - 1].split(".")[0];
                 ImageLoader.images[id] = this;
-                if (counter >= ImageLoader.length) {
-                    callback()
-                }
+                if (counter >= ImageLoader.length) callback();
             };
             img.src = pathArray[i];
 
         }
     }
-}
+};
 
 
