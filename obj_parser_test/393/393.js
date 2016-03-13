@@ -1,8 +1,8 @@
 ;(function() {
 	window.onload = function(){
 		var srcFiles = {
-			obj: "vicviper_mirror_fix.obj",
-			mtl: "vicviper_mirror_fix.mtl"
+			obj: "face_fix.obj",
+			mtl: "face_fix.mtl"
 		};
 		objLoader.load(srcFiles,initialize)
 	}
@@ -57,7 +57,6 @@
       }
       // リンクしたプログラムの使用を指示
       gl.useProgram(prog);
-      console.log("glObj : ", glObj);
       loadBuffer();
       drawFrame();
     })
@@ -70,7 +69,6 @@
 		// 頂点座標に関し、バッファを生成してデータを指定
 		vbuf = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbuf);
-    console.log(glObj)
 		gl.bufferData(gl.ARRAY_BUFFER, glObj.vertices, gl.STATIC_DRAW);
 		// 法線ベクトルに関しても同上。配列長は頂点数3×軸3=9個
 		nbuf = gl.createBuffer();
@@ -99,7 +97,7 @@
 		frame++;
 		// frustum行列の生成
 		var proj_mat = mat4.create();
-		mat4.frustum(proj_mat, -1, 1, -1, 1, 1, 100);
+		mat4.frustum(proj_mat, -1, 1, -1, 1, 3, 100);
 		// 移動回転行列の生成
 		var mv_mat = mat4.create();
 		mat4.translate(mv_mat, mv_mat, [0, -1, -7]);
@@ -144,7 +142,6 @@
 			gl.uniform1f(gl.getUniformLocation(prog, "nscolor"), mtlInfo.ns); // 1fの意味はfloat1個
 
       // テクスチャがあればテクスチャを送信する
-      console.log(mtlInfo.texture)
       if(mtlInfo.texture) {
         gl.bindTexture(gl.TEXTURE_2D, textures[mtlInfo.texture]);
         gl.uniform1i(gl.getUniformLocation(prog, "texture"), 0);
