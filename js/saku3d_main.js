@@ -1,5 +1,6 @@
 var World = function(){
-    AbstractWorld.call(this, "canvasId");
+    //superクラスのコンストラクタを実行
+    AbstractWorld.call(this, "canvasId","aaaa");
 }
 
 World.prototype.init = function(){
@@ -9,9 +10,10 @@ World.prototype.init = function(){
     this.light = new DirectionLight();
     this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
-    var funnel = new Vicviper(this.gl, this.scene3D, window.vicviperModelData, null);
+    this.funnel = new Vicviper(this.gl, this.scene3D, window.vicviperModelData, null);
+    this.funnel.setScale(0.3);
 
-    this.scene3D.addChild(funnel);
+    this.scene3D.addChild(this.funnel);
 
     this.enterFrameHandler()
 }
@@ -36,8 +38,10 @@ window.onload = function () {
             var obj = objParser.objParse(objLoader.files["vicviper_mirror_fix_obj"]);
             var mtl = objParser.mtlParse(objLoader.files["vicviper_mirror_fix_mtl"]);
             // パースしたデータを元にWebGL用のObjectを作成する
-            window.vicviperModelData = objParser.createGLObject(obj, mtl);
-            new World();
+            objParser.createGLObject(obj, mtl , function(returnValue){
+                window.vicviperModelData = returnValue;
+                new World();
+            })
         };
         var srcFiles1 = {
             obj: "models/vicviper_mirror_fix.obj",

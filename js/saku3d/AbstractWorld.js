@@ -1,6 +1,6 @@
-var AbstractWorld = function (canvasId) {
+var AbstractWorld = function (canvasId,hoge) {
     this.gl = this.initWebglContext(canvasId);
-    console.log("AbstractWorld.constructor");
+    console.log("AbstractWorld.constructor:", hoge);
     this.init();
 };
 
@@ -41,8 +41,4 @@ AbstractWorld.prototype = {
         this.scene3D.render();
         requestAnimationFrame(this.enterFrameHandler.bind(this))
     }
-};
-
-var inherits = function(childCtor, parentCtor) {
-    Object.setPrototypeOf(childCtor.prototype, parentCtor.prototype);
 };

@@ -132,7 +132,7 @@ Scene3D.prototype = {
 
     initWebgl: function () {
         //基本背景色の定義
-        this.gl.clearColor(0.01, 0.01, 0.02, 1.0);
+        this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         //深度テストの定義
         this.gl.clearDepth(1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
