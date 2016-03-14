@@ -19,16 +19,16 @@ var Camera = function (canvas) {
     mat4.perspective(this.pMatrix, this.fov, this.aspect, this.near, this.far);
     mat4.multiply(this.vpMatrix, this.pMatrix, this.vMatrix);
     this.count = 0;
-    this.parent = null
+    this.lookTarget = null
 }
 Camera.prototype = {
     setTarget: function (cameraTarget) {
-        this.parent = cameraTarget
+        this.lookTarget = cameraTarget
     },
     render: function () {
 
-        if (this.parent) {
-            this.lookPoint = [this.parent.x, this.parent.y, this.parent.z]
+        if (this.lookTarget) {
+            this.lookPoint = [this.lookTarget.x, this.lookTarget.y, this.lookTarget.z]
         }
         this.cameraPosition = [this.x, this.y, this.z]
 
@@ -47,7 +47,7 @@ DirectionLight.prototype = {}
 Beam = function (gl, scene3D, funnel, cockpit) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.parent = funnel;
+    this.lookTarget = funnel;
     this.target = cockpit;
     this.modelData = window.beam(2, [1, 1, 0, 0.5])
     this.qtn = quat.identity(quat.create());
@@ -72,9 +72,9 @@ Beam = function (gl, scene3D, funnel, cockpit) {
 
 Beam.prototype = {
     init: function () {
-        this.x = this.parent.x;
-        this.y = this.parent.y;
-        this.z = this.parent.z;
+        this.x = this.lookTarget.x;
+        this.y = this.lookTarget.y;
+        this.z = this.lookTarget.z;
         this.alpha = this.startAlpha;
         this.currentLife = this.life;
         //クォータニオンによる姿勢制御
@@ -118,7 +118,7 @@ Beam.prototype = {
 Funnel = function (gl, scene3D, lookTarget) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.parent = lookTarget
+    this.lookTarget = lookTarget
     this.modelData = window.funnel();
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
@@ -160,7 +160,7 @@ Funnel = function (gl, scene3D, lookTarget) {
     this.textureObject = {};
 
     for (var i = 0; i < this.beamLength; i++) {
-        this.beamArray[i] = new Beam(this.gl, this.scene3D, this, this.parent);
+        this.beamArray[i] = new Beam(this.gl, this.scene3D, this, this.lookTarget);
     }
     var diffuseMapSource = ImageLoader.images["texturefunnel"];
     var bumpMapSource = ImageLoader.images["texturefunnel_n"];
@@ -183,7 +183,7 @@ Funnel.prototype = {
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     },
     setTarget: function (cameraTarget) {
-        this.parent = cameraTarget
+        this.lookTarget = cameraTarget
     },
     shoot: function () {
         this.curentBeamIndex++;
@@ -201,10 +201,10 @@ Funnel.prototype = {
         mat4.identity(this.mMatrix);
         mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
         var targetPosition = {x: 0, y: 0, z: 0};
-        if (this.parent) {
-            targetPosition.x = this.parent.x;
-            targetPosition.y = this.parent.y;
-            targetPosition.z = this.parent.z;
+        if (this.lookTarget) {
+            targetPosition.x = this.lookTarget.x;
+            targetPosition.y = this.lookTarget.y;
+            targetPosition.z = this.lookTarget.z;
         }
 
         //オイラー角による向き制御
