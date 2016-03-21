@@ -35,6 +35,8 @@ Vicviper = function (gl, scene3D, initObject) {
     this.textureObject.diffuse = null;
     this.textureObject.bump = null;
     var diffuseMapSource = ImageLoader.images["models/vicviper_mirror_fix.png"];
+    console.log("2 ImageLoader.images[id] : ",ImageLoader.images["models/vicviper_mirror_fix.png"])
+    console.log("diffuseMapSource : " ,  ImageLoader.images, diffuseMapSource)
     this.initTexture(diffuseMapSource, "diffuse");
 
     for (var i = 0; i < this.beamLength; i++) {
