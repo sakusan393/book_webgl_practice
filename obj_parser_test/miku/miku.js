@@ -37,10 +37,10 @@
 	var glObj; // WebGL用に変換されたモデルデータ
 	var initialize = function() {
 		// OBJファイル、MTLファイルをパース
-		var obj = objParser.objParse(files.obj);
-		var mtl = objParser.mtlParse(files.mtl);
+		var obj = ObjParser.objParse(files.obj);
+		var mtl = ObjParser.mtlParse(files.mtl);
 		// パースしたデータを元にWebGL用のObjectを作成する
-		objParser.createGLObject(obj, mtl, function(ret) {
+		ObjParser.createGLObject(obj, mtl, function(ret) {
 			// 全てのテクスチャがロードされたら呼ばれる
 			glObj = ret;
 			

@@ -105,10 +105,10 @@
         mat4.frustum(proj_mat, -1, 1, -1, 1, 1, 100);
         // 移動回転行列の生成
         var mv_mat = mat4.create();
-        mat4.translate(mv_mat, mv_mat, [0, -1, -7]);
+        mat4.translate(mv_mat, mv_mat, [0, -2, -7]);
         var scale = 1;
         mat4.scale(mv_mat, mv_mat, [scale, scale, scale]);
-        mat4.rotate(mv_mat, mv_mat, frame * 0.01, [0.4, 1, .3]); // 軸[0, 1, 0]で回転
+        mat4.rotate(mv_mat, mv_mat, frame * 0.01, [0, 1, 0]); // 軸[0, 1, 0]で回転
         // uniformでShaderに送信。4fvはfloat4つの配列（vector）という意味
         gl.uniformMatrix4fv(gl.getUniformLocation(prog, "projectionMatrix"), false, proj_mat);
         gl.uniformMatrix4fv(gl.getUniformLocation(prog, "modelviewMatrix"), false, mv_mat);
@@ -144,10 +144,10 @@
             // Kd, Ks, Nsをそれぞれuniformで送信
             gl.uniform3fv(gl.getUniformLocation(prog, "kdcolor"), mtlInfo.kd);
             gl.uniform3fv(gl.getUniformLocation(prog, "kscolor"), mtlInfo.ks);
+            console.log(mtlInfo.kd,mtlInfo.ks,mtlInfo.ns)
             gl.uniform1f(gl.getUniformLocation(prog, "nscolor"), mtlInfo.ns); // 1fの意味はfloat1個
 
             // テクスチャがあればテクスチャを送信する
-            console.log(mtlInfo.texture)
             if (mtlInfo.texture) {
                 gl.bindTexture(gl.TEXTURE_2D, textures[mtlInfo.texture]);
                 gl.uniform1i(gl.getUniformLocation(prog, "texture"), 0);

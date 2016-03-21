@@ -48,15 +48,16 @@ varying vec4 vPosition;
 void main() {
 	vec3 n = normalize(e_normal); // 正規化された法線ベクトル
 	vec3 light_v = normalize(vec3(1, 1, 1)); // 正規化された入射光ベクトル
-	float specular = pow(max(dot(-normalize(eye_v), reflect(-light_v, n)), 0.0), nscolor); // 鏡面光は視線ベクトルと反射光ベクトルの内積
-	float l = 0.5; // 環境光の強さ
+	float l = 0.9; // 環境光の強さ
 	vec3 dx = dFdx(vPosition.xyz);
     vec3 dy = dFdy(vPosition.xyz);
     vec3 nn = normalize(cross(normalize(dx), normalize(dy)));
+	float specular = pow(max(dot(-normalize(eye_v), reflect(-light_v, n)), 0.0), 10.0); // 鏡面光は視線ベクトルと反射光ベクトルの内積
 	float diffuse = max(dot(light_v, nn), 0.0); // 拡散光は入射光ベクトルと法線との内積
+	diffuse = 0.0;
 	if(hasTexture > 0.5) {
 		vec4 texcolor = texture2D(texture, texpos); // テクスチャ画像から座標の色を取得する
-		gl_FragColor.rgb = (kdcolor * texcolor.rgb) * (diffuse + l) + kscolor * specular;
+		gl_FragColor.rgb = (texcolor.rgb) * (diffuse) + specular;
 		gl_FragColor.a = texcolor.a;
 	} else {
 		gl_FragColor = vec4(kdcolor * diffuse + kscolor * specular, 1.0) + vec4(kdcolor, 1.0) * vec4(l, l, l, 1.0);

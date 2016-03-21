@@ -10,14 +10,25 @@ World.prototype.init = function(){
     this.light = new DirectionLight();
     this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
-    this.funnel = new Vicviper(this.gl, this.scene3D, window.vicviperModelData, null);
-    this.funnel.setScale(0.3);
+    this.vicviper = new Vicviper(this.gl, this.scene3D, {modelData: window.vicviperModelData,specularIndex:1});
+    this.vicviper.setScale(0.3);
+    this.vicviper.x = -1;
+    this.vicviper.rotationX = 40;
+    this.vicviper2 = new Vicviper(this.gl, this.scene3D, {modelData: window.vicviperModelData,specularIndex:2});
+    this.vicviper2.setScale(0.3);
+    this.vicviper2.x = 1;
+    this.vicviper2.rotationX = 40;
 
-    this.scene3D.addChild(this.funnel);
+    this.scene3D.addChild(this.vicviper);
+    this.scene3D.addChild(this.vicviper2);
 
     this.enterFrameHandler()
 }
 World.prototype.enterFrameHandler = function(){
+    this.vicviper.rotationY+=.3;
+    this.vicviper2.rotationY+=.3;
+
+    this.vicviper.y=0;
     this.scene3D.render();
     requestAnimationFrame(this.enterFrameHandler.bind(this))
 }
@@ -31,27 +42,25 @@ window.onload = function () {
     //テクスチャ読み込み後の処理
     var loadCompleteHandler = function () {
         for (var val in ImageLoader.images) {
-            console.log("loaded", ImageLoader.images[val]);
+            console.log("loaded : ", ImageLoader.images[val]);
         }
+
         //ドキュメントクラス的なもの canvasのIDを渡す
-        var initialize = function () {
-            var obj = objParser.objParse(objLoader.files["vicviper_mirror_fix_obj"]);
-            var mtl = objParser.mtlParse(objLoader.files["vicviper_mirror_fix_mtl"]);
-            // パースしたデータを元にWebGL用のObjectを作成する
-            objParser.createGLObject(obj, mtl , function(returnValue){
-                window.vicviperModelData = returnValue;
-                new World();
-            })
+        var initialize = function (returnValue) {
+            window.vicviperModelData = returnValue;
+            console.log("window.vicviperModelData : ", window.vicviperModelData)
+            new World();
         };
         var srcFiles1 = {
             obj: "models/vicviper_mirror_fix.obj",
             mtl: "models/vicviper_mirror_fix.mtl"
         };
-        objLoader.load(srcFiles1, initialize);
+        ObjLoader.load(srcFiles1, initialize);
     };
 
-    //テクスチャ画像リスト
-    var texturePashArray = ["images/texturengundam.png", "images/texturefunnel.png", "images/texturefunnel_n.png", "images/texturesazabycokpit.jpg", "images/texturestar.png", "images/space.jpg", "images/texturesazabycokpit_n.png"];
-    //テクスチャ画像をImage要素としての読み込み
-    ImageLoader.load(texturePashArray, loadCompleteHandler);
+    // //テクスチャ画像リスト
+    // var texturePashArray = ["images/texturengundam.png", "images/texturefunnel.png", "images/texturefunnel_n.png", "images/texturesazabycokpit.jpg", "images/texturestar.png", "images/space.jpg", "images/texturesazabycokpit_n.png"];
+    // //テクスチャ画像をImage要素としての読み込み
+    // ImageLoader.load(texturePashArray, loadCompleteHandler);
+    loadCompleteHandler();
 };

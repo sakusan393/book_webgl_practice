@@ -1,10 +1,9 @@
-Vicviper = function (gl, scene3D, modelData, lookTarget) {
+Vicviper = function (gl, scene3D, initObject) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.lookTarget = lookTarget;
-    this.modelData = modelData;
+    this.lookTarget = initObject.lookTarget;
+    this.modelData = initObject.modelData;
     this.PI = Math.PI;
-    console.log(modelData)
 
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
@@ -29,7 +28,14 @@ Vicviper = function (gl, scene3D, modelData, lookTarget) {
     this.currentBeam = null;
     this.isLightEnable = true;
     this.isObjData = true;
-    this.alpha = 1.0;
+    this.alpha = 0.0;
+    this.specularIndex = 0;
+    if(initObject && initObject.specularIndex) this.specularIndex = initObject.specularIndex;
+    this.textureObject = {};
+    this.textureObject.diffuse = null;
+    this.textureObject.bump = null;
+    var diffuseMapSource = ImageLoader.images["models/vicviper_mirror_fix.png"];
+    this.initTexture(diffuseMapSource, "diffuse");
 
     for (var i = 0; i < this.beamLength; i++) {
         this.beamArray[i] = new Beans(this.gl, this.scene3D, this, this.lookTarget, ImageLoader.images["beans"]);
@@ -37,6 +43,19 @@ Vicviper = function (gl, scene3D, modelData, lookTarget) {
 }
 
 Vicviper.prototype = {
+    initTexture: function (img, type) {
+        // テクスチャオブジェクトの生成
+        this.textureObject[type] = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.textureObject[type]);
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, 1)
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    },
     setScale:function(value){
         this.scaleX = this.scaleY = this.scaleZ = value;
     },
@@ -76,7 +95,6 @@ Vicviper.prototype = {
             var radX = this.rotationX * this.PI / 180;
             var radY = this.rotationY * this.PI / 180;
             var radZ = this.rotationZ * this.PI / 180;
-            console.log(radZ)
             var axisX = [1.0, 0.0, 0.0];
             var axisY = [0.0, 1.0, 0.0];
             var axisZ = [0.0, 0.0, 1.0];

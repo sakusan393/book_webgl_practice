@@ -15,7 +15,7 @@
 		// canvasを保存してcallbackを呼び出す
 		loadingCount--;
 		imgLoader.images[name] = canvas;
-		func(canvas);
+		func(img);
 	};
 	// 画像をロードする
 	imgLoader.load = function(url, func) {

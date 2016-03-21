@@ -1,7 +1,7 @@
-;var objParser = {};
+;var ObjParser = {};
 (function() {
 	// MTLファイルのパース
-	objParser.mtlParse = function(text) {
+	ObjParser.mtlParse = function(text) {
 		var mtl = {};
 		var current = null; // 現在のmtl情報
 		// 今まで収集したmtl情報を保存する
@@ -45,7 +45,7 @@
 		return mtl;
 	};
 	// OBJファイルのパース
-	objParser.objParse = function(text) {
+	ObjParser.objParse = function(text) {
 		var vertices = []; // 頂点座標
 		var normals = []; // 法線ベクトル
 		var texcoords = []; // テクスチャ座標
@@ -113,7 +113,7 @@
 	};
 
 	// OBJファイルとMTLファイルの情報を元にWebGL用のTypedArrayを用意する
-	objParser.createGLObject = function(obj, mtl) {
+	ObjParser.createGLObject = function(obj, mtl) {
 		// まずポリゴンの枚数を特定する
 		var numTriangles = 0;
 		for(var i = 0; i < obj.faces.length; i++) {

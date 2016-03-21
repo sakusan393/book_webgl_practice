@@ -3,20 +3,40 @@
  */
 ImageLoader = {
     length: 0,
+    counter: 0,
     images: {},
+    isLoading:false,
+    _callback: function(){},
+
     load: function (pathArray, callback) {
+        this.counter = 0;
+        this.isLoading = true;
+        this._callback = callback;
         this.length = pathArray.length;
         for (var i = 0; i < this.length; i++) {
-            var img = new Image();
-            var counter = 0;
-            img.onload = function () {
-                counter++;
-                var id = this.src.split("/")[this.src.split("/").length - 1].split(".")[0];
-                ImageLoader.images[id] = this;
-                if (counter >= ImageLoader.length) callback();
-            };
-            img.src = pathArray[i];
-
+            //load済みかのチェック
+            var id = pathArray[i];
+            if(! ImageLoader.images[id]){
+                var img = new Image();
+                img.onload = this._loaded;
+                img.src = pathArray[i];
+                img.srcSrc = pathArray[i];
+            }else{
+                ImageLoader._checkCount();
+            }
+        }
+    },
+    _loaded: function(event){
+        var id = event.target.srcSrc;
+        // var id = src.split("/")[src.split("/").length - 2].split(".")[0];
+        ImageLoader.images[id] = event.target;
+        ImageLoader._checkCount();
+    },
+    _checkCount: function(event) {
+        ImageLoader.counter++;
+        if (ImageLoader.counter >= ImageLoader.length) {
+            ImageLoader.isLoading = false;
+            ImageLoader._callback();
         }
     }
 };

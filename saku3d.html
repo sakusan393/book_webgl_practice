@@ -12,25 +12,34 @@
     varying vec2 vTexCoord;
     varying vec4 vColor;
     uniform mat4 mvpMatrix;
+    uniform mat4 mMatrix;
     varying vec3 vNormal;
+    varying vec4 vPosition;
+    varying vec4 mvpPosition;
 
     void main(){
         vNormal = normal;
         vTexCoord = texCoord;
         vColor = color;
-        gl_Position = mvpMatrix * vec4(position, 1.0);
+        vPosition = mMatrix * vec4(position, 1.0);
+        mvpPosition = mvpMatrix * vec4(position, 1.0);
+        gl_Position = mvpPosition;
     }
 
     </script>
 
     <script id="fs" type="x-shader/x-fragment">
-    precision mediump float;
+    #extension GL_OES_standard_derivatives : enable
+
+    precision highp float;
     varying vec2 vTexCoord;
-    uniform sampler2D texture;
-    uniform float alpha;
+
 
     varying vec3 vNormal;
     varying vec4 vColor;
+    varying vec4 vPosition;
+    varying vec4 mvpPosition;
+
     uniform vec3 ambientColor;
     uniform mat4 invMatrix;
     uniform vec3 lightDirection;
@@ -40,6 +49,9 @@
     uniform bool useTexture;
     uniform bool isObjData;
     uniform vec3 kdColor;
+    uniform sampler2D texture;
+    uniform float alpha;
+    uniform int specularIndex;
 
 
     void main(){
@@ -51,9 +63,29 @@
             vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
             vec3 invLight = (invMatrix * vec4(lightDirection,0.0)).xyz;
             vec3 halfVector = normalize(invLight + invEye);
-            float spec = pow(clamp(dot(halfVector,vNormal),0.0,.5),3.0);
-            float diff = clamp(dot(normalize(invLight), vNormal) , 0.7, 1.0);
-            destColor = vec4(kdColor*diff+spec + ambientColor.rgb, 1.0);
+
+            float specular = 0.0;
+            if(specularIndex==1){
+                //half vector specular
+                specular = pow(clamp(dot(halfVector,vNormal),0.0,1.5),40.0);
+            }else if(specularIndex==2){
+                vec3 viewVec = normalize(invEye);
+                vec3 refVec = normalize(reflect((-invLight), vNormal));
+                specular = pow(max(dot(viewVec, refVec), 0.0), 90.0); // 鏡面光は視線ベクトルと反射光ベクトルの内積
+            }
+
+            //flat shading normalmap
+            vec3 dx = dFdx(vPosition.xyz);
+            vec3 dy = dFdy(vPosition.xyz);
+            vec3 n = normalize(cross(normalize(dx), normalize(dy)));
+            float diff = clamp(dot(n, invLight) ,1.0,4.0)* 0.03;
+            float diffuse = max(dot(n, invLight),0.0) * 0.2;
+            if(!bool(vTexCoord)){
+                destColor = vec4(kdColor*diff+specular + ambientColor.rgb, 1.0);
+            }else{
+                vec3 col = texture2D(texture, vTexCoord).rgb;
+                destColor = vec4(col*diff+specular+ ambientColor.rgb  ,1.0);
+            }
         }
         else if(!bool(vTexCoord))
         {
@@ -183,10 +215,8 @@
 </script>
 <script src="js/lib/stats.min.js"></script>
 <script src="js/lib/gl-matrix.js"></script>
-<script src="js/lib/objloader.js"></script>
-<script src="js/lib/objparser.js"></script>
 <script src="js/lib/ImageLoader.js"></script>
-<script src="js/lib/imgloader2.js"></script>
+<script src="js/lib/ObjLoader.js"></script>
 <script src="js/saku3d/utils.js"></script>
 <script src="js/saku3d/models.js"></script>
 <script src="js/saku3d/Camera.js"></script>

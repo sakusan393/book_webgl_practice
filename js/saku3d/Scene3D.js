@@ -4,6 +4,7 @@ Scene3D = function (gl, camera, light) {
     this.light = light;
     this.meshList = [];
     this.mvpMatrix = mat4.identity(mat4.create());
+    this.mMatrix = mat4.identity(mat4.create());
     this.count = 0;
     this.initWebgl();
     this.render()
@@ -76,6 +77,8 @@ Scene3D.prototype = {
                 this.gl.useProgram(this.programs);
                 this.gl.uniform3fv(this.uniLocation.eyePosition, this.camera.cameraPosition);
                 this.gl.uniform1i(this.uniLocation.isObjData, this.meshList[i].mesh.isObjData);
+                this.gl.uniform1i(this.uniLocation.specularIndex, this.meshList[i].mesh.specularIndex);
+
                 this.gl.uniform1i(this.uniLocation.isLightEnable, this.meshList[i].mesh.isLightEnable);
 
                 this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
@@ -85,12 +88,14 @@ Scene3D.prototype = {
                 mat4.multiply(this.mvpMatrix, this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
 
+                this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.mMatrix);
                 this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
                 if (this.meshList[i].mesh.isLightEnable) {
                     this.gl.uniform3fv(this.uniLocation.lookPoint, this.camera.lookPoint);
                     this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
                 }
                 //明示的に0番目
+                if (this.meshList[i].mesh.textureObject.diffuse) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.textureObject.diffuse);
                 var pos = 0;
                 for (var j = 0; j < this.meshList[i].mesh.modelData.mtlInfos.length; j++) {
                     var mtlInfo = this.meshList[i].mesh.modelData.mtlInfos[j];
@@ -98,6 +103,8 @@ Scene3D.prototype = {
                     this.gl.drawArrays(this.gl.TRIANGLES, pos / 3, (mtlInfo.endPos - pos) / 3);
                     pos = mtlInfo.endPos;
                 }
+                this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+
             } else {
                 this.gl.useProgram(this.programs);
                 this.gl.uniform3fv(this.uniLocation.eyePosition, this.camera.cameraPosition);
@@ -131,6 +138,10 @@ Scene3D.prototype = {
     },
 
     initWebgl: function () {
+        if (!this.gl.getExtension('OES_standard_derivatives')) {
+            console.log('OES_standard_derivatives is not supported');
+            return;
+        }
         //基本背景色の定義
         this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         //深度テストの定義
@@ -157,6 +168,7 @@ Scene3D.prototype = {
         //uniformのindexの取得
         this.uniLocation = {};
         this.uniLocation.texture = this.gl.getUniformLocation(this.programs, "texture");
+        this.uniLocation.mMatrix = this.gl.getUniformLocation(this.programs, "mMatrix");
         this.uniLocation.mvpMatrix = this.gl.getUniformLocation(this.programs, "mvpMatrix");
         this.uniLocation.invMatrix = this.gl.getUniformLocation(this.programs, "invMatrix");
         this.uniLocation.lightDirection = this.gl.getUniformLocation(this.programs, "lightDirection");
@@ -165,6 +177,7 @@ Scene3D.prototype = {
         this.uniLocation.ambientColor = this.gl.getUniformLocation(this.programs, "ambientColor");
         this.uniLocation.alpha = this.gl.getUniformLocation(this.programs, "alpha");
         this.uniLocation.isLightEnable = this.gl.getUniformLocation(this.programs, "isLightEnable");
+        this.uniLocation.specularIndex = this.gl.getUniformLocation(this.programs, "specularIndex");
         this.uniLocation.isObjData = this.gl.getUniformLocation(this.programs, "isObjData");
         this.uniLocation.kdColor = this.gl.getUniformLocation(this.programs, "kdColor");
 

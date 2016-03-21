@@ -4,17 +4,17 @@
 			obj: "face_fix.obj",
 			mtl: "face_fix.mtl"
 		};
-		objLoader.load(srcFiles,initialize)
+		ObjLoader.load(srcFiles,initialize)
 	}
 	var gl; // WebGLのcontext
 	var prog; // コンパイル・リンクされたプログラム
 	var glObj; // WebGL用に変換されたモデルデータ
 	var initialize = function() {
 		// OBJファイル、MTLファイルをパース
-		var obj = objParser.objParse(objLoader.files.obj);
-		var mtl = objParser.mtlParse(objLoader.files.mtl);
+		var obj = ObjParser.objParse(ObjLoader.files.obj);
+		var mtl = ObjParser.mtlParse(ObjLoader.files.mtl);
 		// パースしたデータを元にWebGL用のObjectを作成する
-		objParser.createGLObject(obj, mtl , function(ret){
+		ObjParser.createGLObject(obj, mtl , function(ret){
       glObj = ret;
 
       // WebGLのcontextを取得

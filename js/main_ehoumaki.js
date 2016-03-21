@@ -830,13 +830,13 @@ window.onload = function () {
         //ドキュメントクラス的なもの canvasのIDを渡す
 
         var initialize = function () {
-            var obj = objParser.objParse(objLoader.files["face_body_fix_obj"]);
-            var mtl = objParser.mtlParse(objLoader.files["face_body_fix_mtl"]);
-            var ehoumakiObj = objParser.objParse(objLoader.files["ehoumaki_obj"]);
-            var ehoumakiMtl = objParser.mtlParse(objLoader.files["ehoumaki_mtl"]);
+            var obj = ObjParser.objParse(ObjLoader.files["face_body_fix_obj"]);
+            var mtl = ObjParser.mtlParse(ObjLoader.files["face_body_fix_mtl"]);
+            var ehoumakiObj = ObjParser.objParse(ObjLoader.files["ehoumaki_obj"]);
+            var ehoumakiMtl = ObjParser.mtlParse(ObjLoader.files["ehoumaki_mtl"]);
             // パースしたデータを元にWebGL用のObjectを作成する
-            window.face393ModelData = objParser.createGLObject(obj, mtl);
-            window.ehoumakiModelData = objParser.createGLObject(ehoumakiObj, ehoumakiMtl);
+            window.face393ModelData = ObjParser.createGLObject(obj, mtl);
+            window.ehoumakiModelData = ObjParser.createGLObject(ehoumakiObj, ehoumakiMtl);
             new World();
         };
         var modelLoadComplete = function(){
@@ -844,14 +844,14 @@ window.onload = function () {
                 obj: "models/ehoumaki.obj",
                 mtl: "models/ehoumaki.mtl"
             };
-            objLoader.load(srcFiles2, initialize);
+            ObjLoader.load(srcFiles2, initialize);
         }
         var modelLoadCounter = 0;
         var srcFiles1 = {
             obj: "models/face_body_fix.obj",
             mtl: "models/face_body_fix.mtl"
         };
-        objLoader.load(srcFiles1, modelLoadComplete);
+        ObjLoader.load(srcFiles1, modelLoadComplete);
     }
 
     //テクスチャ画像リスト
