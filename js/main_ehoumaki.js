@@ -19,16 +19,16 @@ var Camera = function (canvas) {
     mat4.perspective(this.pMatrix, this.fov, this.aspect, this.near, this.far);
     mat4.multiply(this.vpMatrix, this.pMatrix, this.vMatrix);
     this.count = 0;
-    this.parent = null
+    this.lookTarget = null
 }
 Camera.prototype = {
     setTarget: function (cameraTarget) {
-        this.parent = cameraTarget
+        this.lookTarget = cameraTarget
     },
     render: function () {
 
-        if (this.parent) {
-            this.lookPoint = [this.parent.x, this.parent.y, this.parent.z]
+        if (this.lookTarget) {
+            this.lookPoint = [this.lookTarget.x, this.lookTarget.y, this.lookTarget.z]
         }
         this.cameraPosition = [this.x, this.y, this.z]
 
@@ -47,7 +47,7 @@ DirectionLight.prototype = {}
 Beam = function (gl, scene3D, funnel, cockpit, img) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.parent = funnel;
+    this.lookTarget = funnel;
     this.target = cockpit;
     //this.modelData = window.beam(2,[1,1,0,0.5])
     this.modelData = window.sphere(10, 10, .3, [1.0, 1.0, 0, 1.0]);
@@ -94,9 +94,9 @@ Beam.prototype = {
 
     },
     init: function () {
-        this.x = this.parent.x;
-        this.y = this.parent.y;
-        this.z = this.parent.z;
+        this.x = this.lookTarget.x;
+        this.y = this.lookTarget.y;
+        this.z = this.lookTarget.z;
         this.alpha = this.startAlpha;
         this.currentLife = this.life;
         //クォータニオンによる姿勢制御
@@ -139,7 +139,7 @@ Beam.prototype = {
 BeamEhoumaki = function (gl, scene3D, funnel, cockpit) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.parent = funnel;
+    this.lookTarget = funnel;
     this.target = cockpit;
     //this.modelData = window.beam(2,[1,1,0,0.5])
     this.modelData = window.ehoumakiModelData;
@@ -167,9 +167,9 @@ BeamEhoumaki = function (gl, scene3D, funnel, cockpit) {
 
 BeamEhoumaki.prototype = {
     init: function () {
-        this.x = this.parent.x;
-        this.y = this.parent.y;
-        this.z = this.parent.z;
+        this.x = this.lookTarget.x;
+        this.y = this.lookTarget.y;
+        this.z = this.lookTarget.z;
         this.alpha = this.startAlpha;
         this.currentLife = this.life;
         //クォータニオンによる姿勢制御
@@ -212,7 +212,7 @@ BeamEhoumaki.prototype = {
 Face393 = function (gl, scene3D, lookTarget) {
     this.gl = gl;
     this.scene3D = scene3D;
-    this.parent = lookTarget
+    this.lookTarget = lookTarget
     this.modelData = window.face393ModelData;
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
@@ -255,8 +255,8 @@ Face393 = function (gl, scene3D, lookTarget) {
     this.alpha = 1.0;
 
     for (var i = 0; i < this.beamLength; i++) {
-        this.beamArray[i] = new Beam(this.gl, this.scene3D, this, this.parent, ImageLoader.images["beans"]);
-        this.ehoumakiArray[i] = new BeamEhoumaki(this.gl, this.scene3D, this, this.parent);
+        this.beamArray[i] = new Beam(this.gl, this.scene3D, this, this.lookTarget, ImageLoader.images["beans"]);
+        this.ehoumakiArray[i] = new BeamEhoumaki(this.gl, this.scene3D, this, this.lookTarget);
     }
 }
 
@@ -287,10 +287,10 @@ Face393.prototype = {
         mat4.translate(this.mMatrix, this.mMatrix, translatePosition);
         mat4.scale(this.mMatrix, this.mMatrix, [this.scaleX, this.scaleY, this.scaleZ]);
         var targetPosition = {x: 100, y: 100, z: 0};
-        if (this.parent) {
-            targetPosition.x = this.parent.x;
-            targetPosition.y = this.parent.y;
-            targetPosition.z = this.parent.z;
+        if (this.lookTarget) {
+            targetPosition.x = this.lookTarget.x;
+            targetPosition.y = this.lookTarget.y;
+            targetPosition.z = this.lookTarget.z;
         }
         //
         //クォータニオンによる姿勢制御
@@ -830,13 +830,13 @@ window.onload = function () {
         //ドキュメントクラス的なもの canvasのIDを渡す
 
         var initialize = function () {
-            var obj = objParser.objParse(objLoader.files["face_body_fix_obj"]);
-            var mtl = objParser.mtlParse(objLoader.files["face_body_fix_mtl"]);
-            var ehoumakiObj = objParser.objParse(objLoader.files["ehoumaki_obj"]);
-            var ehoumakiMtl = objParser.mtlParse(objLoader.files["ehoumaki_mtl"]);
+            var obj = ObjParser.objParse(ObjLoader.files["face_body_fix_obj"]);
+            var mtl = ObjParser.mtlParse(ObjLoader.files["face_body_fix_mtl"]);
+            var ehoumakiObj = ObjParser.objParse(ObjLoader.files["ehoumaki_obj"]);
+            var ehoumakiMtl = ObjParser.mtlParse(ObjLoader.files["ehoumaki_mtl"]);
             // パースしたデータを元にWebGL用のObjectを作成する
-            window.face393ModelData = objParser.createGLObject(obj, mtl);
-            window.ehoumakiModelData = objParser.createGLObject(ehoumakiObj, ehoumakiMtl);
+            window.face393ModelData = ObjParser.createGLObject(obj, mtl);
+            window.ehoumakiModelData = ObjParser.createGLObject(ehoumakiObj, ehoumakiMtl);
             new World();
         };
         var modelLoadComplete = function(){
@@ -844,14 +844,14 @@ window.onload = function () {
                 obj: "models/ehoumaki.obj",
                 mtl: "models/ehoumaki.mtl"
             };
-            objLoader.load(srcFiles2, initialize);
+            ObjLoader.load(srcFiles2, initialize);
         }
         var modelLoadCounter = 0;
         var srcFiles1 = {
             obj: "models/face_body_fix.obj",
             mtl: "models/face_body_fix.mtl"
         };
-        objLoader.load(srcFiles1, modelLoadComplete);
+        ObjLoader.load(srcFiles1, modelLoadComplete);
     }
 
     //テクスチャ画像リスト
