@@ -20,7 +20,10 @@ ImageLoader = {
                 var img = new Image();
                 img.onload = this._loaded;
                 img.src = pathArray[i];
+
                 img.srcSrc = pathArray[i];
+                console.log(pathArray[i].length);
+                console.log(pathArray[i]);
             }else{
                 ImageLoader._checkCount();
             }
@@ -28,8 +31,8 @@ ImageLoader = {
     },
     _loaded: function(event){
         var id = event.target.srcSrc;
-        // var id = src.split("/")[src.split("/").length - 2].split(".")[0];
         ImageLoader.images[id] = event.target;
+        console.log("000000000000000000id] : ",ImageLoader.images["models_vicviper_mirror_fix.png"])
         ImageLoader._checkCount();
     },
     _checkCount: function(event) {

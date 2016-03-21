@@ -41,14 +41,13 @@ window.onload = function () {
 
     //テクスチャ読み込み後の処理
     var loadCompleteHandler = function () {
-        for (var val in ImageLoader.images) {
-            console.log("loaded : ", ImageLoader.images[val]);
-        }
 
         //ドキュメントクラス的なもの canvasのIDを渡す
         var initialize = function (returnValue) {
             window.vicviperModelData = returnValue;
-            console.log("window.vicviperModelData : ", window.vicviperModelData)
+            for (var val in ImageLoader.images) {
+                console.log("loaded : ", ImageLoader.images[val]);
+            }
             new World();
         };
         var srcFiles1 = {
