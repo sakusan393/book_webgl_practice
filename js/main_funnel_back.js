@@ -119,7 +119,7 @@ Funnel = function (gl, scene3D, lookTarget) {
     this.gl = gl;
     this.scene3D = scene3D;
     this.lookTarget = lookTarget
-    this.modelData = window.vicviper();
+    this.modelData = window.funnel();
     this.mMatrix = mat4.identity(mat4.create());
     this.invMatrix = mat4.identity(mat4.create());
 
