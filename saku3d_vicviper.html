@@ -60,7 +60,7 @@
         if(isObjData)
         {
             vec3 eyeDirection = normalize(eyePosition - lookPoint);
-            vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz;
+            vec3 invEye = normalize(normalize(invMatrix * vec4(eyeDirection, 1.0)).xyz);
             vec3 invLight = (invMatrix * vec4(lightDirection,0.0)).xyz;
             vec3 halfVector = normalize(invLight + invEye);
 
@@ -69,9 +69,8 @@
                 //half vector specular
                 specular = pow(clamp(dot(halfVector,vNormal),0.0,1.5),40.0);
             }else if(specularIndex==2){
-                vec3 viewVec = normalize(invEye);
                 vec3 refVec = normalize(reflect((-invLight), vNormal));
-                specular = pow(max(dot(viewVec, refVec), 0.0), 90.0); // 鏡面光は視線ベクトルと反射光ベクトルの内積
+                specular = pow(max(dot(invEye, refVec), 0.0), 90.0); // 鏡面光は視線ベクトルと反射光ベクトルの内積
             }
 
             //flat shading normalmap
