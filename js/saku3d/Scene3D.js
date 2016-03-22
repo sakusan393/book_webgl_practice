@@ -80,15 +80,15 @@ Scene3D.prototype = {
         this.gl.uniform1i(this.uniLocation.specularIndex, this.meshList[i].mesh.specularIndex);
 
         this.gl.uniform1i(this.uniLocation.isLightEnable, this.meshList[i].mesh.isLightEnable);
+        this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
 
         this.setAttribute(this.meshList[i].vertexBufferList, this.attLocation, this.attStride);
 
         this.meshList[i].mesh.render();
-        this.gl.uniform1f(this.uniLocation.alpha, this.meshList[i].mesh.alpha);
         mat4.multiply(this.mvpMatrix, this.camera.vpMatrix, this.meshList[i].mesh.mMatrix);
 
 
-        this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.mMatrix);
+        this.gl.uniformMatrix4fv(this.uniLocation.mMatrix, false, this.meshList[i].mesh.mMatrix);
         this.gl.uniformMatrix4fv(this.uniLocation.mvpMatrix, false, this.mvpMatrix);
         if (this.meshList[i].mesh.isLightEnable) {
           this.gl.uniform3fv(this.uniLocation.lookPoint, this.camera.lookPoint);

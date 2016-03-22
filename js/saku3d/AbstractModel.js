@@ -23,7 +23,7 @@ AbstractModel = function (gl, scene3D, initObject) {
 
   this.rotationX = 0;
   this.rotationY = 0;
-  this.rotationY = 0;
+  this.rotationZ = 0;
 
   this.scaleX = 1;
   this.scaleY = 1;
@@ -91,5 +91,7 @@ AbstractModel.prototype = {
     //
 
     mat4.invert(this.invMatrix, this.mMatrix);
+
+
   }
 }
