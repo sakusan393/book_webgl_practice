@@ -95,7 +95,10 @@ Scene3D.prototype = {
           this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
         }
         //明示的に0番目
-        if (this.meshList[i].mesh.textureObject.diffuse) this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.textureObject.diffuse);
+        console.log(this.meshList[i].mesh.textureObject.diffuse);
+        if (this.meshList[i].mesh.textureObject.diffuse) {
+          this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.textureObject.diffuse);
+        }
         var pos = 0;
         for (var j = 0; j < this.meshList[i].mesh.modelData.mtlInfos.length; j++) {
           var mtlInfo = this.meshList[i].mesh.modelData.mtlInfos[j];
