@@ -95,7 +95,6 @@ Scene3D.prototype = {
           this.gl.uniformMatrix4fv(this.uniLocation.invMatrix, false, this.meshList[i].mesh.invMatrix);
         }
         //明示的に0番目
-        console.log(this.meshList[i].mesh.textureObject.diffuse);
         if (this.meshList[i].mesh.textureObject.diffuse) {
           this.gl.bindTexture(this.gl.TEXTURE_2D, this.meshList[i].mesh.textureObject.diffuse);
         }
