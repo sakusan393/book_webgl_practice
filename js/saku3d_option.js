@@ -19,11 +19,11 @@ World.prototype.init = function () {
     this.vicviper = new Option(this.gl, this.scene3D, {modelData: modelData, specularIndex: 1});
     this.vicviper.setScale(0.3);
     this.vicviper.x = -1;
-    this.vicviper.rotationX = 40;
+    this.vicviper.rotationX = 10;
     this.vicviper2 = new Option(this.gl, this.scene3D, {modelData: modelData, specularIndex: 2});
     this.vicviper2.setScale(0.3);
     this.vicviper2.x = 1;
-    this.vicviper2.rotationX = 40;
+    this.vicviper2.rotationX = 10;
 
     this.scene3D.addChild(this.vicviper);
     this.scene3D.addChild(this.vicviper2);
@@ -31,8 +31,8 @@ World.prototype.init = function () {
   }).bind(this));
 }
 World.prototype.enterFrameHandler = function () {
-  this.vicviper.rotationY += .3;
-  this.vicviper2.rotationY += .3;
+  this.vicviper.rotationY += 3;
+  this.vicviper2.rotationY += 3;
 
 
 
