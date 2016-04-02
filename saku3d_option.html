@@ -80,7 +80,7 @@
             float diff = clamp(dot(vNormal, invLight) ,1.0,4.0)* 0.9;
             float diffuse = max(dot(vNormal, invLight),0.0) * 0.9;
             if(true){
-                destColor = vec4(kdColor*diff+specular + ambientColor.rgb, 0.5);
+                destColor = vec4(kdColor*diff+specular + ambientColor.rgb, 0.4);
             }else{
                 //vec3 col = texture2D(texture, vTexCoord).rgb;
                 //destColor = vec4(col*diff+specular+ ambientColor.rgb  ,1.0);

@@ -34,7 +34,9 @@ World.prototype.enterFrameHandler = function () {
   this.vicviper.rotationY += .3;
   this.vicviper2.rotationY += .3;
 
-  var scale = Math.sin(new Date().getTime()/500) * 0.05 + 0.2;
+
+
+  var scale = Math.sin(CLOCK.getElapsedTime()/2) * 0.03 + 0.2;
   this.vicviper.setScale(scale);
   this.vicviper2.setScale(scale);
 
