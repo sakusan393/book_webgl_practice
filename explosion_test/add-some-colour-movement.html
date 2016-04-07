@@ -27,7 +27,6 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 
     <body style="background:#000">
         <div id="container"></div>
-        <div id="title" style="position:absolute;top:50%;left:50%;margin-left:-362px;margin-top:-100px"><img src="bascule.png"></div>
         <div></div>
     </body>
 
@@ -234,8 +233,8 @@ void main() {
 
   vUv = uv;
 
-  noise = 10.0 *  -.10 * turbulence( .5 * normal + time );
-  float b = 5.0 * pnoise( 0.05 * position + vec3( 20.0 * time ), vec3( 100.0 ) );
+  noise = 10.0 *  -.10 * turbulence( 0.5 * normal + time );
+  float b = 50.0 * pnoise( 0.05 * position + vec3( 20.0 * time ), vec3( 100.0 ) );
   float displacement = - 10. * noise + b;
 
   vec3 newPosition = position + normal * displacement;
