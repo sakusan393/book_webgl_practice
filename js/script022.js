@@ -148,7 +148,7 @@ onload = function(){
         gl.clearDepth(1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        gl.colorMask(false, true, true, true);
+        gl.colorMask(true, true, true, true);
         // クォータニオンを行列に適用
         var qMatrix = m.identity(m.create());
         q.toMatIV(qt, qMatrix);
@@ -230,10 +230,10 @@ onload = function(){
 
 
         // canvasを初期化
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.clearDepth(1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.colorMask(true, true, true, true);
+        // gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        // gl.clearDepth(1.0);
+        // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        // gl.colorMask(true, true, true, true);
         //gl.depthMask(false);
 
         // クォータニオンを行列に適用
@@ -279,8 +279,7 @@ onload = function(){
         gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
 
         // ビルボード用テクスチャをバインド
-        //gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, frameBuffer.t);
+        // gl.activeTexture(gl.TEXTURE0);
 
         //gl.uniform1i(uniLocation[1], 0);
 
@@ -294,6 +293,7 @@ onload = function(){
         gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
 
         //isPoint
+        gl.bindTexture(gl.TEXTURE_2D, frameBuffer.t);
         gl.useProgram(programs.prg2);
         set_attribute(VBOList, attLocation2, attStride);
         gl.uniformMatrix4fv(uniLocation2[0], false, mvpMatrix);

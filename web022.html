@@ -1,0 +1,72 @@
+<html>
+<head>
+  <title>wgld.org WebGL sample 022</title>
+  <script src="https://wgld.org/j/minMatrixb.js" type="text/javascript"></script>
+  <script src="js/script022.js" type="text/javascript"></script>
+
+  <script id="vs" type="x-shader/x-vertex">
+attribute vec3 position;
+attribute vec4 color;
+attribute vec2 textureCoord;
+uniform   mat4 mvpMatrix;
+varying   vec4 vColor;
+varying   vec2 vTextureCoord;
+
+void main(void){
+	vColor        = color;
+	vTextureCoord = textureCoord;
+	gl_Position   = mvpMatrix * vec4(position, 1.0);
+	gl_PointSize = 30.0;
+}
+
+</script>
+
+  <script id="fs" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform sampler2D texture;
+varying vec4      vColor;
+varying vec2      vTextureCoord;
+uniform int isPoint;
+
+void main(void){
+    if(bool(isPoint)){
+        //vec4 smpColor = texture2D(texture, gl_PointCoord);
+        gl_FragColor  = vColor;
+        //discard;
+    }else{
+        vec4 smpColor = texture2D(texture, vTextureCoord);
+        gl_FragColor  = vColor * smpColor;
+	}
+}
+
+</script>
+
+  <script id="fs2" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform sampler2D texture;
+varying vec4      vColor;
+varying vec2      vTextureCoord;
+uniform int isPoint;
+
+void main(void){
+    vec4 smpColor = texture2D(texture, gl_PointCoord);
+    gl_FragColor  = smpColor;
+}
+
+</script>
+  <style type="text/css">
+    p{
+      font-family: "ヒラギノ角ゴ Pro W6","Hiragino Kaku Gothic Pro","HiraKakuPro-W6","メイリオ ボールド",Meiryo Bold,"ＭＳ Ｐゴシック","MS PGothic",Osaka,Verdana,sans-serif
+      /*font-family:"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","HiraKakuPro-W3","メイリオ",Meiryo,"ＭＳ Ｐゴシック","MS PGothic",Osaka,Verdana,sans-serif;*/
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<p>
+  <input id="check" type="checkbox" checked> billboard
+</p>
+</body>
+</html>
