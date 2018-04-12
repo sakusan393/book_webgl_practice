@@ -11,19 +11,19 @@ World.prototype.init = function () {
   this.scene3D = new Scene3D(this.gl, this.camera, this.light);
 
   var srcFiles1 = {
-    obj: "models/vicviper_mirror_fix.obj",
-    mtl: "models/vicviper_mirror_fix.mtl"
+    obj: "models/option.obj",
+    mtl: "models/option.mtl"
   };
   ObjLoader.load(srcFiles1, (function(modelData){
     console.log(this)
-    this.vicviper = new Vicviper(this.gl, this.scene3D, {modelData: modelData, specularIndex: 1});
+    this.vicviper = new Option(this.gl, this.scene3D, {modelData: modelData, specularIndex: 1});
     this.vicviper.setScale(0.3);
     this.vicviper.x = -1;
-    this.vicviper.rotationX = 40;
-    this.vicviper2 = new Vicviper(this.gl, this.scene3D, {modelData: modelData, specularIndex: 2});
+    this.vicviper.rotationX = 10;
+    this.vicviper2 = new Option(this.gl, this.scene3D, {modelData: modelData, specularIndex: 2});
     this.vicviper2.setScale(0.3);
     this.vicviper2.x = 1;
-    this.vicviper2.rotationX = 40;
+    this.vicviper2.rotationX = 10;
 
     this.scene3D.addChild(this.vicviper);
     this.scene3D.addChild(this.vicviper2);
@@ -31,8 +31,14 @@ World.prototype.init = function () {
   }).bind(this));
 }
 World.prototype.enterFrameHandler = function () {
-  this.vicviper.rotationY += .3;
-  this.vicviper2.rotationY += .3;
+  this.vicviper.rotationY += 3;
+  this.vicviper2.rotationY += 3;
+
+
+
+  var scale = Math.sin(CLOCK.getElapsedTime()/2) * 0.03 + 0.2;
+  this.vicviper.setScale(scale);
+  this.vicviper2.setScale(scale);
 
   this.vicviper.y = 0;
   this.scene3D.render();

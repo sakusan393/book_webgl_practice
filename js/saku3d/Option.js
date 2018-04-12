@@ -1,9 +1,9 @@
-Vicviper = function (gl, scene3D, initObject) {
+Option = function (gl, scene3D, initObject) {
   //superクラスのコンストラクタを実行
   AbstractModel.call(this, gl, scene3D, initObject);
 }
 
-Vicviper.prototype = {
+Option.prototype = {
   initialize: function (initObject) {
     //拡張用
     this.beamLength = 20;
@@ -18,9 +18,7 @@ Vicviper.prototype = {
     this.textureObject = {};
     this.textureObject.diffuse = null;
     this.textureObject.bump = null;
-    var diffuseMapSource = ImageLoader.images["models/vicviper_mirror_fix.png"];
-    this.initTexture(diffuseMapSource, "diffuse");
   }
 }
 
-inherits(Vicviper,AbstractModel);
+inherits(Option,AbstractModel);
